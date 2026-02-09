@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { TemplateCategory } from '@/types/template';
 import { TEMPLATE_CATEGORIES } from '@/types/template';
 import type { getTemplates } from './actions';
+import { DeleteButton } from './delete-button';
 
 interface TemplateCardProps {
   template: Awaited<ReturnType<typeof getTemplates>>[number];
@@ -78,10 +79,18 @@ export function TemplateCard({ template }: TemplateCardProps) {
             )}
           </div>
 
-          {/* Last updated time */}
-          <p className="text-xs text-muted-foreground">
-            {formatRelativeTime(template.updatedAt)}
-          </p>
+          {/* Last updated time and delete button */}
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">
+              {formatRelativeTime(template.updatedAt)}
+            </p>
+            <div onClick={(e) => e.preventDefault()}>
+              <DeleteButton
+                templateId={template.id}
+                templateName={template.name}
+              />
+            </div>
+          </div>
         </CardContent>
       </Card>
     </Link>

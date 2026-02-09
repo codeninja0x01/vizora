@@ -2,7 +2,7 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Key, Video } from 'lucide-react';
+import { Key, Video, Layers, LayoutGrid } from 'lucide-react';
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -74,6 +74,43 @@ export default async function DashboardPage() {
               <p className="text-sm text-muted-foreground">
                 Manage your API keys for programmatic access to OpenVideo
                 services
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/dashboard/templates" className="block">
+          <Card className="h-full transition-colors hover:bg-accent/50">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <div className="rounded-full bg-primary/10 p-2">
+                  <Layers className="size-5 text-primary" />
+                </div>
+                <span>Templates</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Create and manage reusable video templates with dynamic merge
+                fields
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/gallery" className="block">
+          <Card className="h-full transition-colors hover:bg-accent/50">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <div className="rounded-full bg-primary/10 p-2">
+                  <LayoutGrid className="size-5 text-primary" />
+                </div>
+                <span>Template Gallery</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Browse pre-built templates and clone them to your account
               </p>
             </CardContent>
           </Card>

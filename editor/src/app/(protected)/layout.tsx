@@ -73,6 +73,18 @@ export default async function ProtectedLayout({
                 >
                   API Keys
                 </Link>
+                <Link
+                  href="/dashboard/templates"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Templates
+                </Link>
+                <Link
+                  href="/gallery"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Gallery
+                </Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">
