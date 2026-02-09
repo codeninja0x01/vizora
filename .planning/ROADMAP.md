@@ -95,10 +95,15 @@ Plans:
   4. User can browse pre-built template gallery and clone templates to their account
   5. Template merge fields are validated via JSON schema and invalid data returns clear error
 
-**Plans**: TBD
+**Plans**: 6 plans
 
 Plans:
-- Plans to be defined during `/gsd:plan-phase 3`
+- [ ] 03-01-PLAN.md -- Template Prisma model, TypeScript types, and Zod schema builder
+- [ ] 03-02-PLAN.md -- Template CRUD server actions and merge field extraction logic
+- [ ] 03-03-PLAN.md -- Editor Save-as-Template flow and template mode with merge field marking
+- [ ] 03-04-PLAN.md -- Dashboard My Templates page with card grid and navigation
+- [ ] 03-05-PLAN.md -- Template gallery with category filtering and detail/preview pages
+- [ ] 03-06-PLAN.md -- Template cloning flow and REST API validation endpoint
 
 ---
 
@@ -273,7 +278,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 |-------|----------------|--------|-----------|
 | 1. Editor Polish | 6/6 | ✓ Complete | 2026-02-09 |
 | 2. Foundation & Auth | 0/5 | Planned | - |
-| 3. Template System | 0/TBD | Not started | - |
+| 3. Template System | 0/6 | Planned | - |
 | 4. Async Rendering | 0/TBD | Not started | - |
 | 5. Render Progress & History | 0/TBD | Not started | - |
 | 6. Storage Integration | 0/TBD | Not started | - |
