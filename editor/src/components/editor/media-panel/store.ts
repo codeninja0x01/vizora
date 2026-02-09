@@ -79,6 +79,8 @@ export const tabs: {
 interface MediaPanelStore {
   activeTab: Tab;
   setActiveTab: (tab: Tab) => void;
+  isPanelOpen: boolean;
+  togglePanel: (tab: Tab) => void;
   highlightMediaId: string | null;
   requestRevealMedia: (mediaId: string) => void;
   clearHighlight: () => void;
@@ -86,15 +88,29 @@ interface MediaPanelStore {
   setShowProperties: (show: boolean) => void;
 }
 
-export const useMediaPanelStore = create<MediaPanelStore>((set) => ({
+export const useMediaPanelStore = create<MediaPanelStore>((set, get) => ({
   activeTab: 'uploads',
-  setActiveTab: (tab) => set({ activeTab: tab, showProperties: false }),
+  isPanelOpen: true,
+  setActiveTab: (tab) => set({ activeTab: tab, showProperties: false, isPanelOpen: true }),
+  togglePanel: (tab) => {
+    const currentTab = get().activeTab;
+    const currentOpen = get().isPanelOpen;
+
+    if (currentTab === tab && currentOpen) {
+      // Clicking the active tab when panel is open - collapse it
+      set({ isPanelOpen: false });
+    } else {
+      // Clicking a different tab or reopening - set active and open
+      set({ activeTab: tab, isPanelOpen: true, showProperties: false });
+    }
+  },
   highlightMediaId: null,
   requestRevealMedia: (mediaId) =>
     set({
       activeTab: 'uploads',
       highlightMediaId: mediaId,
       showProperties: false,
+      isPanelOpen: true,
     }),
   clearHighlight: () => set({ highlightMediaId: null }),
   showProperties: false,
