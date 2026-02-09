@@ -239,11 +239,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 09-01-PLAN.md -- Billing schema, tier configuration, Stripe client, and credit utilities
-- [ ] 09-02-PLAN.md -- Stripe webhook endpoint and subscription lifecycle handlers
-- [ ] 09-03-PLAN.md -- Credit enforcement in render and batch APIs with auto-refund
-- [ ] 09-04-PLAN.md -- Billing dashboard page with server actions and usage analytics
-- [ ] 09-05-PLAN.md -- Low-credit notification banner and sidebar navigation
+- [x] 09-01-PLAN.md -- Billing schema, tier configuration, Stripe client, and credit utilities
+- [x] 09-02-PLAN.md -- Stripe webhook endpoint and subscription lifecycle handlers
+- [x] 09-03-PLAN.md -- Credit enforcement in render and batch APIs with auto-refund
+- [x] 09-04-PLAN.md -- Billing dashboard page with server actions and usage analytics
+- [x] 09-05-PLAN.md -- Low-credit notification banner and sidebar navigation
 
 ---
 
