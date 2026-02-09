@@ -1,0 +1,15 @@
+{
+  "url": "/templates/{{parameters.templateId}}",
+  "method": "GET",
+  "response": {
+    "iterate": "{{body.mergeFields}}",
+    "output": {
+      "name": "{{item.key}}",
+      "label": "{{item.label}}",
+      "type": "{{if(item.type == 'number', 'number', if(item.type == 'image', 'url', 'text'))}}",
+      "required": "{{item.required}}",
+      "default": "{{item.defaultValue}}",
+      "help": "{{if(item.type == 'color', 'Enter color value, e.g. #FF0000', '')}}"
+    }
+  }
+}

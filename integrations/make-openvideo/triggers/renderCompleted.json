@@ -1,0 +1,45 @@
+{
+  "name": "renderCompleted",
+  "label": "Render Completed",
+  "description": "Triggers when a video render finishes successfully.",
+  "type_id": 10,
+  "connection": "api-key",
+  "attach": {
+    "url": "/webhooks",
+    "method": "POST",
+    "body": {
+      "url": "{{webhook.url}}",
+      "enabled": true
+    },
+    "response": {
+      "uid": "{{body.id}}"
+    }
+  },
+  "detach": {
+    "url": "/webhooks/{{webhook.uid}}",
+    "method": "DELETE"
+  },
+  "respond": {
+    "status": 200,
+    "type": "json",
+    "body": {
+      "accepted": true
+    }
+  },
+  "output": [
+    {
+      "name": "renderId",
+      "type": "text",
+      "label": "Render ID"
+    },
+    {
+      "name": "statusUrl",
+      "type": "url",
+      "label": "Status URL"
+    }
+  ],
+  "mappable": {
+    "renderId": "{{body.data.renderId}}",
+    "statusUrl": "{{baseUrl}}/renders/{{body.data.renderId}}"
+  }
+}
