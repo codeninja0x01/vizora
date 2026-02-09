@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition, useId } from 'react';
 import {
   createCheckoutSession,
   createPortalSession,
@@ -34,13 +34,16 @@ interface BillingContentProps {
     creditPercentage: number;
     daysUntilRenewal: number | null;
     isLowCredit: boolean;
-    tierConfig: Record<string, {
-      monthlyAllotment: number;
-      concurrentLimit: number;
-      displayName: string;
-      priceMonthly: number | null;
-      maxRollover: number;
-    }>;
+    tierConfig: Record<
+      string,
+      {
+        monthlyAllotment: number;
+        concurrentLimit: number;
+        displayName: string;
+        priceMonthly: number | null;
+        maxRollover: number;
+      }
+    >;
     creditPacks: Array<{
       id: string;
       credits: number;
@@ -84,7 +87,19 @@ export function BillingContent({
     message: '',
   });
 
-  const { organization, creditPercentage, daysUntilRenewal, isLowCredit, tierConfig, creditPacks } = billing;
+  const nameId = useId();
+  const emailId = useId();
+  const companyId = useId();
+  const messageId = useId();
+
+  const {
+    organization,
+    creditPercentage,
+    daysUntilRenewal,
+    isLowCredit,
+    tierConfig,
+    creditPacks,
+  } = billing;
   const currentTier = organization.tier as 'free' | 'pro' | 'enterprise';
   const currentTierConfig = tierConfig[currentTier];
 
@@ -169,7 +184,7 @@ export function BillingContent({
 
       const result = await submitEnterpriseContact(formData);
       if (result.success) {
-        toast.success('Your message has been sent! We\'ll be in touch soon.');
+        toast.success("Your message has been sent! We'll be in touch soon.");
         setEnterpriseForm({ name: '', email: '', company: '', message: '' });
       } else {
         toast.error(result.error || 'Failed to send message');
@@ -178,17 +193,24 @@ export function BillingContent({
   };
 
   // Get render stats
-  const completedRenders = usage.renderStats.find(s => s.status === 'completed')?._count || 0;
-  const failedRenders = usage.renderStats.find(s => s.status === 'failed')?._count || 0;
+  const completedRenders =
+    usage.renderStats.find((s) => s.status === 'completed')?._count || 0;
+  const failedRenders =
+    usage.renderStats.find((s) => s.status === 'failed')?._count || 0;
 
   // Format transaction description
   const getTransactionDescription = (reason: string) => {
     switch (reason) {
-      case 'render': return 'Render';
-      case 'subscription_renewal': return 'Subscription Renewal';
-      case 'credit_pack': return 'Credit Pack';
-      case 'system_refund': return 'System Refund';
-      default: return reason;
+      case 'render':
+        return 'Render';
+      case 'subscription_renewal':
+        return 'Subscription Renewal';
+      case 'credit_pack':
+        return 'Credit Pack';
+      case 'system_refund':
+        return 'System Refund';
+      default:
+        return reason;
     }
   };
 
@@ -218,7 +240,9 @@ export function BillingContent({
               Current Plan
             </h2>
             <div className="flex items-center gap-2">
-              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getTierBadgeColor()}`}>
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-medium ${getTierBadgeColor()}`}
+              >
                 {currentTierConfig.displayName}
               </span>
               {organization.cancelAtPeriodEnd && (
@@ -228,19 +252,21 @@ export function BillingContent({
               )}
             </div>
           </div>
-          {currentTier !== 'free' && organization.subscriptionStatus === 'past_due' && (
-            <div className="flex items-center gap-2 text-sm text-red-400">
-              <AlertCircle className="size-4" />
-              <span>Payment failed</span>
-            </div>
-          )}
+          {currentTier !== 'free' &&
+            organization.subscriptionStatus === 'past_due' && (
+              <div className="flex items-center gap-2 text-sm text-red-400">
+                <AlertCircle className="size-4" />
+                <span>Payment failed</span>
+              </div>
+            )}
         </div>
 
         {/* Payment Failed Warning */}
         {organization.subscriptionStatus === 'past_due' && (
           <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
             <p className="text-sm text-red-400">
-              Payment failed - rendering suspended. Please update your payment method.
+              Payment failed - rendering suspended. Please update your payment
+              method.
             </p>
           </div>
         )}
@@ -248,9 +274,12 @@ export function BillingContent({
         {/* Credit Balance */}
         <div className="mb-4">
           <div className="flex items-baseline justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Credit Balance</span>
+            <span className="text-sm text-muted-foreground">
+              Credit Balance
+            </span>
             <span className="text-2xl font-bold tabular-nums font-heading">
-              {organization.creditBalance.toLocaleString()} / {organization.monthlyAllotment.toLocaleString()}
+              {organization.creditBalance.toLocaleString()} /{' '}
+              {organization.monthlyAllotment.toLocaleString()}
             </span>
           </div>
           <div className="h-2 rounded-full bg-muted overflow-hidden">
@@ -292,7 +321,9 @@ export function BillingContent({
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Free Plan */}
-          <div className={`rounded-xl border ${currentTier === 'free' ? 'border-primary/50 bg-primary/5' : 'border-border/40 bg-card/50'} p-6`}>
+          <div
+            className={`rounded-xl border ${currentTier === 'free' ? 'border-primary/50 bg-primary/5' : 'border-border/40 bg-card/50'} p-6`}
+          >
             <div className="mb-4">
               {currentTier === 'free' && (
                 <span className="px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">
@@ -301,7 +332,12 @@ export function BillingContent({
               )}
             </div>
             <h3 className="text-xl font-bold font-heading mb-2">Free</h3>
-            <p className="text-3xl font-bold font-heading mb-4">$0<span className="text-sm text-muted-foreground font-normal">/mo</span></p>
+            <p className="text-3xl font-bold font-heading mb-4">
+              $0
+              <span className="text-sm text-muted-foreground font-normal">
+                /mo
+              </span>
+            </p>
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="size-4 text-green-500" />
@@ -315,7 +351,9 @@ export function BillingContent({
           </div>
 
           {/* Pro Plan */}
-          <div className={`rounded-xl border ${currentTier === 'pro' ? 'border-primary/50 bg-primary/5' : 'border-border/40 bg-card/50'} p-6 relative`}>
+          <div
+            className={`rounded-xl border ${currentTier === 'pro' ? 'border-primary/50 bg-primary/5' : 'border-border/40 bg-card/50'} p-6 relative`}
+          >
             {currentTier !== 'pro' && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <span className="px-3 py-1 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300">
@@ -331,7 +369,12 @@ export function BillingContent({
               </div>
             )}
             <h3 className="text-xl font-bold font-heading mb-2">Pro</h3>
-            <p className="text-3xl font-bold font-heading mb-4">$29<span className="text-sm text-muted-foreground font-normal">/mo</span></p>
+            <p className="text-3xl font-bold font-heading mb-4">
+              $29
+              <span className="text-sm text-muted-foreground font-normal">
+                /mo
+              </span>
+            </p>
             <ul className="space-y-2 text-sm mb-6">
               <li className="flex items-center gap-2">
                 <CheckCircle2 className="size-4 text-green-500" />
@@ -344,6 +387,7 @@ export function BillingContent({
             </ul>
             {currentTier === 'free' && (
               <button
+                type="button"
                 onClick={handleUpgradeToPro}
                 disabled={isPending}
                 className="w-full px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-colors disabled:opacity-50"
@@ -353,6 +397,7 @@ export function BillingContent({
             )}
             {currentTier === 'pro' && organization.stripeCustomerId && (
               <button
+                type="button"
                 onClick={handleManageSubscription}
                 disabled={isPending}
                 className="w-full px-4 py-2 rounded-lg border border-border/40 hover:bg-white/[0.03] text-foreground font-medium transition-colors disabled:opacity-50"
@@ -363,7 +408,9 @@ export function BillingContent({
           </div>
 
           {/* Enterprise Plan */}
-          <div className={`rounded-xl border ${currentTier === 'enterprise' ? 'border-primary/50 bg-primary/5' : 'border-border/40 bg-card/50'} p-6`}>
+          <div
+            className={`rounded-xl border ${currentTier === 'enterprise' ? 'border-primary/50 bg-primary/5' : 'border-border/40 bg-card/50'} p-6`}
+          >
             {currentTier === 'enterprise' && (
               <div className="mb-4">
                 <span className="px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">
@@ -399,28 +446,44 @@ export function BillingContent({
           <form onSubmit={handleEnterpriseSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1.5">
+                <label
+                  htmlFor={nameId}
+                  className="block text-sm font-medium text-foreground mb-1.5"
+                >
                   Name *
                 </label>
                 <input
                   type="text"
-                  id="name"
+                  id={nameId}
                   value={enterpriseForm.name}
-                  onChange={(e) => setEnterpriseForm({ ...enterpriseForm, name: e.target.value })}
+                  onChange={(e) =>
+                    setEnterpriseForm({
+                      ...enterpriseForm,
+                      name: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                   placeholder="Your name"
                   required
                 />
               </div>
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">
+                <label
+                  htmlFor={emailId}
+                  className="block text-sm font-medium text-foreground mb-1.5"
+                >
                   Email *
                 </label>
                 <input
                   type="email"
-                  id="email"
+                  id={emailId}
                   value={enterpriseForm.email}
-                  onChange={(e) => setEnterpriseForm({ ...enterpriseForm, email: e.target.value })}
+                  onChange={(e) =>
+                    setEnterpriseForm({
+                      ...enterpriseForm,
+                      email: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                   placeholder="your@email.com"
                   required
@@ -428,26 +491,42 @@ export function BillingContent({
               </div>
             </div>
             <div>
-              <label htmlFor="company" className="block text-sm font-medium text-foreground mb-1.5">
+              <label
+                htmlFor={companyId}
+                className="block text-sm font-medium text-foreground mb-1.5"
+              >
                 Company
               </label>
               <input
                 type="text"
-                id="company"
+                id={companyId}
                 value={enterpriseForm.company}
-                onChange={(e) => setEnterpriseForm({ ...enterpriseForm, company: e.target.value })}
+                onChange={(e) =>
+                  setEnterpriseForm({
+                    ...enterpriseForm,
+                    company: e.target.value,
+                  })
+                }
                 className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
                 placeholder="Your company name"
               />
             </div>
             <div>
-              <label htmlFor="message" className="block text-sm font-medium text-foreground mb-1.5">
+              <label
+                htmlFor={messageId}
+                className="block text-sm font-medium text-foreground mb-1.5"
+              >
                 Message *
               </label>
               <textarea
-                id="message"
+                id={messageId}
                 value={enterpriseForm.message}
-                onChange={(e) => setEnterpriseForm({ ...enterpriseForm, message: e.target.value })}
+                onChange={(e) =>
+                  setEnterpriseForm({
+                    ...enterpriseForm,
+                    message: e.target.value,
+                  })
+                }
                 rows={4}
                 className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
                 placeholder="Tell us about your needs..."
@@ -479,6 +558,7 @@ export function BillingContent({
             Update payment method, view invoices, or cancel your subscription
           </p>
           <button
+            type="button"
             onClick={handleManageSubscription}
             disabled={isPending}
             className="px-4 py-2 rounded-lg border border-border/40 hover:bg-white/[0.03] text-foreground font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
@@ -503,10 +583,18 @@ export function BillingContent({
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {creditPacks.map((pack) => {
-            const pricePerCredit = (pack.priceUsd / pack.credits * 100).toFixed(2);
+            const pricePerCredit = (
+              (pack.priceUsd / pack.credits) *
+              100
+            ).toFixed(2);
             return (
-              <div key={pack.id} className="rounded-xl border border-border/40 bg-card/50 p-6">
-                <h3 className="text-xl font-bold font-heading mb-1">{pack.label}</h3>
+              <div
+                key={pack.id}
+                className="rounded-xl border border-border/40 bg-card/50 p-6"
+              >
+                <h3 className="text-xl font-bold font-heading mb-1">
+                  {pack.label}
+                </h3>
                 <p className="text-3xl font-bold font-heading text-primary mb-2">
                   ${pack.priceUsd}
                 </p>
@@ -514,6 +602,7 @@ export function BillingContent({
                   ${pricePerCredit} per 100 credits
                 </p>
                 <button
+                  type="button"
                   onClick={() => handleBuyCreditPack(pack.id)}
                   disabled={isPending}
                   className="w-full px-4 py-2 rounded-lg border border-border/40 hover:bg-white/[0.03] text-foreground font-medium transition-colors disabled:opacity-50"
@@ -539,7 +628,9 @@ export function BillingContent({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="rounded-lg bg-white/[0.03] p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Credits Used</span>
+              <span className="text-sm text-muted-foreground">
+                Credits Used
+              </span>
               <TrendingUp className="size-4 text-primary" />
             </div>
             <p className="text-2xl font-bold font-heading mt-2 tabular-nums">
@@ -548,7 +639,9 @@ export function BillingContent({
           </div>
           <div className="rounded-lg bg-white/[0.03] p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Renders Completed</span>
+              <span className="text-sm text-muted-foreground">
+                Renders Completed
+              </span>
               <CheckCircle2 className="size-4 text-green-500" />
             </div>
             <p className="text-2xl font-bold font-heading mt-2 tabular-nums">
@@ -557,7 +650,9 @@ export function BillingContent({
           </div>
           <div className="rounded-lg bg-white/[0.03] p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Renders Failed</span>
+              <span className="text-sm text-muted-foreground">
+                Renders Failed
+              </span>
               <AlertCircle className="size-4 text-red-500" />
             </div>
             <p className="text-2xl font-bold font-heading mt-2 tabular-nums">
@@ -569,7 +664,9 @@ export function BillingContent({
         {/* Transaction History */}
         <div className="rounded-xl border border-border/40 bg-card/50 overflow-hidden">
           <div className="p-4 border-b border-border/20">
-            <h3 className="font-semibold text-foreground">Credit Transaction History</h3>
+            <h3 className="font-semibold text-foreground">
+              Credit Transaction History
+            </h3>
           </div>
           <div className="overflow-x-auto">
             {usage.transactions.length === 0 ? (
@@ -580,23 +677,37 @@ export function BillingContent({
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border/20">
-                    <th className="text-left p-3 font-medium text-muted-foreground">Date</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Description</th>
-                    <th className="text-right p-3 font-medium text-muted-foreground">Amount</th>
-                    <th className="text-right p-3 font-medium text-muted-foreground">Balance After</th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">
+                      Date
+                    </th>
+                    <th className="text-left p-3 font-medium text-muted-foreground">
+                      Description
+                    </th>
+                    <th className="text-right p-3 font-medium text-muted-foreground">
+                      Amount
+                    </th>
+                    <th className="text-right p-3 font-medium text-muted-foreground">
+                      Balance After
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {usage.transactions.map((tx) => (
-                    <tr key={tx.id} className="border-b border-border/20 hover:bg-white/[0.02]">
+                    <tr
+                      key={tx.id}
+                      className="border-b border-border/20 hover:bg-white/[0.02]"
+                    >
                       <td className="p-3 text-muted-foreground">
                         {formatDate(tx.createdAt)}
                       </td>
                       <td className="p-3 text-foreground">
                         {getTransactionDescription(tx.reason)}
                       </td>
-                      <td className={`p-3 text-right font-medium tabular-nums ${tx.amount >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                        {tx.amount >= 0 ? '+' : ''}{tx.amount.toLocaleString()}
+                      <td
+                        className={`p-3 text-right font-medium tabular-nums ${tx.amount >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                      >
+                        {tx.amount >= 0 ? '+' : ''}
+                        {tx.amount.toLocaleString()}
                       </td>
                       <td className="p-3 text-right font-medium tabular-nums text-foreground">
                         {tx.balanceAfter.toLocaleString()}

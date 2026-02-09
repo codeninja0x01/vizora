@@ -11,7 +11,12 @@ export default async function BillingPage({
   const usageResult = await getUsageData();
 
   // Handle error states
-  if (!billingResult.success || !usageResult.success) {
+  if (
+    !billingResult.success ||
+    !usageResult.success ||
+    !billingResult.data ||
+    !usageResult.data
+  ) {
     return (
       <div className="space-y-6">
         <div>
@@ -24,7 +29,9 @@ export default async function BillingPage({
         </div>
         <div className="rounded-xl border border-border/50 bg-card/40 p-12 text-center">
           <p className="text-muted-foreground">
-            {billingResult.error || usageResult.error || 'Unable to load billing data'}
+            {billingResult.error ||
+              usageResult.error ||
+              'Unable to load billing data'}
           </p>
         </div>
       </div>
@@ -33,8 +40,8 @@ export default async function BillingPage({
 
   return (
     <BillingContent
-      billing={billingResult.data!}
-      usage={usageResult.data!}
+      billing={billingResult.data}
+      usage={usageResult.data}
       showSuccess={params.success === 'true'}
       showCreditsAdded={params.credits_added === 'true'}
     />
