@@ -12,7 +12,7 @@ export function ActivityBar() {
   const { activeTab, togglePanel } = useMediaPanelStore();
 
   return (
-    <div className="flex flex-col items-center w-12 h-full bg-[oklch(0.16_0_0)] py-3 gap-1">
+    <div className="flex flex-col items-center w-12 h-full bg-[var(--activity-bar-bg)] py-3 gap-1">
       {(Object.keys(tabs) as Tab[]).map((tabKey) => {
         const tab = tabs[tabKey];
         const isActive = activeTab === tabKey;
@@ -20,11 +20,12 @@ export function ActivityBar() {
           <Tooltip key={tabKey} delayDuration={10}>
             <TooltipTrigger asChild>
               <button
+                type="button"
                 className={cn(
-                  'flex items-center justify-center w-10 h-10 rounded-sm transition-all duration-150',
+                  'flex items-center justify-center w-10 h-10 rounded-md transition-all duration-150',
                   isActive
-                    ? 'bg-accent-purple-500/15 text-accent-purple-500'
-                    : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+                    ? 'bg-white/5 text-foreground border-l-2 border-accent-purple-500'
+                    : 'text-muted-foreground hover:bg-white/5 hover:text-foreground border-l-2 border-transparent'
                 )}
                 onClick={() => togglePanel(tabKey)}
               >

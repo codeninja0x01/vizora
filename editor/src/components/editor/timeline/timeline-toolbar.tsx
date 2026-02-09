@@ -54,7 +54,7 @@ export function TimelineToolbar({
     <div className="flex items-center justify-between px-2 py-1 h-10 bg-[var(--panel-background)] border-b border-white/5">
       <TooltipProvider delayDuration={300}>
         {/* Left section - Edit tools */}
-        <div className="flex items-center gap-0.5 bg-white/5 rounded-md p-0.5">
+        <div className="flex items-center gap-0.5 bg-white/[0.03] rounded-md p-0.5">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" onClick={onSplit}>
@@ -114,7 +114,7 @@ export function TimelineToolbar({
                 variant="ghost"
                 size="icon"
                 onClick={toggle}
-                className="size-9 bg-white/10 rounded-full hover:bg-white/15"
+                className="size-9 bg-white/10 rounded-full hover:bg-white/15 active:bg-white/20 focus-visible:ring-1 focus-visible:ring-accent-purple-500/50"
               >
                 {isPlaying ? (
                   <Pause className="size-5" />
@@ -160,7 +160,7 @@ export function TimelineToolbar({
         </div>
 
         {/* Right section - Zoom controls */}
-        <div className="flex items-center gap-0.5 bg-white/5 rounded-md p-0.5">
+        <div className="flex items-center gap-0.5 bg-white/[0.03] rounded-md p-0.5">
           <Button variant="ghost" size="icon" onClick={handleZoomOut}>
             <ZoomOut className="size-4" />
           </Button>

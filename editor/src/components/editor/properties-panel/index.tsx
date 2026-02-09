@@ -35,10 +35,10 @@ export function PropertySection({
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger className="w-full flex items-center gap-2 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">
+      <CollapsibleTrigger className="w-full flex items-center gap-2 py-2 text-[11px] font-medium uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
         <ChevronRightIcon
           className={cn(
-            'size-3.5 transition-transform duration-150',
+            'size-3 shrink-0 transition-transform duration-150',
             isOpen && 'rotate-90'
           )}
         />
@@ -73,9 +73,9 @@ export function PropertiesPanel({ selectedClips }: { selectedClips: IClip[] }) {
   // Multi-select state
   if (selectedClips.length > 1) {
     return (
-      <div className="bg-[var(--panel-background)] h-full flex flex-col items-center justify-center gap-2">
-        <LayersIcon className="size-8 text-muted-foreground" />
-        <div className="text-sm text-muted-foreground">Group</div>
+      <div className="bg-[var(--panel-background)] h-full flex flex-col items-center justify-center gap-3">
+        <LayersIcon className="size-10 text-muted-foreground/50" />
+        <div className="text-xs text-muted-foreground/70">Group</div>
       </div>
     );
   }
@@ -83,10 +83,13 @@ export function PropertiesPanel({ selectedClips }: { selectedClips: IClip[] }) {
   // Empty state - no selection
   if (selectedClips.length === 0) {
     return (
-      <div className="bg-[var(--panel-background)] h-full flex flex-col items-center justify-center gap-2">
-        <MousePointerClickIcon className="size-8 text-muted-foreground" />
-        <div className="text-sm text-muted-foreground">
-          Select a clip to edit its properties
+      <div className="bg-[var(--panel-background)] h-full flex flex-col items-center justify-center gap-3">
+        <MousePointerClickIcon
+          className="size-10 text-muted-foreground/50 animate-pulse"
+          style={{ animationDuration: '3s' }}
+        />
+        <div className="text-xs text-muted-foreground/70">
+          Select a clip to edit properties
         </div>
       </div>
     );
@@ -124,7 +127,7 @@ export function PropertiesPanel({ selectedClips }: { selectedClips: IClip[] }) {
 
       {/* Content */}
       <ScrollArea className="flex-1">
-        <div className="px-4 py-3 space-y-1">{renderSpecificProperties()}</div>
+        <div className="px-4 py-3 space-y-2">{renderSpecificProperties()}</div>
       </ScrollArea>
     </div>
   );

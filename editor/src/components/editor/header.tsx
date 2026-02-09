@@ -242,7 +242,7 @@ export default function Header() {
           className="h-8 px-4 rounded-lg font-medium gap-1.5"
           onClick={() => setIsExportModalOpen(true)}
         >
-          <Download className="size-5" />
+          <Download className="size-4" />
           <span>Download</span>
         </Button>
       </div>
