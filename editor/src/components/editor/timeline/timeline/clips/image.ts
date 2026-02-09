@@ -1,8 +1,13 @@
-import { BaseTimelineClip, BaseClipProps } from './base';
+import { BaseTimelineClip, type BaseClipProps } from './base';
 import { createResizeControls } from '../controls';
-import { Control, util } from 'fabric';
+import { type Control, util } from 'fabric';
 import { editorFont } from '@/components/editor/constants';
 import { unitsToTimeMs } from '../utils/filmstrip';
+import {
+  CLIP_COLORS,
+  SELECTION_COLOR,
+  SELECTION_BORDER_WIDTH,
+} from '@/components/editor/timeline/timeline-constants';
 
 const MICROSECONDS_IN_SECOND = 1_000_000;
 
@@ -14,13 +19,13 @@ export class Image extends BaseTimelineClip {
   }
 
   static ownDefaults = {
-    rx: 6,
-    ry: 6,
+    rx: 4,
+    ry: 4,
     objectCaching: false,
     borderColor: 'transparent',
     stroke: 'transparent',
     strokeWidth: 0,
-    fill: '#164e63',
+    fill: CLIP_COLORS.image,
     borderOpacityWhenMoving: 1,
     hoverCursor: 'default',
   };
@@ -143,10 +148,10 @@ export class Image extends BaseTimelineClip {
 
   public updateSelected(ctx: CanvasRenderingContext2D) {
     const borderColor = this.isSelected
-      ? '#ffffff'
+      ? SELECTION_COLOR
       : 'rgba(255, 255, 255, 0.1)';
-    const borderWidth = 2;
-    const radius = 6;
+    const borderWidth = SELECTION_BORDER_WIDTH;
+    const radius = 4;
 
     ctx.save();
     ctx.fillStyle = borderColor;

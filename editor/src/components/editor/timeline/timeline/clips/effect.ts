@@ -1,7 +1,12 @@
-import { BaseTimelineClip, BaseClipProps } from './base';
-import { Control } from 'fabric';
+import { BaseTimelineClip, type BaseClipProps } from './base';
+import type { Control } from 'fabric';
 import { createResizeControls } from '../controls';
 import { editorFont } from '@/components/editor/constants';
+import {
+  CLIP_COLORS,
+  SELECTION_COLOR,
+  SELECTION_BORDER_WIDTH,
+} from '@/components/editor/timeline/timeline-constants';
 
 export class Effect extends BaseTimelineClip {
   isSelected: boolean;
@@ -10,13 +15,13 @@ export class Effect extends BaseTimelineClip {
   }
 
   static ownDefaults = {
-    rx: 10,
-    ry: 10,
+    rx: 4,
+    ry: 4,
     objectCaching: false,
     borderColor: 'transparent',
     stroke: 'transparent',
     strokeWidth: 0,
-    fill: '#7c2d12',
+    fill: CLIP_COLORS.effect,
     borderOpacityWhenMoving: 1,
     hoverCursor: 'default',
   };
@@ -24,7 +29,7 @@ export class Effect extends BaseTimelineClip {
     super(options);
     Object.assign(this, Effect.ownDefaults);
     this.set({
-      // fill: options.fill || TRACK_COLORS.effect.solid,
+      fill: CLIP_COLORS.effect,
     });
   }
 
@@ -60,9 +65,11 @@ export class Effect extends BaseTimelineClip {
     this.set({ dirty: true });
   }
   public updateSelected(ctx: CanvasRenderingContext2D) {
-    const borderColor = this.isSelected ? '#c2410c' : '#9a3412';
-    const borderWidth = 2;
-    const radius = 10;
+    const borderColor = this.isSelected
+      ? SELECTION_COLOR
+      : 'rgba(255, 255, 255, 0.1)';
+    const borderWidth = SELECTION_BORDER_WIDTH;
+    const radius = 4;
 
     ctx.save();
     ctx.fillStyle = borderColor;
