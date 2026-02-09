@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Video } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Video, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RenderCard } from '@/components/render/render-card';
 import { useRenderEvents } from '@/hooks/use-render-events';
@@ -129,6 +129,17 @@ export function RenderList({ initialRenders }: RenderListProps) {
     }
   };
 
+  // Count expiring renders (deletionWarningShown = true)
+  const expiringCount = useMemo(() => {
+    return renders.filter(
+      (r) =>
+        r.status === 'completed' &&
+        r.deletionWarningShown &&
+        r.expiresAt &&
+        new Date(r.expiresAt) > new Date()
+    ).length;
+  }, [renders]);
+
   return (
     <div className="space-y-6">
       {/* Filters */}
@@ -139,10 +150,24 @@ export function RenderList({ initialRenders }: RenderListProps) {
         onSearchChange={setSearch}
       />
 
+      {/* Expiry warning banner */}
+      {expiringCount > 0 && (
+        <div className="flex items-center gap-3 rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
+          <AlertTriangle className="size-5 flex-shrink-0 text-amber-400" />
+          <p className="text-sm text-amber-400">
+            <strong>{expiringCount}</strong> rendered video
+            {expiringCount === 1 ? '' : 's'} expiring within 7 days — download
+            before deletion
+          </p>
+        </div>
+      )}
+
       {/* Render list or empty state */}
       {renders.length === 0 ? (
-        <div className="rounded-lg border border-border bg-card/50 p-12 text-center">
-          <Video className="mx-auto mb-4 size-12 text-muted-foreground" />
+        <div className="rounded-xl border border-border/50 bg-card/40 p-12 text-center">
+          <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-muted/50">
+            <Video className="size-7 text-muted-foreground/40" />
+          </div>
           <h2 className="mb-2 text-xl font-semibold">No renders found</h2>
           <p className="text-muted-foreground">
             {search || status !== 'all'

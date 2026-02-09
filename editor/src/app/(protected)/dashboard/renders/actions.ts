@@ -110,6 +110,8 @@ export async function getRenders(filters?: {
       errorMessage: r.errorMessage,
       resolution: null, // Will be populated when available from render options
       fileSize: null, // Will be populated when storage integration exists
+      expiresAt: r.expiresAt?.toISOString() ?? null,
+      deletionWarningShown: r.deletionWarningShown,
     })),
     nextCursor,
     hasMore,

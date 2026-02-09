@@ -1,7 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronRight, ChevronDown, Layers } from 'lucide-react';
+import {
+  ChevronRight,
+  ChevronDown,
+  Layers,
+  Download,
+  AlertTriangle,
+} from 'lucide-react';
 import { ProgressBar } from './progress-bar';
 import { RenderStatusBadge } from './render-status-badge';
 import { VideoPreview } from './video-preview';
@@ -20,6 +26,8 @@ interface RenderCardData {
   errorMessage?: string | null;
   resolution?: string | null;
   fileSize?: number | null;
+  expiresAt?: string | null;
+  deletionWarningShown?: boolean;
   // Live progress from SSE (passed as prop, updated by parent)
   liveProgress?: number | null;
 }
@@ -82,6 +90,21 @@ function formatFileSize(bytes: number): string {
 
   const mb = kb / 1024;
   return `${mb.toFixed(1)} MB`;
+}
+
+/**
+ * Format expiry date to relative time (e.g., "in 23 days")
+ */
+function formatExpiryRelative(expiresAt: string): string {
+  const now = new Date();
+  const expiry = new Date(expiresAt);
+  const diffMs = expiry.getTime() - now.getTime();
+  const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+
+  if (diffDays < 0) return 'expired';
+  if (diffDays === 0) return 'today';
+  if (diffDays === 1) return 'tomorrow';
+  return `in ${diffDays} days`;
 }
 
 /**
@@ -223,11 +246,44 @@ export function RenderCard({ render }: RenderCardProps) {
 
           {/* Status-specific content */}
           {render.status === 'completed' && render.outputUrl && (
-            <VideoPreview
-              videoUrl={render.outputUrl}
-              thumbnailUrl={render.templateThumbnail || undefined}
-              fileName={`${render.templateName}.mp4`}
-            />
+            <>
+              <VideoPreview
+                videoUrl={render.outputUrl}
+                thumbnailUrl={render.templateThumbnail || undefined}
+                fileName={`${render.templateName}.mp4`}
+              />
+
+              {/* Download button */}
+              <div className="mt-3">
+                <a
+                  href={render.outputUrl}
+                  download={`${render.templateName}.mp4`}
+                  className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                >
+                  <Download className="size-4" />
+                  Download
+                </a>
+              </div>
+
+              {/* Expiry information */}
+              {render.expiresAt && (
+                <div className="mt-3">
+                  {render.deletionWarningShown ? (
+                    <div className="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-sm text-amber-400">
+                      <AlertTriangle className="size-4 flex-shrink-0" />
+                      <span>
+                        Expires {formatExpiryRelative(render.expiresAt)} —
+                        download before deletion
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="text-xs text-muted-foreground">
+                      Auto-deletes {formatExpiryRelative(render.expiresAt)}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
 
           {render.status === 'failed' && render.errorMessage && (
