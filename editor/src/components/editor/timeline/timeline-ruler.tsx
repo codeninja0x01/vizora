@@ -41,18 +41,18 @@ export function TimelineRuler({
 
     const pixelsPerSecond = TIMELINE_CONSTANTS.PIXELS_PER_SECOND * zoomLevel;
 
-    // Background for valid duration (darker)
+    // Background - seamless blend with timeline
     const durationX = duration * pixelsPerSecond;
     if (durationX > 0) {
-      ctx.fillStyle = 'rgba(33, 33, 33, 1)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0)'; // Transparent - seamless blend
       ctx.fillRect(0, 0, Math.min(width, durationX), 24);
     }
 
     // Drawing settings
-    ctx.fillStyle = '#9ca3af'; // text-gray-400
-    ctx.strokeStyle = '#374151'; // border-gray-700
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.50)'; // text-muted-foreground equivalent
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.10)'; // Minor ticks
     ctx.lineWidth = 1;
-    ctx.font = '12px Inter, sans-serif';
+    ctx.font = '11px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
 
@@ -118,7 +118,6 @@ export function TimelineRuler({
       const isBeyondDuration = time > duration + 0.001;
       ctx.globalAlpha = isBeyondDuration ? 0.4 : 1.0;
 
-      ctx.beginPath();
       // Check if main interval
       // Use epsilon for float comparison
       const isMain =
@@ -126,22 +125,27 @@ export function TimelineRuler({
         Math.abs((time % mainInterval) - mainInterval) < 0.001;
 
       if (isMain) {
-        // Main Tick (Botom)
+        // Main Tick - more visible
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.20)';
+        ctx.beginPath();
         ctx.moveTo(x, 18);
         ctx.lineTo(x, 24);
+        ctx.stroke();
 
         // Text (Top)
         const text = formatTime(time);
         ctx.fillText(text, x, 4);
       } else {
-        // Sub Tick (Bottom, shorter)
+        // Sub Tick (Bottom, shorter) - less visible
         // Only draw sub ticks if there's enough space
         if (subInterval !== mainInterval) {
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.10)';
+          ctx.beginPath();
           ctx.moveTo(x, 21);
           ctx.lineTo(x, 24);
+          ctx.stroke();
         }
       }
-      ctx.stroke();
     }
     ctx.globalAlpha = 1.0;
   }, [zoomLevel, duration, width]);

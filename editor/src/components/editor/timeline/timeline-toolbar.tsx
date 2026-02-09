@@ -10,26 +10,18 @@ import {
   Pause,
   Play,
   SkipBack,
+  SkipForward,
   Magnet,
   ZoomOut,
   ZoomIn,
   Copy,
   Trash2,
-  ArrowLeftToLine,
-  ArrowRightToLine,
   Scissors,
 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { DEFAULT_FPS } from '@/stores/project-store';
 import { formatTimeCode } from '@/lib/time';
 import { EditableTimecode } from '@/components/ui/editable-timecode';
-
-import {
-  IconPlayerPauseFilled,
-  IconPlayerPlayFilled,
-  IconPlayerSkipBack,
-  IconPlayerSkipForward,
-} from '@tabler/icons-react';
 
 export function TimelineToolbar({
   zoomLevel,
@@ -59,13 +51,14 @@ export function TimelineToolbar({
   };
 
   return (
-    <div className="flex items-center justify-between px-2 py-1 border-b h-10">
-      <div className="flex items-center gap-1">
-        <TooltipProvider delayDuration={500}>
+    <div className="flex items-center justify-between px-2 py-1 h-10 bg-[var(--panel-background)] border-b border-white/5">
+      <TooltipProvider delayDuration={300}>
+        {/* Left section - Edit tools */}
+        <div className="flex items-center gap-0.5 bg-white/5 rounded-md p-0.5">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" onClick={onSplit}>
-                <Scissors className="h-4 w-4" />
+                <Scissors className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Split element (Ctrl+S)</TooltipContent>
@@ -74,7 +67,7 @@ export function TimelineToolbar({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" onClick={onDuplicate}>
-                <Copy className="h-4 w-4" />
+                <Copy className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Duplicate element (Ctrl+D)</TooltipContent>
@@ -83,24 +76,24 @@ export function TimelineToolbar({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon" onClick={onDelete}>
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Delete element (Delete)</TooltipContent>
           </Tooltip>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="ghost" size="icon">
-                <Magnet className="h-4 w-4" />
+                <Magnet className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Auto snapping</TooltipContent>
           </Tooltip>
-        </TooltipProvider>
-      </div>
+        </div>
 
-      <div className="flex items-center gap-0">
-        <TooltipProvider delayDuration={500}>
+        {/* Center section - Playback controls */}
+        <div className="flex items-center gap-0">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -109,18 +102,24 @@ export function TimelineToolbar({
                 size="icon"
                 onClick={() => seek(0)}
               >
-                <IconPlayerSkipBack className="h-4 w-4" />
+                <SkipBack className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>Return to Start (Home / Enter)</TooltipContent>
           </Tooltip>
+
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" onClick={toggle}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggle}
+                className="size-9 bg-white/10 rounded-full hover:bg-white/15"
+              >
                 {isPlaying ? (
-                  <IconPlayerPauseFilled className="size-5" />
+                  <Pause className="size-5" />
                 ) : (
-                  <IconPlayerPlayFilled className="size-5" />
+                  <Play className="size-5 fill-current" />
                 )}
               </Button>
             </TooltipTrigger>
@@ -128,19 +127,21 @@ export function TimelineToolbar({
               {isPlaying ? 'Pause (Space)' : 'Play (Space)'}
             </TooltipContent>
           </Tooltip>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 className="size-7"
                 variant="ghost"
                 size="icon"
-                onClick={() => seek(0)}
+                onClick={() => seek(duration)}
               >
-                <IconPlayerSkipForward className="h-4 w-4" />
+                <SkipForward className="size-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Return to Start (Home / Enter)</TooltipContent>
+            <TooltipContent>Skip to End</TooltipContent>
           </Tooltip>
+
           {/* Time Display */}
           <div className="flex flex-row items-center justify-center px-2">
             <EditableTimecode
@@ -156,13 +157,12 @@ export function TimelineToolbar({
               {formatTimeCode(duration, 'MM:SS')}
             </div>
           </div>
-        </TooltipProvider>
-      </div>
+        </div>
 
-      <div className="flex items-center gap-1">
-        <div className="flex items-center gap-1">
+        {/* Right section - Zoom controls */}
+        <div className="flex items-center gap-0.5 bg-white/5 rounded-md p-0.5">
           <Button variant="ghost" size="icon" onClick={handleZoomOut}>
-            <ZoomOut className="h-4 w-4" />
+            <ZoomOut className="size-4" />
           </Button>
           <Slider
             className="w-24"
@@ -173,10 +173,10 @@ export function TimelineToolbar({
             step={0.15}
           />
           <Button variant="ghost" size="icon" onClick={handleZoomIn}>
-            <ZoomIn className="h-4 w-4" />
+            <ZoomIn className="size-4" />
           </Button>
         </div>
-      </div>
+      </TooltipProvider>
     </div>
   );
 }
