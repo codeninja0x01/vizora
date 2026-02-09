@@ -12,6 +12,7 @@
     "worker:deletion": "tsx src/workers/deletion-warning-worker.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.74.0",
     "@aws-sdk/client-s3": "^3.922.0",
     "@aws-sdk/s3-request-presigner": "^3.946.0",
     "@deepgram/sdk": "^4.11.2",
