@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Async Rendering** - Queue-based rendering with worker processes (completed 2026-02-09)
 - [x] **Phase 5: Render Progress & History** - Real-time updates and dashboard integration (completed 2026-02-09)
 - [ ] **Phase 6: Storage Integration** - Asset uploads and video delivery via R2
-- [ ] **Phase 7: Webhooks** - Callback system for render completion
+- [x] **Phase 7: Webhooks** - Callback system for render completion (completed 2026-02-09)
 - [ ] **Phase 8: Bulk Generation** - Batch rendering and CSV import
 - [ ] **Phase 9: Billing & Usage** - Stripe integration with metered usage
 - [ ] **Phase 10: External Integrations** - Zapier and Make connectivity
@@ -191,10 +191,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 07-01-PLAN.md -- Webhook foundation (schema, types, HMAC signature, SSRF validator, delivery queue)
-- [ ] 07-02-PLAN.md -- Webhook REST API endpoints (register, list, update, delete, rotate secret)
-- [ ] 07-03-PLAN.md -- Webhook delivery worker and render worker integration
-- [ ] 07-04-PLAN.md -- Dashboard webhooks management page with server actions
+- [x] 07-01-PLAN.md -- Webhook foundation (schema, types, HMAC signature, SSRF validator, delivery queue)
+- [x] 07-02-PLAN.md -- Webhook REST API endpoints (register, list, update, delete, rotate secret)
+- [x] 07-03-PLAN.md -- Webhook delivery worker and render worker integration
+- [x] 07-04-PLAN.md -- Dashboard webhooks management page with server actions
 
 ---
 
@@ -297,7 +297,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 4. Async Rendering | 3/3 | ✓ Complete | 2026-02-09 |
 | 5. Render Progress & History | 4/4 | ✓ Complete | 2026-02-09 |
 | 6. Storage Integration | 0/4 | Not started | - |
-| 7. Webhooks | 0/4 | Not started | - |
+| 7. Webhooks | 4/4 | ✓ Complete | 2026-02-09 |
 | 8. Bulk Generation | 0/5 | Not started | - |
 | 9. Billing & Usage | 0/TBD | Not started | - |
 | 10. External Integrations | 0/TBD | Not started | - |

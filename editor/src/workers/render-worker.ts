@@ -4,17 +4,28 @@ import { redisConnection } from '@/lib/redis';
 import { applyMergeData } from '@/lib/merge-fields';
 import { formatRenderError } from '@/lib/error-categorization';
 import type { MergeField } from '@/types/template';
-import { mkdir } from 'fs/promises';
+import { mkdir, readFile, unlink } from 'fs/promises';
 import { join } from 'path';
 import { webhookQueue } from '@/lib/webhooks/queue';
 import type { WebhookPayload } from '@/lib/webhooks/types';
 import { randomUUID } from 'node:crypto';
+import { R2StorageService } from '@/lib/r2';
+import { config } from '@/lib/config';
 
 // Dynamic import for ESM package
 let Renderer: any;
 
 const RENDER_OUTPUT_DIR = process.env.RENDER_OUTPUT_DIR || '/tmp/renders';
 const RENDER_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes per user decision
+
+// Initialize R2 storage service
+const r2 = new R2StorageService({
+  bucketName: config.r2.bucket,
+  accessKeyId: config.r2.accessKeyId,
+  secretAccessKey: config.r2.secretAccessKey,
+  accountId: config.r2.accountId,
+  cdn: config.r2.cdn,
+});
 
 /**
  * Enqueue webhook delivery jobs for all enabled webhooks in the organization
@@ -145,23 +156,82 @@ async function processRenderJob(job: Job) {
 
     await renderer.render();
 
-    // Report near-completion progress
+    // Report progress after rendering
+    await job.updateProgress({ percent: 90, userId: job.data.userId });
+
+    // Upload MP4 to R2
+    let cdnUrl: string;
+    try {
+      console.log(`[Worker] Uploading render ${job.data.renderId} to R2...`);
+      const fileBuffer = await readFile(outputPath);
+      const r2Key = `renders/${job.data.renderId}.mp4`;
+      cdnUrl = await r2.uploadData(r2Key, fileBuffer, 'video/mp4');
+      console.log(`[Worker] Upload successful: ${cdnUrl}`);
+
+      // Clean up local file after successful upload
+      await unlink(outputPath).catch((err) => {
+        console.warn(
+          `[Worker] Failed to clean up local file ${outputPath}:`,
+          err
+        );
+      });
+    } catch (error) {
+      console.error(
+        `[Worker] R2 upload failed for render ${job.data.renderId}:`,
+        error
+      );
+      throw new Error('Failed to upload render to storage');
+    }
+
+    // Report progress after R2 upload
     await job.updateProgress({ percent: 95, userId: job.data.userId });
 
-    // Update DB with completed status
-    const outputUrl = `/renders/${job.data.renderId}.mp4`;
+    // Calculate expiry (30 days from completion)
+    const completedAt = new Date();
+    const expiresAt = new Date(
+      completedAt.getTime() + 30 * 24 * 60 * 60 * 1000
+    );
+
+    // Update DB with completed status, CDN URL, and expiry
     await prisma.render.update({
       where: { id: job.data.renderId },
       data: {
         status: 'completed',
-        outputUrl,
-        completedAt: new Date(),
+        outputUrl: cdnUrl,
+        completedAt,
+        expiresAt,
       },
     });
 
-    console.log(
-      `[Worker] Render ${job.data.renderId} completed -> ${outputUrl}`
-    );
+    // Schedule deletion warning (23 days = 7 days before expiry)
+    try {
+      const { deletionWarningQueue } = await import(
+        '@/lib/deletion-warning-queue'
+      );
+      await deletionWarningQueue.add(
+        'send-deletion-warning',
+        {
+          renderId: job.data.renderId,
+          userId: job.data.userId,
+          organizationId: job.data.organizationId,
+        },
+        {
+          delay: 23 * 24 * 60 * 60 * 1000, // 23 days in ms
+          jobId: `deletion-warning-${job.data.renderId}`, // Idempotent
+        }
+      );
+      console.log(
+        `[Worker] Scheduled deletion warning for render ${job.data.renderId}`
+      );
+    } catch (error) {
+      // Log but don't fail the render if warning scheduling fails
+      console.error(
+        `[Worker] Failed to schedule deletion warning for render ${job.data.renderId}:`,
+        error
+      );
+    }
+
+    console.log(`[Worker] Render ${job.data.renderId} completed -> ${cdnUrl}`);
 
     // Enqueue webhook notifications
     await enqueueWebhooks(job.data.renderId, job.data.organizationId, {
@@ -172,13 +242,13 @@ async function processRenderJob(job: Job) {
         renderId: job.data.renderId,
         templateId: job.data.templateId,
         status: 'done',
-        outputUrl,
+        outputUrl: cdnUrl,
         completedAt: new Date().toISOString(),
       },
     });
 
     // Return result for BullMQ's completed event (include userId for event routing)
-    return { outputPath, outputUrl, userId: job.data.userId };
+    return { outputPath, outputUrl: cdnUrl, userId: job.data.userId };
   } catch (error) {
     const { category, message } = formatRenderError(error);
     await prisma.render.update({
