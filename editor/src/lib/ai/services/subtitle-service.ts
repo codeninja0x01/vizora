@@ -8,7 +8,10 @@ import { transcribe } from '@/lib/transcribe';
 import type { Word } from '@/lib/transcribe/types';
 import { groupWordsIntoCues } from '../utils/word-timing';
 import type { SubtitleCue, WordTiming } from '../utils/word-timing';
-import type { SubtitlePreset } from '../presets/subtitle-presets';
+import {
+  getDefaultPreset as getDefaultSubtitlePreset,
+  type SubtitlePreset,
+} from '../presets/subtitle-presets';
 
 export interface GenerateSubtitleOptions {
   mode: 'karaoke' | 'phrase';
@@ -114,10 +117,8 @@ export class SubtitleService {
    * Get default subtitle preset
    *
    * Returns the 'modern-karaoke' preset as the default
-   * This will be implemented properly once presets are defined
    */
-  static getDefaultPreset(): any {
-    // This will be replaced with actual preset lookup once presets module is created
-    return null;
+  static getDefaultPreset(): SubtitlePreset {
+    return getDefaultSubtitlePreset();
   }
 }
