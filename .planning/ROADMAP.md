@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Template System** - Template CRUD with merge fields and validation (completed 2026-02-09)
 - [x] **Phase 4: Async Rendering** - Queue-based rendering with worker processes (completed 2026-02-09)
 - [x] **Phase 5: Render Progress & History** - Real-time updates and dashboard integration (completed 2026-02-09)
-- [ ] **Phase 6: Storage Integration** - Asset uploads and video delivery via R2
+- [x] **Phase 6: Storage Integration** - Asset uploads and video delivery via R2 (completed 2026-02-09)
 - [x] **Phase 7: Webhooks** - Callback system for render completion (completed 2026-02-09)
 - [ ] **Phase 8: Bulk Generation** - Batch rendering and CSV import
 - [ ] **Phase 9: Billing & Usage** - Stripe integration with metered usage
@@ -168,10 +168,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 06-01-PLAN.md -- Storage foundation (schema, R2 enhancements, file validation, deps)
-- [ ] 06-02-PLAN.md -- Render video R2 storage (worker upload, CDN URLs, deletion warnings)
-- [ ] 06-03-PLAN.md -- Asset upload API and folder management (presigned URLs, CRUD, usage safety)
-- [ ] 06-04-PLAN.md -- Asset library editor panel (drag-drop, progress, grid, folders)
+- [x] 06-01-PLAN.md -- Storage foundation (schema, R2 enhancements, file validation, deps)
+- [x] 06-02-PLAN.md -- Render video R2 storage (worker upload, CDN URLs, deletion warnings)
+- [x] 06-03-PLAN.md -- Asset upload API and folder management (presigned URLs, CRUD, usage safety)
+- [x] 06-04-PLAN.md -- Asset library editor panel (drag-drop, progress, grid, folders)
 
 ---
 
@@ -296,7 +296,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 3. Template System | 6/6 | ✓ Complete | 2026-02-09 |
 | 4. Async Rendering | 3/3 | ✓ Complete | 2026-02-09 |
 | 5. Render Progress & History | 4/4 | ✓ Complete | 2026-02-09 |
-| 6. Storage Integration | 0/4 | Not started | - |
+| 6. Storage Integration | 4/4 | ✓ Complete | 2026-02-09 |
 | 7. Webhooks | 4/4 | ✓ Complete | 2026-02-09 |
 | 8. Bulk Generation | 0/5 | Not started | - |
 | 9. Billing & Usage | 0/TBD | Not started | - |
