@@ -7,6 +7,16 @@
 
 Requirements for initial release. Each maps to roadmap phases.
 
+### Editor UX
+
+- [ ] **EDIT-01**: Editor uses cohesive modern design system (consistent color palette, typography, spacing across all panels)
+- [ ] **EDIT-02**: Editor panels (timeline, properties, canvas, layers) have refined layout with clear visual hierarchy
+- [ ] **EDIT-03**: Toolbar and controls use modern, polished components (buttons, dropdowns, sliders, inputs)
+- [ ] **EDIT-04**: Timeline UI has polished track visualization with clear clip boundaries and smooth interactions
+- [ ] **EDIT-05**: Property/inspector panels display settings with clean grouping and intuitive controls
+- [ ] **EDIT-06**: Editor uses consistent, modern icon system across all panels and toolbars
+- [ ] **EDIT-07**: Dark theme with professional color palette suitable for creative work
+
 ### Authentication & Access
 
 - [ ] **AUTH-01**: User can sign up with email and password
@@ -144,65 +154,72 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | Phase 1 | Pending |
-| AUTH-02 | Phase 1 | Pending |
-| AUTH-03 | Phase 1 | Pending |
-| AUTH-04 | Phase 1 | Pending |
-| AUTH-05 | Phase 1 | Pending |
-| AUTH-06 | Phase 1 | Pending |
-| AUTH-07 | Phase 1 | Pending |
-| TMPL-01 | Phase 2 | Pending |
-| TMPL-02 | Phase 2 | Pending |
-| TMPL-03 | Phase 2 | Pending |
-| TMPL-04 | Phase 2 | Pending |
-| TMPL-05 | Phase 2 | Pending |
-| TMPL-06 | Phase 2 | Pending |
-| TMPL-07 | Phase 2 | Pending |
-| TMPL-08 | Phase 2 | Pending |
-| RNDR-01 | Phase 3 | Pending |
-| RNDR-02 | Phase 3 | Pending |
-| RNDR-03 | Phase 3 | Pending |
-| RNDR-04 | Phase 3 | Pending |
-| RNDR-05 | Phase 4 | Pending |
-| RNDR-06 | Phase 3 | Pending |
-| RNDR-07 | Phase 3 | Pending |
-| STOR-01 | Phase 5 | Pending |
-| STOR-02 | Phase 5 | Pending |
-| STOR-03 | Phase 5 | Pending |
-| STOR-04 | Phase 5 | Pending |
-| WHBK-01 | Phase 6 | Pending |
-| WHBK-02 | Phase 6 | Pending |
-| WHBK-03 | Phase 6 | Pending |
-| WHBK-04 | Phase 6 | Pending |
-| WHBK-05 | Phase 9 | Pending |
-| WHBK-06 | Phase 9 | Pending |
-| WHBK-07 | Phase 9 | Pending |
-| BULK-01 | Phase 7 | Pending |
-| BULK-02 | Phase 7 | Pending |
-| BULK-03 | Phase 7 | Pending |
-| BULK-04 | Phase 7 | Pending |
-| BILL-01 | Phase 8 | Pending |
-| BILL-02 | Phase 8 | Pending |
-| BILL-03 | Phase 8 | Pending |
-| BILL-04 | Phase 8 | Pending |
-| BILL-05 | Phase 8 | Pending |
-| BILL-06 | Phase 8 | Pending |
-| AI-01 | Phase 10 | Pending |
-| AI-02 | Phase 10 | Pending |
-| AI-03 | Phase 10 | Pending |
-| AI-04 | Phase 10 | Pending |
-| AI-05 | Phase 10 | Pending |
-| DASH-01 | Phase 2 | Pending |
-| DASH-02 | Phase 4 | Pending |
-| DASH-03 | Phase 8 | Pending |
+| EDIT-01 | Phase 1 | Pending |
+| EDIT-02 | Phase 1 | Pending |
+| EDIT-03 | Phase 1 | Pending |
+| EDIT-04 | Phase 1 | Pending |
+| EDIT-05 | Phase 1 | Pending |
+| EDIT-06 | Phase 1 | Pending |
+| EDIT-07 | Phase 1 | Pending |
+| AUTH-01 | Phase 2 | Pending |
+| AUTH-02 | Phase 2 | Pending |
+| AUTH-03 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Pending |
+| AUTH-05 | Phase 2 | Pending |
+| AUTH-06 | Phase 2 | Pending |
+| AUTH-07 | Phase 2 | Pending |
+| TMPL-01 | Phase 3 | Pending |
+| TMPL-02 | Phase 3 | Pending |
+| TMPL-03 | Phase 3 | Pending |
+| TMPL-04 | Phase 3 | Pending |
+| TMPL-05 | Phase 3 | Pending |
+| TMPL-06 | Phase 3 | Pending |
+| TMPL-07 | Phase 3 | Pending |
+| TMPL-08 | Phase 3 | Pending |
+| RNDR-01 | Phase 4 | Pending |
+| RNDR-02 | Phase 4 | Pending |
+| RNDR-03 | Phase 4 | Pending |
+| RNDR-04 | Phase 4 | Pending |
+| RNDR-05 | Phase 5 | Pending |
+| RNDR-06 | Phase 4 | Pending |
+| RNDR-07 | Phase 4 | Pending |
+| STOR-01 | Phase 6 | Pending |
+| STOR-02 | Phase 6 | Pending |
+| STOR-03 | Phase 6 | Pending |
+| STOR-04 | Phase 6 | Pending |
+| WHBK-01 | Phase 7 | Pending |
+| WHBK-02 | Phase 7 | Pending |
+| WHBK-03 | Phase 7 | Pending |
+| WHBK-04 | Phase 7 | Pending |
+| WHBK-05 | Phase 10 | Pending |
+| WHBK-06 | Phase 10 | Pending |
+| WHBK-07 | Phase 10 | Pending |
+| BULK-01 | Phase 8 | Pending |
+| BULK-02 | Phase 8 | Pending |
+| BULK-03 | Phase 8 | Pending |
+| BULK-04 | Phase 8 | Pending |
+| BILL-01 | Phase 9 | Pending |
+| BILL-02 | Phase 9 | Pending |
+| BILL-03 | Phase 9 | Pending |
+| BILL-04 | Phase 9 | Pending |
+| BILL-05 | Phase 9 | Pending |
+| BILL-06 | Phase 9 | Pending |
+| AI-01 | Phase 11 | Pending |
+| AI-02 | Phase 11 | Pending |
+| AI-03 | Phase 11 | Pending |
+| AI-04 | Phase 11 | Pending |
+| AI-05 | Phase 11 | Pending |
+| DASH-01 | Phase 3 | Pending |
+| DASH-02 | Phase 5 | Pending |
+| DASH-03 | Phase 9 | Pending |
 
 **Coverage:**
-- v1 requirements: 51 total
-- Mapped to phases: 51
+- v1 requirements: 58 total
+- Mapped to phases: 58
 - Unmapped: 0
 
-**Coverage validated:** All 51 v1 requirements mapped to exactly one phase.
+**Coverage validated:** All 58 v1 requirements mapped to exactly one phase.
 
 ---
 *Requirements defined: 2026-02-09*
-*Last updated: 2026-02-09 after roadmap creation*
+*Last updated: 2026-02-09 after adding Editor UX requirements and renumbering phases*
