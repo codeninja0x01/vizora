@@ -284,10 +284,17 @@ Plans:
   4. User can generate video from text prompt using text-to-video AI
   5. User can auto-generate templates from text descriptions
 
-**Plans**: TBD
+**Plans**: 8 plans
 
 Plans:
-- Plans to be defined during `/gsd:plan-phase 11`
+- [ ] 11-01-PLAN.md -- TTS provider abstraction, ElevenLabs + OpenAI adapters, voice and synthesis APIs
+- [ ] 11-02-PLAN.md -- Voiceover panel with voice catalog, script input, and editor integration
+- [ ] 11-03-PLAN.md -- Subtitle service with word-level timing, WebVTT generation, and 8 presets
+- [ ] 11-04-PLAN.md -- Subtitle panel UI with preset gallery, mode toggle, and editor integration
+- [ ] 11-05-PLAN.md -- Text-to-video assembly service with stock footage providers and style presets
+- [ ] 11-06-PLAN.md -- Storyboard wizard UI with scene editor and dashboard entry page
+- [ ] 11-07-PLAN.md -- Template generation service with Claude structured outputs and merge field detection
+- [ ] 11-08-PLAN.md -- Template generation chat UI with style picker and iterative refinement
 
 ---
 
@@ -308,4 +315,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 8. Bulk Generation | 5/5 | ✓ Complete | 2026-02-09 |
 | 9. Billing & Usage | 5/5 | ✓ Complete | 2026-02-09 |
 | 10. External Integrations | 4/4 | ✓ Complete | 2026-02-09 |
-| 11. AI Features | 0/TBD | Not started | - |
+| 11. AI Features | 0/8 | Not started | - |
