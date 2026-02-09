@@ -98,7 +98,7 @@ export async function getRenders(filters?: {
   return {
     items: items.map((r) => ({
       id: r.id,
-      status: r.status,
+      status: r.status as 'queued' | 'active' | 'completed' | 'failed',
       templateName: r.template.name,
       templateThumbnail: r.template.thumbnailUrl,
       createdAt: r.queuedAt.toISOString(),
