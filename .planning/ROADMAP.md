@@ -211,10 +211,14 @@ Plans:
   3. User can track batch progress showing overall completion and individual job statuses
   4. Batch renders respect concurrent limits per subscription tier
 
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- Plans to be defined during `/gsd:plan-phase 8`
+- [ ] 08-01-PLAN.md -- Batch foundation (Batch model, batchId on Render, utilities, dependencies)
+- [ ] 08-02-PLAN.md -- Batch REST API (submit, status polling, retry failed)
+- [ ] 08-03-PLAN.md -- Batch SSE events and streaming ZIP download
+- [ ] 08-04-PLAN.md -- Bulk Generate dashboard page (CSV upload, field mapping, preview)
+- [ ] 08-05-PLAN.md -- Batch progress in renders dashboard (grouped entries, retry, download)
 
 ---
 
@@ -294,7 +298,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 5. Render Progress & History | 4/4 | ✓ Complete | 2026-02-09 |
 | 6. Storage Integration | 0/4 | Not started | - |
 | 7. Webhooks | 0/4 | Not started | - |
-| 8. Bulk Generation | 0/TBD | Not started | - |
+| 8. Bulk Generation | 0/5 | Not started | - |
 | 9. Billing & Usage | 0/TBD | Not started | - |
 | 10. External Integrations | 0/TBD | Not started | - |
 | 11. AI Features | 0/TBD | Not started | - |
