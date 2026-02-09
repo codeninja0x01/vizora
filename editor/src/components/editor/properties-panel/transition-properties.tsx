@@ -6,7 +6,7 @@ import {
   InputGroupInput,
 } from '@/components/ui/input-group';
 import { Slider } from '@/components/ui/slider';
-import { GL_TRANSITION_OPTIONS, Transition } from 'openvideo';
+import { GL_TRANSITION_OPTIONS } from 'openvideo';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useStudioStore } from '@/stores/studio-store';
 import { Loader2, Timer } from 'lucide-react';
@@ -20,7 +20,7 @@ let LAST_SCROLL_POS = 0;
 
 export function TransitionProperties({ clip }: TransitionPropertiesProps) {
   const transitionClip = clip as any;
-  const { studio, selectedClips } = useStudioStore();
+  const { studio } = useStudioStore();
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
   const [loaded, setLoaded] = React.useState(LOADED_CACHE);
@@ -75,7 +75,7 @@ export function TransitionProperties({ clip }: TransitionPropertiesProps) {
         Math.min(maxDurationMicro, newDuration)
       );
 
-      const transitionStart = toClip!.display.from - newDuration / 2;
+      const transitionStart = (toClip?.display?.from ?? 0) - newDuration / 2;
       const transitionEnd = transitionStart + newDuration;
       const transitionMeta = {
         key: newKey,
