@@ -13,9 +13,17 @@ interface UploadingAsset {
   file: File; // Keep file reference for upload
 }
 
+// Folder with counts from getFolders
+type AssetFolderWithCount = AssetFolder & {
+  _count: {
+    assets: number;
+    children: number;
+  };
+};
+
 interface AssetStoreState {
   assets: Asset[]; // From DB
-  folders: AssetFolder[]; // From DB
+  folders: AssetFolderWithCount[]; // From DB
   currentFolderId: string | null; // null = root
   uploading: Map<string, UploadingAsset>;
   isLoading: boolean;
@@ -24,7 +32,7 @@ interface AssetStoreState {
 
   // Actions
   setAssets: (assets: Asset[]) => void;
-  setFolders: (folders: AssetFolder[]) => void;
+  setFolders: (folders: AssetFolderWithCount[]) => void;
   setCurrentFolderId: (id: string | null) => void;
   addUploading: (asset: UploadingAsset) => void;
   updateUploadProgress: (id: string, progress: number) => void;

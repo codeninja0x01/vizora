@@ -34,6 +34,9 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { ALLOWED_FILE_TYPES, MAX_FILE_SIZE } from '@/lib/storage/validation';
+import { getFolders } from '@/actions/folder-actions';
+import { FolderBar, FolderCard } from './asset-folders';
+import type { AssetFolder } from '@prisma/client';
 
 // Helper to format duration like 00:00 (unused but kept for potential future use)
 function _formatDuration(seconds?: number) {
@@ -206,31 +209,41 @@ export default function PanelUploads() {
     removeUploading,
     deleteAssetLocal,
     currentFolderId,
+    setCurrentFolderId,
+    folders,
+    setFolders,
   } = useAssetStore();
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
-  // Load assets on mount and when currentFolderId changes
+  // Load assets and folders on mount and when currentFolderId changes
   useEffect(() => {
-    const loadAssets = async () => {
+    const loadData = async () => {
       try {
         useAssetStore.setState({ isLoading: true });
-        const fetchedAssets = await getAssets({
-          folderId: currentFolderId,
-          search: searchQuery || undefined,
-        });
+
+        // Load folders and assets in parallel
+        const [fetchedFolders, fetchedAssets] = await Promise.all([
+          getFolders(currentFolderId),
+          getAssets({
+            folderId: currentFolderId,
+            search: searchQuery || undefined,
+          }),
+        ]);
+
+        setFolders(fetchedFolders);
         setAssets(fetchedAssets);
       } catch (error) {
-        console.error('Failed to load assets:', error);
+        console.error('Failed to load data:', error);
         toast.error('Failed to load assets');
       } finally {
         useAssetStore.setState({ isLoading: false });
       }
     };
 
-    loadAssets();
-  }, [currentFolderId, searchQuery, setAssets]);
+    loadData();
+  }, [currentFolderId, searchQuery, setAssets, setFolders]);
 
   // react-dropzone configuration
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -310,10 +323,25 @@ export default function PanelUploads() {
     asset.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Reload folders after creation
+  const handleFolderCreated = async () => {
+    try {
+      const fetchedFolders = await getFolders(currentFolderId);
+      setFolders(fetchedFolders);
+    } catch (error) {
+      console.error('Failed to reload folders:', error);
+    }
+  };
+
   // Convert uploading Map to array for rendering
   const uploadingArray = Array.from(uploading.values());
 
-  if (isLoading && assets.length === 0 && uploadingArray.length === 0) {
+  if (
+    isLoading &&
+    assets.length === 0 &&
+    uploadingArray.length === 0 &&
+    folders.length === 0
+  ) {
     return (
       <div className="h-full flex items-center justify-center">
         <span className="text-sm text-muted-foreground">Loading...</span>
@@ -321,13 +349,14 @@ export default function PanelUploads() {
     );
   }
 
-  const hasAssets = assets.length > 0 || uploadingArray.length > 0;
+  const hasAssets =
+    assets.length > 0 || uploadingArray.length > 0 || folders.length > 0;
 
   return (
     <div className="h-full flex flex-col">
       {/* Search and Upload Header */}
       {hasAssets ? (
-        <div className="flex-1 p-4 flex gap-2">
+        <div className="p-4 flex gap-2">
           <InputGroup>
             <InputGroupAddon className="bg-secondary/30 pointer-events-none text-muted-foreground w-8 justify-center">
               <Search size={14} />
@@ -348,7 +377,7 @@ export default function PanelUploads() {
           </Button>
         </div>
       ) : (
-        <div className="flex-1 p-4 flex gap-2">
+        <div className="p-4 flex gap-2">
           <Button
             onClick={() => document.getElementById('dropzone-input')?.click()}
             variant={'outline'}
@@ -358,6 +387,14 @@ export default function PanelUploads() {
           </Button>
         </div>
       )}
+
+      {/* Folder navigation bar */}
+      <FolderBar
+        folders={folders}
+        currentFolderId={currentFolderId}
+        onNavigate={setCurrentFolderId}
+        onFolderCreated={handleFolderCreated}
+      />
 
       {/* Drop zone wrapper */}
       <ScrollArea className="flex-1 px-4">
@@ -395,6 +432,15 @@ export default function PanelUploads() {
                   key={upload.id}
                   asset={upload}
                   onRemove={removeUploading}
+                />
+              ))}
+
+              {/* Folders (above assets) */}
+              {folders.map((folder) => (
+                <FolderCard
+                  key={folder.id}
+                  folder={folder}
+                  onClick={() => setCurrentFolderId(folder.id)}
                 />
               ))}
 
