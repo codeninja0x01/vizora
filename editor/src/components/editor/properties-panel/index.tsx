@@ -5,9 +5,51 @@ import { VideoProperties } from './video-properties';
 import { AudioProperties } from './audio-properties';
 import { CaptionProperties } from './caption-properties';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { IClip } from 'openvideo';
+import type { IClip } from 'openvideo';
 import { EffectProperties } from './effect-properties';
 import { TransitionProperties } from './transition-properties';
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from '@/components/ui/collapsible';
+import {
+  ChevronRightIcon,
+  MousePointerClickIcon,
+  LayersIcon,
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+interface PropertySectionProps {
+  title: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}
+
+export function PropertySection({
+  title,
+  defaultOpen = true,
+  children,
+}: PropertySectionProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger className="w-full flex items-center gap-2 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors">
+        <ChevronRightIcon
+          className={cn(
+            'size-3.5 transition-transform duration-150',
+            isOpen && 'rotate-90'
+          )}
+        />
+        {title}
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-2 pb-3 space-y-3">
+        {children}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
 
 export function PropertiesPanel({ selectedClips }: { selectedClips: IClip[] }) {
   const [, setTick] = useState(0);
@@ -28,10 +70,24 @@ export function PropertiesPanel({ selectedClips }: { selectedClips: IClip[] }) {
     };
   }, [selectedClips]);
 
+  // Multi-select state
   if (selectedClips.length > 1) {
     return (
-      <div className="bg-card h-full p-4 flex flex-col items-center justify-center gap-3">
-        <div className="text-lg font-medium">Group</div>
+      <div className="bg-[var(--panel-background)] h-full flex flex-col items-center justify-center gap-2">
+        <LayersIcon className="size-8 text-muted-foreground" />
+        <div className="text-sm text-muted-foreground">Group</div>
+      </div>
+    );
+  }
+
+  // Empty state - no selection
+  if (selectedClips.length === 0) {
+    return (
+      <div className="bg-[var(--panel-background)] h-full flex flex-col items-center justify-center gap-2">
+        <MousePointerClickIcon className="size-8 text-muted-foreground" />
+        <div className="text-sm text-muted-foreground">
+          Select a clip to edit its properties
+        </div>
       </div>
     );
   }
@@ -60,10 +116,16 @@ export function PropertiesPanel({ selectedClips }: { selectedClips: IClip[] }) {
   };
 
   return (
-    <ScrollArea className="h-full">
-      <div className="flex flex-col gap-4 p-4">
-        {renderSpecificProperties()}
+    <div className="bg-[var(--panel-background)] h-full flex flex-col">
+      {/* Header */}
+      <div className="px-4 py-2.5 text-sm font-medium border-b border-white/5">
+        Properties
       </div>
-    </ScrollArea>
+
+      {/* Content */}
+      <ScrollArea className="flex-1">
+        <div className="px-4 py-3 space-y-1">{renderSpecificProperties()}</div>
+      </ScrollArea>
+    </div>
   );
 }
