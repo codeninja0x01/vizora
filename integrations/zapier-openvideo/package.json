@@ -1,0 +1,22 @@
+{
+  "name": "zapier-openvideo",
+  "version": "0.1.0",
+  "description": "Zapier integration for OpenVideo video rendering",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "validate": "zapier validate"
+  },
+  "dependencies": {
+    "zapier-platform-core": "15.x"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "zapier": {
+    "platformVersion": "15.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
