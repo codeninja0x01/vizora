@@ -25,10 +25,11 @@ model User {
   banExpires    DateTime?
 
   // Relations
-  sessions Session[]
-  accounts Account[]
-  members  Member[]
-  apiKeys  ApiKey[]
+  sessions  Session[]
+  accounts  Account[]
+  members   Member[]
+  apiKeys   ApiKey[]
+  templates Template[]
 }
 
 model Session {
@@ -88,6 +89,7 @@ model Organization {
   members     Member[]
   invitations Invitation[]
   apiKeys     ApiKey[]
+  templates   Template[]
 }
 
 model Member {
@@ -137,4 +139,42 @@ model ApiKey {
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([keyHash])
+}
+
+// Template System
+
+enum TemplateCategory {
+  SOCIAL_MEDIA
+  ADVERTISING
+  PRESENTATIONS
+  E_COMMERCE
+  EDUCATION
+  ENTERTAINMENT
+  OTHER
+}
+
+model Template {
+  id             String            @id @default(cuid())
+  name           String
+  description    String?
+  thumbnailUrl   String?
+  projectData    Json
+  mergeFields    Json
+  mergeSchema    Json
+  category       TemplateCategory?
+  tags           String[]
+  isPublic       Boolean           @default(false)
+  featured       Boolean           @default(false)
+  userId         String
+  organizationId String
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  // Relations
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([organizationId])
+  @@index([category, isPublic, featured])
 }
