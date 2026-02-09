@@ -202,7 +202,13 @@ export async function getTemplates() {
     },
   });
 
-  return templates;
+  // Cast JsonValue types to proper TypeScript types
+  return templates.map((t) => ({
+    ...t,
+    projectData: t.projectData as Record<string, unknown>,
+    mergeFields: t.mergeFields as any,
+    mergeSchema: t.mergeSchema as Record<string, unknown>,
+  }));
 }
 
 /**
@@ -234,7 +240,13 @@ export async function getTemplateById(id: string) {
     }
   }
 
-  return template;
+  // Cast JsonValue types to proper TypeScript types
+  return {
+    ...template,
+    projectData: template.projectData as Record<string, unknown>,
+    mergeFields: template.mergeFields as any,
+    mergeSchema: template.mergeSchema as Record<string, unknown>,
+  };
 }
 
 /**
@@ -278,5 +290,11 @@ export async function getGalleryTemplates(filters?: {
     take: 50,
   });
 
-  return templates;
+  // Cast JsonValue types to proper TypeScript types
+  return templates.map((t) => ({
+    ...t,
+    projectData: t.projectData as Record<string, unknown>,
+    mergeFields: t.mergeFields as any,
+    mergeSchema: t.mergeSchema as Record<string, unknown>,
+  }));
 }
