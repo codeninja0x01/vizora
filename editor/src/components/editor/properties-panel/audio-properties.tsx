@@ -1,4 +1,3 @@
-import * as React from 'react';
 import type { IClip } from 'openvideo';
 import { IconVolume, IconGauge, IconMusic } from '@tabler/icons-react';
 import {
@@ -26,9 +25,9 @@ export function AudioProperties({ clip }: AudioPropertiesProps) {
         <div className="flex flex-col gap-2.5">
           {/* Volume */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-medium text-muted-foreground">
+            <span className="text-xs font-medium text-muted-foreground">
               Volume
-            </label>
+            </span>
             <div className="flex items-center gap-4">
               <IconVolume className="size-4 text-muted-foreground" />
               <Slider
@@ -44,7 +43,7 @@ export function AudioProperties({ clip }: AudioPropertiesProps) {
                   value={Math.round((audioClip.volume ?? 1) * 100)}
                   onChange={(e) =>
                     handleUpdate({
-                      volume: (parseInt(e.target.value) || 0) / 100,
+                      volume: (parseInt(e.target.value, 10) || 0) / 100,
                     })
                   }
                   className="text-sm p-0 text-center"
@@ -58,9 +57,9 @@ export function AudioProperties({ clip }: AudioPropertiesProps) {
 
           {/* Pitch (UI Only) */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-medium text-muted-foreground">
+            <span className="text-xs font-medium text-muted-foreground">
               Pitch
-            </label>
+            </span>
             <div className="flex items-center gap-4">
               <IconMusic className="size-4 text-muted-foreground" />
               <Slider
@@ -88,9 +87,9 @@ export function AudioProperties({ clip }: AudioPropertiesProps) {
 
           {/* Speed (UI Only) */}
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-medium text-muted-foreground">
+            <span className="text-xs font-medium text-muted-foreground">
               Speed
-            </label>
+            </span>
             <div className="flex items-center gap-4">
               <IconGauge className="size-4 text-muted-foreground" />
               <Slider

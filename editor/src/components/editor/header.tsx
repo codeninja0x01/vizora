@@ -96,6 +96,43 @@ export default function Header() {
     }
   };
 
+  const isSourcelessClipType = (type: string) => {
+    return ['Text', 'Caption', 'Effect', 'Transition'].includes(type);
+  };
+
+  const filterValidClips = (clips: any[]) => {
+    return clips.filter((clipJSON: any) => {
+      if (isSourcelessClipType(clipJSON.type)) {
+        return true;
+      }
+      return clipJSON.src && clipJSON.src.trim() !== '';
+    });
+  };
+
+  const processImportedJSON = async (file: File) => {
+    const text = await file.text();
+    const json = JSON.parse(text);
+
+    if (!json.clips || !Array.isArray(json.clips)) {
+      throw new Error('Invalid JSON format: missing clips array');
+    }
+
+    if (!studio) {
+      throw new Error('Studio not initialized');
+    }
+
+    const validClips = filterValidClips(json.clips);
+
+    if (validClips.length === 0) {
+      throw new Error(
+        'No valid clips found in JSON. All clips have empty source URLs.'
+      );
+    }
+
+    const validJson = { ...json, clips: validClips };
+    await studio.loadFromJSON(validJson);
+  };
+
   const handleImportJSON = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -107,38 +144,7 @@ export default function Header() {
       if (!file) return;
 
       try {
-        const text = await file.text();
-        const json = JSON.parse(text);
-
-        if (!json.clips || !Array.isArray(json.clips)) {
-          throw new Error('Invalid JSON format: missing clips array');
-        }
-
-        if (!studio) {
-          throw new Error('Studio not initialized');
-        }
-
-        // Filter out clips with empty sources (except Text, Caption, and Effect)
-        const validClips = json.clips.filter((clipJSON: any) => {
-          if (
-            clipJSON.type === 'Text' ||
-            clipJSON.type === 'Caption' ||
-            clipJSON.type === 'Effect' ||
-            clipJSON.type === 'Transition'
-          ) {
-            return true;
-          }
-          return clipJSON.src && clipJSON.src.trim() !== '';
-        });
-
-        if (validClips.length === 0) {
-          throw new Error(
-            'No valid clips found in JSON. All clips have empty source URLs.'
-          );
-        }
-
-        const validJson = { ...json, clips: validClips };
-        await studio.loadFromJSON(validJson);
+        await processImportedJSON(file);
       } catch (error) {
         Log.error('Load from JSON error:', error);
         alert(`Failed to load from JSON: ${(error as Error).message}`);
