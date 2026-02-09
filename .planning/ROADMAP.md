@@ -44,10 +44,15 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Timeline tracks have clear clip boundaries, smooth interactions, and professional appearance
   5. Dark theme with professional color palette suitable for creative work is applied throughout
 
-**Plans**: TBD
+**Plans**: 6 plans
 
 Plans:
-- Plans to be defined during `/gsd:plan-phase 1`
+- [ ] 01-01-PLAN.md -- Design system foundation (tokens, theme, button variants)
+- [ ] 01-02-PLAN.md -- Activity bar and seamless panel layout
+- [ ] 01-03-PLAN.md -- Header and timeline toolbar polish
+- [ ] 01-04-PLAN.md -- Properties panel progressive disclosure
+- [ ] 01-05-PLAN.md -- Timeline canvas clip color coding and waveforms
+- [ ] 01-06-PLAN.md -- Visual verification checkpoint
 
 ---
 
@@ -262,7 +267,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Editor Polish | 0/TBD | Not started | - |
+| 1. Editor Polish | 0/6 | Planned | - |
 | 2. Foundation & Auth | 0/TBD | Not started | - |
 | 3. Template System | 0/TBD | Not started | - |
 | 4. Async Rendering | 0/TBD | Not started | - |
