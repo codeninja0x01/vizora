@@ -4,6 +4,7 @@ import {
   subscribeUser,
   unsubscribeUser,
   registerRender,
+  registerBatchRender,
   type RenderEvent,
 } from '@/lib/render-events';
 
@@ -32,11 +33,15 @@ export async function GET(request: Request) {
       userId,
       status: { in: ['queued', 'active'] },
     },
-    select: { id: true },
+    select: { id: true, batchId: true },
   });
 
   for (const render of activeRenders) {
-    registerRender(render.id, userId);
+    if (render.batchId) {
+      registerBatchRender(render.id, userId, render.batchId);
+    } else {
+      registerRender(render.id, userId);
+    }
   }
 
   // Create SSE stream

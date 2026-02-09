@@ -8,7 +8,12 @@ import Redis from 'ioredis';
 
 // Event type definitions
 export interface RenderEvent {
-  type: 'progress' | 'completed' | 'failed';
+  type:
+    | 'progress'
+    | 'completed'
+    | 'failed'
+    | 'batch.progress'
+    | 'batch.completed';
   renderId: string;
   data: {
     progress?: number;
@@ -16,6 +21,16 @@ export interface RenderEvent {
     errorCategory?: string;
     errorMessage?: string;
     templateName?: string;
+    // Batch-specific fields
+    batchId?: string;
+    batchProgress?: {
+      total: number;
+      queued: number;
+      processing: number;
+      completed: number;
+      failed: number;
+      percentComplete: number;
+    };
   };
 }
 
@@ -25,6 +40,7 @@ type EventCallback = (event: RenderEvent) => void;
 let queueEvents: QueueEvents | null = null;
 const userListeners = new Map<string, Set<EventCallback>>();
 const renderOwnerMap = new Map<string, string>(); // renderId -> userId
+const renderBatchMap = new Map<string, string>(); // renderId -> batchId
 
 // Singleton pattern with globalThis for HMR survival
 const globalForQueueEvents = globalThis as unknown as {
@@ -99,7 +115,7 @@ export function initQueueEvents(): QueueEvents {
   // Completed event handler
   queueEvents.on(
     'completed',
-    ({ jobId, returnvalue }: { jobId: string; returnvalue: any }) => {
+    async ({ jobId, returnvalue }: { jobId: string; returnvalue: any }) => {
       try {
         const parsed =
           typeof returnvalue === 'string'
@@ -131,6 +147,76 @@ export function initQueueEvents(): QueueEvents {
           });
         }
 
+        // Check for batch association and emit batch events
+        const batchId = renderBatchMap.get(jobId);
+        if (batchId) {
+          try {
+            // Dynamic import to avoid circular dependency issues
+            const { getBatchProgress, updateBatchStatus } = await import(
+              '@/lib/batch/tracker'
+            );
+
+            // Update batch status in database
+            await updateBatchStatus(batchId);
+
+            // Get updated progress
+            const batchProgress = await getBatchProgress(batchId);
+
+            // Emit batch progress event
+            if (callbacks && callbacks.size > 0) {
+              const batchProgressEvent: RenderEvent = {
+                type: 'batch.progress',
+                renderId: jobId,
+                data: {
+                  batchId,
+                  batchProgress,
+                },
+              };
+              callbacks.forEach((callback) => {
+                try {
+                  callback(batchProgressEvent);
+                } catch (error) {
+                  console.error(
+                    '[QueueEvents] Batch progress callback error:',
+                    error
+                  );
+                }
+              });
+            }
+
+            // Check if batch is in terminal state
+            const isTerminal =
+              batchProgress.queued === 0 && batchProgress.processing === 0;
+
+            if (isTerminal) {
+              const batchCompletedEvent: RenderEvent = {
+                type: 'batch.completed',
+                renderId: jobId,
+                data: {
+                  batchId,
+                  batchProgress,
+                },
+              };
+              callbacks?.forEach((callback) => {
+                try {
+                  callback(batchCompletedEvent);
+                } catch (error) {
+                  console.error(
+                    '[QueueEvents] Batch completed callback error:',
+                    error
+                  );
+                }
+              });
+            }
+
+            // Clean up renderBatchMap
+            renderBatchMap.delete(jobId);
+          } catch (error) {
+            console.error('[QueueEvents] Batch event emission error:', error);
+            // Don't let batch tracking failures break individual render events
+          }
+        }
+
         // Clean up renderOwnerMap
         renderOwnerMap.delete(jobId);
       } catch (error) {
@@ -142,7 +228,13 @@ export function initQueueEvents(): QueueEvents {
   // Failed event handler
   queueEvents.on(
     'failed',
-    ({ jobId, failedReason }: { jobId: string; failedReason: string }) => {
+    async ({
+      jobId,
+      failedReason,
+    }: {
+      jobId: string;
+      failedReason: string;
+    }) => {
       try {
         // Look up userId from renderOwnerMap (may not have prior progress events)
         const userId = renderOwnerMap.get(jobId);
@@ -169,6 +261,76 @@ export function initQueueEvents(): QueueEvents {
               console.error('[QueueEvents] Callback error:', error);
             }
           });
+        }
+
+        // Check for batch association and emit batch events
+        const batchId = renderBatchMap.get(jobId);
+        if (batchId) {
+          try {
+            // Dynamic import to avoid circular dependency issues
+            const { getBatchProgress, updateBatchStatus } = await import(
+              '@/lib/batch/tracker'
+            );
+
+            // Update batch status in database
+            await updateBatchStatus(batchId);
+
+            // Get updated progress
+            const batchProgress = await getBatchProgress(batchId);
+
+            // Emit batch progress event
+            if (callbacks && callbacks.size > 0) {
+              const batchProgressEvent: RenderEvent = {
+                type: 'batch.progress',
+                renderId: jobId,
+                data: {
+                  batchId,
+                  batchProgress,
+                },
+              };
+              callbacks.forEach((callback) => {
+                try {
+                  callback(batchProgressEvent);
+                } catch (error) {
+                  console.error(
+                    '[QueueEvents] Batch progress callback error:',
+                    error
+                  );
+                }
+              });
+            }
+
+            // Check if batch is in terminal state
+            const isTerminal =
+              batchProgress.queued === 0 && batchProgress.processing === 0;
+
+            if (isTerminal) {
+              const batchCompletedEvent: RenderEvent = {
+                type: 'batch.completed',
+                renderId: jobId,
+                data: {
+                  batchId,
+                  batchProgress,
+                },
+              };
+              callbacks?.forEach((callback) => {
+                try {
+                  callback(batchCompletedEvent);
+                } catch (error) {
+                  console.error(
+                    '[QueueEvents] Batch completed callback error:',
+                    error
+                  );
+                }
+              });
+            }
+
+            // Clean up renderBatchMap
+            renderBatchMap.delete(jobId);
+          } catch (error) {
+            console.error('[QueueEvents] Batch event emission error:', error);
+            // Don't let batch tracking failures break individual render events
+          }
         }
 
         // Clean up renderOwnerMap
@@ -200,6 +362,19 @@ export function initQueueEvents(): QueueEvents {
  */
 export function registerRender(renderId: string, userId: string): void {
   renderOwnerMap.set(renderId, userId);
+}
+
+/**
+ * Register a render that belongs to a batch for batch event tracking.
+ * Populates both renderOwnerMap and renderBatchMap.
+ */
+export function registerBatchRender(
+  renderId: string,
+  userId: string,
+  batchId: string
+): void {
+  renderOwnerMap.set(renderId, userId);
+  renderBatchMap.set(renderId, batchId);
 }
 
 /**

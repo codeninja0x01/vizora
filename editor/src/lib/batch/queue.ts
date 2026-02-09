@@ -29,36 +29,39 @@ function chunkArray<T>(array: T[], size: number): T[][] {
 /**
  * Queue batch renders with automatic chunking to prevent Redis errors
  *
+ * @param renders - Array of render records with IDs, merge data, and batch index
  * @param batchId - Batch ID to link renders to
  * @param templateId - Template to render
- * @param mergeDataArray - Array of merge data (one per render)
  * @param userId - User ID creating the batch
  * @param organizationId - Organization ID
  * @returns Array of queued job IDs
  */
 export async function queueBatchRenders(
+  renders: Array<{
+    id: string;
+    mergeData: Record<string, unknown>;
+    batchIndex: number;
+  }>,
   batchId: string,
   templateId: string,
-  mergeDataArray: Record<string, unknown>[],
   userId: string,
   organizationId: string
 ): Promise<string[]> {
-  // Prepare all jobs with pre-created render IDs
-  const jobs = mergeDataArray.map((mergeData, index) => {
-    const renderId = `render_${batchId}_${index}`;
+  // Prepare all jobs with actual render IDs from database
+  const jobs = renders.map((render) => {
     return {
       name: 'render-video',
       data: {
-        renderId,
+        renderId: render.id,
         templateId,
-        mergeData,
+        mergeData: render.mergeData,
         batchId,
-        batchIndex: index,
+        batchIndex: render.batchIndex,
         userId,
         organizationId,
       },
       opts: {
-        jobId: renderId,
+        jobId: render.id,
       },
     };
   });
