@@ -37,6 +37,9 @@ async function processRenderJob(job: Job) {
       data: { status: 'active', startedAt: new Date() },
     });
 
+    // Report initial progress
+    await job.updateProgress({ percent: 5, userId: job.data.userId });
+
     // Fetch template with projectData (full data, not the API-trimmed version)
     const template = await prisma.template.findUnique({
       where: { id: job.data.templateId },
@@ -46,12 +49,18 @@ async function processRenderJob(job: Job) {
       throw new Error(`Template ${job.data.templateId} not found`);
     }
 
+    // Report progress after fetching template
+    await job.updateProgress({ percent: 10, userId: job.data.userId });
+
     // Apply merge data using existing applyMergeData from merge-fields.ts
     const mergedProjectData = applyMergeData(
       template.projectData as Record<string, unknown>,
       template.mergeFields as unknown as MergeField[],
       job.data.mergeData || {}
     );
+
+    // Report progress after applying merge data
+    await job.updateProgress({ percent: 15, userId: job.data.userId });
 
     // Render video using Renderer class from @designcombo/node
     const outputPath = join(RENDER_OUTPUT_DIR, `${job.data.renderId}.mp4`);
@@ -64,12 +73,35 @@ async function processRenderJob(job: Job) {
       },
     });
 
-    // Log progress events
+    // Progress handler with throttling (max 2 updates/sec)
+    let lastProgressUpdate = 0;
     renderer.on('progress', (progress: any) => {
-      console.log(`[Worker] Render ${job.data.renderId}: ${progress.message}`);
+      const now = Date.now();
+      if (now - lastProgressUpdate < 500) return; // Throttle to max 2 updates/sec
+      lastProgressUpdate = now;
+
+      // Map renderer progress to 15-90% range (15% is pre-render, 90% is post-render)
+      // The renderer emits progress with a message, we'll estimate based on frame rendering
+      const percent = progress.percent
+        ? 15 + Math.floor(progress.percent * 0.75)
+        : undefined;
+
+      if (percent !== undefined) {
+        job.updateProgress({ percent, userId: job.data.userId });
+        console.log(
+          `[Worker] Render ${job.data.renderId}: ${percent}% - ${progress.message || ''}`
+        );
+      } else {
+        console.log(
+          `[Worker] Render ${job.data.renderId}: ${progress.message}`
+        );
+      }
     });
 
     await renderer.render();
+
+    // Report near-completion progress
+    await job.updateProgress({ percent: 95, userId: job.data.userId });
 
     // Update DB with completed status
     const outputUrl = `/renders/${job.data.renderId}.mp4`;
@@ -86,8 +118,8 @@ async function processRenderJob(job: Job) {
       `[Worker] Render ${job.data.renderId} completed -> ${outputUrl}`
     );
 
-    // Return result for BullMQ's completed event
-    return { outputPath, outputUrl };
+    // Return result for BullMQ's completed event (include userId for event routing)
+    return { outputPath, outputUrl, userId: job.data.userId };
   } catch (error) {
     const { category, message } = formatRenderError(error);
     await prisma.render.update({
