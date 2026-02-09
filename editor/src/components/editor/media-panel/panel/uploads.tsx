@@ -1,101 +1,137 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
+import { useDropzone } from 'react-dropzone';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useStudioStore } from '@/stores/studio-store';
-import {
-  Image,
-  Video,
-  Audio,
-  Log,
-  clipToJSON,
-  type IClip as StudioClip,
-} from 'openvideo';
+import { useAssetStore } from '@/stores/asset-store';
+import { Image, Video, Audio, Log } from 'openvideo';
 import {
   Upload,
-  Film,
   Search,
-  X,
-  HardDrive,
   Trash2,
   Music,
+  Loader2,
+  AlertTriangle,
 } from 'lucide-react';
-import {
-  storageService,
-  type StorageStats,
-} from '@/lib/storage/storage-service';
-import type { MediaFile, MediaType } from '@/types/media';
-import { uploadFile } from '@/lib/upload-utils';
+import { getAssets, deleteAsset } from '@/actions/asset-actions';
+import type { Asset } from '@prisma/client';
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from '@/components/ui/input-group';
-interface VisualAsset {
-  id: string;
-  type: MediaType;
-  src: string;
-  name: string;
-  preview?: string;
-  width?: number;
-  height?: number;
-  duration?: number;
-  size?: number;
-}
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
+import { ALLOWED_FILE_TYPES, MAX_FILE_SIZE } from '@/lib/storage/validation';
 
-const STORAGE_KEY = 'designcombo_uploads';
-const PROJECT_ID = 'local-uploads';
-
-// Detect file type from MIME type and extension
-function detectFileType(file: File): MediaType {
-  const mime = file.type.toLowerCase();
-  const ext = file.name.split('.').pop()?.toLowerCase() || '';
-
-  if (
-    mime.startsWith('audio/') ||
-    ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a'].includes(ext)
-  ) {
-    return 'audio';
-  }
-  if (
-    mime.startsWith('video/') ||
-    ['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(ext)
-  ) {
-    return 'video';
-  }
-  return 'image';
-}
-
-// Replace old blob URLs with new ones in serialized clips
-// function replaceUrlsInClips<T>(
-//   clips: T[],
-//   urlMapping: Record<string, string>
-// ): T[] {
-//   const json = JSON.stringify(clips);
-//   let updated = json;
-//   for (const [oldUrl, newUrl] of Object.entries(urlMapping)) {
-//     updated = updated.split(oldUrl).join(newUrl);
-//   }
-//   return JSON.parse(updated);
-// }
-
-// Helper to format duration like 00:00
-function formatDuration(seconds?: number) {
+// Helper to format duration like 00:00 (unused but kept for potential future use)
+function _formatDuration(seconds?: number) {
   if (!seconds) return '';
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
-// Asset card component
+// Uploading asset card (shows progress inline on thumbnail)
+function UploadingAssetCard({
+  asset,
+  onRemove,
+}: {
+  asset: {
+    id: string;
+    name: string;
+    progress: number;
+    status: string;
+    error?: string;
+    previewUrl?: string;
+  };
+  onRemove: (id: string) => void;
+}) {
+  const isError = asset.status === 'error';
+
+  return (
+    <div className="flex flex-col gap-1.5 group relative">
+      <div className="relative aspect-square rounded-sm overflow-hidden bg-foreground/20 border border-transparent flex items-center justify-center">
+        {/* Preview if available */}
+        {/* biome-ignore lint/performance/noImgElement: blob URL preview during upload */}
+        {asset.previewUrl && !isError && (
+          <img
+            src={asset.previewUrl}
+            alt={asset.name}
+            className="max-w-full max-h-full object-contain opacity-60"
+          />
+        )}
+
+        {/* Error indicator */}
+        {isError && (
+          <div className="w-full h-full flex items-center justify-center">
+            <AlertTriangle className="text-destructive" size={32} />
+          </div>
+        )}
+
+        {/* Loading indicator */}
+        {!isError && asset.status !== 'complete' && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+            <Loader2 className="text-white animate-spin" size={24} />
+          </div>
+        )}
+
+        {/* Progress bar at bottom */}
+        {!isError && asset.status === 'uploading' && (
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/60">
+            <div
+              className="h-full bg-indigo-500 transition-all duration-300"
+              style={{ width: `${asset.progress}%` }}
+            />
+          </div>
+        )}
+
+        {/* Remove button */}
+        {isError && (
+          <button
+            type="button"
+            className="absolute top-1 right-1 p-1 rounded bg-black/60 hover:bg-destructive transition-colors"
+            onClick={() => onRemove(asset.id)}
+          >
+            <Trash2 size={12} className="text-white" />
+          </button>
+        )}
+      </div>
+
+      {/* Label */}
+      <p className="text-[10px] text-muted-foreground truncate px-0.5">
+        {asset.name}
+      </p>
+
+      {/* Error message */}
+      {isError && asset.error && (
+        <p className="text-[9px] text-destructive truncate px-0.5">
+          {asset.error}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// Asset card component (DB-backed)
 function AssetCard({
   asset,
   onAdd,
   onDelete,
 }: {
-  asset: VisualAsset;
-  onAdd: (asset: VisualAsset) => void;
+  asset: Asset;
+  onAdd: (asset: Asset) => void;
   onDelete: (id: string) => void;
 }) {
   return (
@@ -104,13 +140,14 @@ function AssetCard({
       onClick={() => onAdd(asset)}
     >
       <div className="relative aspect-square rounded-sm overflow-hidden bg-foreground/20 border border-transparent group-hover:border-primary/50 transition-all flex items-center justify-center">
-        {asset.type === 'image' ? (
+        {/* biome-ignore lint/performance/noImgElement: CDN URL from R2, not Next.js optimized */}
+        {asset.category === 'image' ? (
           <img
-            src={asset.src}
+            src={asset.cdnUrl}
             alt={asset.name}
             className="max-w-full max-h-full object-contain"
           />
-        ) : asset.type === 'audio' ? (
+        ) : asset.category === 'audio' ? (
           <div className="w-full h-full flex items-center justify-center relative">
             <Music
               className="text-[#2dc28c]"
@@ -121,8 +158,9 @@ function AssetCard({
           </div>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-black/40 relative">
+            {/* biome-ignore lint/a11y/useKeyWithMouseEvents: video preview on hover for visual feedback */}
             <video
-              src={asset.src}
+              src={asset.cdnUrl}
               className="max-w-full max-h-full object-contain pointer-events-none"
               muted
               onMouseOver={(e) => (e.currentTarget as HTMLVideoElement).play()}
@@ -131,13 +169,6 @@ function AssetCard({
                 (e.currentTarget as HTMLVideoElement).currentTime = 0;
               }}
             />
-          </div>
-        )}
-
-        {/* Duration Overlay (Bottom Left) */}
-        {asset.duration && (
-          <div className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/60 text-[10px] text-white font-medium">
-            {formatDuration(asset.duration)}
           </div>
         )}
 
@@ -164,244 +195,125 @@ function AssetCard({
 
 export default function PanelUploads() {
   const { studio } = useStudioStore();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [uploads, setUploads] = useState<VisualAsset[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [storageStats, setStorageStats] = useState<StorageStats | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const {
+    assets,
+    uploading,
+    searchQuery,
+    isLoading,
+    setAssets,
+    setSearchQuery,
+    uploadFile,
+    removeUploading,
+    deleteAssetLocal,
+    currentFolderId,
+  } = useAssetStore();
 
-  // Load storage stats
-  const loadStorageStats = useCallback(async () => {
-    const stats = await storageService.getStorageStats();
-    setStorageStats(stats);
-  }, []);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
-  // Recover uploads from OPFS on mount
+  // Load assets on mount and when currentFolderId changes
   useEffect(() => {
-    const recoverFromOPFS = async () => {
+    const loadAssets = async () => {
       try {
-        if (!storageService.isOPFSSupported()) {
-          // Fall back to localStorage only (won't persist blobs)
-          const stored = localStorage.getItem(STORAGE_KEY);
-          if (stored) {
-            setUploads(JSON.parse(stored));
-          }
-          setIsLoaded(true);
-          return;
-        }
-
-        // Load files from OPFS
-        const opfsFiles = await storageService.loadAllMediaFiles({
-          projectId: PROJECT_ID,
+        useAssetStore.setState({ isLoading: true });
+        const fetchedAssets = await getAssets({
+          folderId: currentFolderId,
+          search: searchQuery || undefined,
         });
-
-        if (opfsFiles.length === 0) {
-          // No OPFS files, try localStorage for backwards compatibility
-          const stored = localStorage.getItem(STORAGE_KEY);
-          if (stored) {
-            setUploads(JSON.parse(stored));
-          }
-          setIsLoaded(true);
-          await loadStorageStats();
-          return;
-        }
-
-        // Load old localStorage entries for URL mapping
-        const oldEntries: VisualAsset[] = JSON.parse(
-          localStorage.getItem(STORAGE_KEY) || '[]'
-        );
-        const urlMapping: Record<string, string> = {};
-
-        // Generate new blob URLs from OPFS files
-        const recoveredAssets: VisualAsset[] = opfsFiles.map((file) => {
-          const newBlobUrl = file.url || URL.createObjectURL(file.file);
-
-          // Find matching old entry by ID or name to map URLs
-          const oldEntry = oldEntries.find(
-            (e) => e.id === file.id || e.name === file.name
-          );
-
-          if (oldEntry?.src && oldEntry.src !== newBlobUrl) {
-            urlMapping[oldEntry.src] = newBlobUrl;
-          }
-
-          // Prefer R2 URL from previous state if available
-          const isR2Url = oldEntry?.src && !oldEntry.src.startsWith('blob:');
-          const finalUrl = isR2Url ? oldEntry.src! : newBlobUrl;
-
-          return {
-            id: file.id,
-            name: file.name,
-            src: finalUrl,
-            type: file.type,
-            width: file.width,
-            height: file.height,
-            duration: file.duration,
-          };
-        });
-        console.warn('USE THIS LOGIC WHEN NEW CLIPS ARE ADDEDE EVENT');
-        // // Update timeline clips with new blob URLs if needed
-        // if (Object.keys(urlMapping).length > 0 && studio) {
-        //   try {
-        //     // Serialize current clips
-        //     const serializedClips = studio.clips.map((clip) =>
-        //       clipToJSON(clip as unknown as StudioClip)
-        //     );
-        //     console.log('Serialized clips:', {
-        //       serializedClips,
-        //       urlMapping
-        //     });
-        //     // Replace old URLs with new blob URLs
-        //     const updatedClips = replaceUrlsInClips(
-        //       serializedClips,
-        //       urlMapping
-        //     );
-        //     if (updatedClips.length > 0) {
-        //       console.log('Updated clips:', updatedClips);
-
-        //       // Reload with updated URLs
-        //       await studio.loadFromJSON({ clips: updatedClips });
-        //     }
-        //   } catch (error) {
-        //     Log.warn('Failed to update timeline URLs:', error);
-        //   }
-        // }
-
-        setUploads(recoveredAssets);
-        // Update localStorage with new URLs
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(recoveredAssets));
-        await loadStorageStats();
+        setAssets(fetchedAssets);
       } catch (error) {
-        console.error('Failed to recover uploads from OPFS:', error);
-        // Fall back to localStorage
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          setUploads(JSON.parse(stored));
-        }
+        console.error('Failed to load assets:', error);
+        toast.error('Failed to load assets');
       } finally {
-        setIsLoaded(true);
+        useAssetStore.setState({ isLoading: false });
       }
     };
 
-    recoverFromOPFS();
-  }, [studio, loadStorageStats]);
+    loadAssets();
+  }, [currentFolderId, searchQuery, setAssets]);
 
-  // Handle file upload
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    setIsUploading(true);
-    const newAssets: VisualAsset[] = [];
-
-    try {
-      for (const file of Array.from(files)) {
-        const id = crypto.randomUUID();
-        const type = detectFileType(file);
-
-        // 1. Upload to R2
-        let uploadResult;
-        try {
-          uploadResult = await uploadFile(file);
-        } catch (error) {
-          console.error('R2 upload failed, falling back to local only:', error);
-        }
-
-        const src = uploadResult?.url || URL.createObjectURL(file);
-
-        // 2. Save to OPFS if supported (for local caching/backup)
-        if (storageService.isOPFSSupported()) {
-          const mediaFile: MediaFile = {
-            id,
-            file,
-            name: file.name,
-            type,
-            url: src,
-          };
-          await storageService.saveMediaFile({
-            projectId: PROJECT_ID,
-            mediaItem: mediaFile,
-          });
-        }
-
-        newAssets.push({
-          id,
-          name: file.name,
-          src: src,
-          type,
-          size: file.size,
-        });
+  // react-dropzone configuration
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop: async (acceptedFiles) => {
+      for (const file of acceptedFiles) {
+        await uploadFile(file);
       }
+    },
+    maxSize: MAX_FILE_SIZE,
+    accept: {
+      'video/*': ALLOWED_FILE_TYPES.video.extensions.map((ext) => `.${ext}`),
+      'image/*': ALLOWED_FILE_TYPES.image.extensions.map((ext) => `.${ext}`),
+      'audio/*': ALLOWED_FILE_TYPES.audio.extensions.map((ext) => `.${ext}`),
+    },
+    noClick: false,
+  });
 
-      const updated = [...newAssets, ...uploads];
-      setUploads(updated);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      await loadStorageStats();
-    } catch (error) {
-      console.error('Upload failed:', error);
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
+  // Handle delete with confirmation
+  const handleDeleteClick = (id: string) => {
+    setDeleteTargetId(id);
+    setDeleteDialogOpen(true);
   };
 
-  // Handle delete
-  const handleDelete = async (id: string) => {
-    try {
-      if (storageService.isOPFSSupported()) {
-        await storageService.deleteMediaFile({
-          projectId: PROJECT_ID,
-          id,
-        });
-      }
+  const handleDeleteConfirm = async () => {
+    if (!deleteTargetId) return;
 
-      const updated = uploads.filter((a) => a.id !== id);
-      setUploads(updated);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      await loadStorageStats();
+    try {
+      const result = await deleteAsset(deleteTargetId);
+
+      if (result.success) {
+        deleteAssetLocal(deleteTargetId);
+        toast.success('Asset deleted');
+      } else {
+        toast.error(result.error || 'Failed to delete asset');
+      }
     } catch (error) {
-      console.error('Failed to delete upload:', error);
+      console.error('Delete error:', error);
+      toast.error('Failed to delete asset');
+    } finally {
+      setDeleteDialogOpen(false);
+      setDeleteTargetId(null);
     }
   };
 
   // Add item to canvas
-  const addItemToCanvas = async (asset: VisualAsset) => {
+  const addItemToCanvas = async (asset: Asset) => {
     if (!studio) return;
 
     try {
-      if (asset.type === 'image') {
-        const imageClip = await Image.fromUrl(asset.src);
+      if (asset.category === 'image') {
+        const imageClip = await Image.fromUrl(asset.cdnUrl);
         imageClip.name = asset.name;
         imageClip.display = { from: 0, to: 5 * 1e6 };
         imageClip.duration = 5 * 1e6;
         await imageClip.scaleToFit(1080, 1920);
         imageClip.centerInScene(1080, 1920);
         await studio.addClip(imageClip);
-      } else if (asset.type === 'audio') {
-        const audioClip = await Audio.fromUrl(asset.src);
+      } else if (asset.category === 'audio') {
+        const audioClip = await Audio.fromUrl(asset.cdnUrl);
         audioClip.name = asset.name;
         await studio.addClip(audioClip);
       } else {
-        const videoClip = await Video.fromUrl(asset.src);
+        const videoClip = await Video.fromUrl(asset.cdnUrl);
         videoClip.name = asset.name;
         await videoClip.scaleToFit(1080, 1920);
         videoClip.centerInScene(1080, 1920);
         await studio.addClip(videoClip);
       }
     } catch (error) {
-      Log.error(`Failed to add ${asset.type}:`, error);
+      Log.error(`Failed to add ${asset.category}:`, error);
+      toast.error(`Failed to add ${asset.category} to canvas`);
     }
   };
 
   // Filter assets by search query
-  const filteredAssets = uploads.filter((asset) =>
+  const filteredAssets = assets.filter((asset) =>
     asset.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (!isLoaded) {
+  // Convert uploading Map to array for rendering
+  const uploadingArray = Array.from(uploading.values());
+
+  if (isLoading && assets.length === 0 && uploadingArray.length === 0) {
     return (
       <div className="h-full flex items-center justify-center">
         <span className="text-sm text-muted-foreground">Loading...</span>
@@ -409,80 +321,115 @@ export default function PanelUploads() {
     );
   }
 
+  const hasAssets = assets.length > 0 || uploadingArray.length > 0;
+
   return (
     <div className="h-full flex flex-col">
-      <input
-        type="file"
-        ref={fileInputRef}
-        className="hidden"
-        accept="image/*,video/*,audio/*"
-        multiple
-        onChange={handleFileUpload}
-      />
-      {/* Search input */}
-      {uploads.length > 0 ? (
-        <div>
-          <div className="flex-1 p-4 flex gap-2">
-            <InputGroup>
-              <InputGroupAddon className="bg-secondary/30 pointer-events-none text-muted-foreground w-8 justify-center">
-                <Search size={14} />
-              </InputGroupAddon>
+      {/* Search and Upload Header */}
+      {hasAssets ? (
+        <div className="flex-1 p-4 flex gap-2">
+          <InputGroup>
+            <InputGroupAddon className="bg-secondary/30 pointer-events-none text-muted-foreground w-8 justify-center">
+              <Search size={14} />
+            </InputGroupAddon>
 
-              <InputGroupInput
-                placeholder="Search uploads..."
-                className="bg-secondary/30 border-0 h-full text-xs box-border pl-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </InputGroup>
-            <Button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-              variant={'outline'}
-            >
-              <Upload size={14} />
-            </Button>
-          </div>
+            <InputGroupInput
+              placeholder="Search assets..."
+              className="bg-secondary/30 border-0 h-full text-xs box-border pl-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </InputGroup>
+          <Button
+            onClick={() => document.getElementById('dropzone-input')?.click()}
+            variant={'outline'}
+          >
+            <Upload size={14} />
+          </Button>
         </div>
       ) : (
-        <div>
-          <div className="flex-1 p-4 flex gap-2">
-            <Button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploading}
-              variant={'outline'}
-              className="w-full"
-            >
-              <Upload size={14} /> Upload
-            </Button>
-          </div>
+        <div className="flex-1 p-4 flex gap-2">
+          <Button
+            onClick={() => document.getElementById('dropzone-input')?.click()}
+            variant={'outline'}
+            className="w-full"
+          >
+            <Upload size={14} /> Upload
+          </Button>
         </div>
       )}
 
-      {/* Assets grid */}
+      {/* Drop zone wrapper */}
       <ScrollArea className="flex-1 px-4">
-        {filteredAssets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-2">
-            <Upload size={32} className="opacity-50" />
-            <span className="text-sm">
-              {uploads.length === 0 ? 'No uploads yet' : 'No matches found'}
-            </span>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-x-3 gap-y-4">
+        <div {...getRootProps()} className="relative min-h-full">
+          {/* biome-ignore lint/correctness/useUniqueElementIds: single instance in uploads panel */}
+          <input {...getInputProps()} id="dropzone-input" />
+
+          {/* Drag overlay */}
+          {isDragActive && (
+            <div className="absolute inset-0 z-50 flex items-center justify-center bg-primary/5 border-2 border-dashed border-primary/30 rounded-lg">
+              <div className="text-center">
+                <Upload size={32} className="mx-auto mb-2 text-primary" />
+                <p className="text-sm text-muted-foreground">Drop files here</p>
+              </div>
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!hasAssets && !isDragActive && (
+            <div className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-2">
+              <Upload size={32} className="opacity-50" />
+              <span className="text-sm">No assets yet</span>
+              <span className="text-xs opacity-70">
+                Drag & drop files or click upload
+              </span>
+            </div>
+          )}
+
+          {/* Assets grid */}
+          {hasAssets && (
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-x-3 gap-y-4 pb-4">
+              {/* Uploading assets at top */}
+              {uploadingArray.map((upload) => (
+                <UploadingAssetCard
+                  key={upload.id}
+                  asset={upload}
+                  onRemove={removeUploading}
+                />
+              ))}
+
+              {/* DB assets */}
               {filteredAssets.map((asset) => (
                 <AssetCard
                   key={asset.id}
                   asset={asset}
                   onAdd={addItemToCanvas}
-                  onDelete={handleDelete}
+                  onDelete={handleDeleteClick}
                 />
               ))}
             </div>
-          </>
-        )}
+          )}
+        </div>
       </ScrollArea>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete asset?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The asset will be permanently
+              removed from storage.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
