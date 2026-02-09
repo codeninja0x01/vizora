@@ -14,6 +14,7 @@ import {
 import { useTimelineStore } from '@/stores/timeline-store';
 import { usePlaybackStore } from '@/stores/playback-store';
 import { useStudioStore } from '@/stores/studio-store';
+import { TimelineDropZone } from './timeline-drop-zone';
 
 import { useTimelineZoom } from '@/hooks/use-timeline-zoom';
 
@@ -309,169 +310,174 @@ export function Timeline() {
       <TimelineStudioSync timelineCanvas={timelineCanvasRef.current} />
 
       {/* Timeline Container */}
-      <div
-        className="flex-1 flex flex-col overflow-hidden relative bg-[#121212]"
-        ref={timelineRef}
-      >
-        <TimelinePlayhead
-          duration={duration}
-          zoomLevel={zoomLevel}
-          tracks={tracks}
-          seek={seek}
-          rulerRef={rulerRef}
-          rulerScrollRef={rulerScrollRef}
-          tracksScrollRef={tracksScrollRef}
-          trackLabelsRef={trackLabelsRef}
-          timelineRef={timelineRef}
-          playheadRef={playheadRef}
-          isSnappingToPlayhead={false}
-        />
-
-        {/* Timeline Header with Ruler */}
+      <TimelineDropZone>
         <div
-          style={{ opacity: duration === 0 ? 0 : 1 }}
-          className="flex sticky top-0"
+          className="flex-1 flex flex-col overflow-hidden relative bg-[#121212]"
+          ref={timelineRef}
         >
-          {/* Track Labels Header */}
-          <div className="w-16 shrink-0 bg-card border-r flex items-center justify-between h-6">
-            {/* Empty space */}
-            <span className="text-sm font-medium text-muted-foreground opacity-0">
-              .
-            </span>
-          </div>
+          <TimelinePlayhead
+            duration={duration}
+            zoomLevel={zoomLevel}
+            tracks={tracks}
+            seek={seek}
+            rulerRef={rulerRef}
+            rulerScrollRef={rulerScrollRef}
+            tracksScrollRef={tracksScrollRef}
+            trackLabelsRef={trackLabelsRef}
+            timelineRef={timelineRef}
+            playheadRef={playheadRef}
+            isSnappingToPlayhead={false}
+          />
 
-          {/* Timeline Ruler */}
+          {/* Timeline Header with Ruler */}
           <div
-            className="flex-1 relative overflow-hidden h-6"
-            onWheel={(e) => {
-              // Check if this is horizontal scrolling - if so, don't handle it here
-              if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
-                return; // Let ScrollArea handle horizontal scrolling
-              }
-              handleWheel(e);
-            }}
-            onClick={handleTimelineContentClick}
-            data-ruler-area
+            style={{ opacity: duration === 0 ? 0 : 1 }}
+            className="flex sticky top-0"
           >
-            <ScrollArea
-              className="w-full scrollbar-hidden"
-              ref={rulerScrollRef}
-              onScroll={(e) => {
-                if (isUpdatingRef.current) return;
-                isUpdatingRef.current = true;
-                const scrollX = (e.currentTarget as HTMLDivElement).scrollLeft;
-                timelineCanvasRef.current?.setScroll(scrollX, undefined);
-                isUpdatingRef.current = false;
-              }}
-            >
-              <div
-                ref={rulerRef}
-                className="relative h-6 select-none cursor-default"
-                style={{
-                  width: `${dynamicTimelineWidth}px`,
-                }}
-                onMouseDown={handleRulerMouseDown}
-              >
-                <TimelineRuler
-                  zoomLevel={zoomLevel}
-                  duration={duration}
-                  width={dynamicTimelineWidth}
-                />
-              </div>
-            </ScrollArea>
-          </div>
-        </div>
+            {/* Track Labels Header */}
+            <div className="w-16 shrink-0 bg-card border-r flex items-center justify-between h-6">
+              {/* Empty space */}
+              <span className="text-sm font-medium text-muted-foreground opacity-0">
+                .
+              </span>
+            </div>
 
-        {/* Tracks Area */}
-        <div className="flex-1 flex overflow-hidden">
-          {/* Track Labels */}
-          {tracks.length > 0 && (
+            {/* Timeline Ruler */}
             <div
-              ref={trackLabelsRef}
-              className="w-16 shrink-0 overflow-y-hidden z-10"
-              data-track-labels
+              className="flex-1 relative overflow-hidden h-6"
+              onWheel={(e) => {
+                // Check if this is horizontal scrolling - if so, don't handle it here
+                if (e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+                  return; // Let ScrollArea handle horizontal scrolling
+                }
+                handleWheel(e);
+              }}
+              onClick={handleTimelineContentClick}
+              data-ruler-area
             >
-              <div className="flex flex-col">
-                {tracks.map((track, index) => (
-                  <div key={track.id}>
-                    {/* Top separator for first track */}
-                    {index === 0 && (
+              <ScrollArea
+                className="w-full scrollbar-hidden"
+                ref={rulerScrollRef}
+                onScroll={(e) => {
+                  if (isUpdatingRef.current) return;
+                  isUpdatingRef.current = true;
+                  const scrollX = (e.currentTarget as HTMLDivElement)
+                    .scrollLeft;
+                  timelineCanvasRef.current?.setScroll(scrollX, undefined);
+                  isUpdatingRef.current = false;
+                }}
+              >
+                <div
+                  ref={rulerRef}
+                  className="relative h-6 select-none cursor-default"
+                  style={{
+                    width: `${dynamicTimelineWidth}px`,
+                  }}
+                  onMouseDown={handleRulerMouseDown}
+                >
+                  <TimelineRuler
+                    zoomLevel={zoomLevel}
+                    duration={duration}
+                    width={dynamicTimelineWidth}
+                  />
+                </div>
+              </ScrollArea>
+            </div>
+          </div>
+
+          {/* Tracks Area */}
+          <div className="flex-1 flex overflow-hidden">
+            {/* Track Labels */}
+            {tracks.length > 0 && (
+              <div
+                ref={trackLabelsRef}
+                className="w-16 shrink-0 overflow-y-hidden z-10"
+                data-track-labels
+              >
+                <div className="flex flex-col">
+                  {tracks.map((track, index) => (
+                    <div key={track.id}>
+                      {/* Top separator for first track */}
+                      {index === 0 && (
+                        <div
+                          className="w-full"
+                          style={{
+                            height: `${TIMELINE_CONSTANTS.TRACK_PADDING_TOP}px`,
+                            marginBottom: '0px',
+                            background: 'transparent',
+                          }}
+                        />
+                      )}
+
                       <div
-                        className="w-full"
+                        className={cn(
+                          'flex items-center px-3 group bg-input/40'
+                        )}
+                        style={{ height: getTrackHeight(track.type as any) }}
+                      >
+                        <div className="flex items-center justify-center flex-1 min-w-0 gap-1">
+                          <TrackIcon track={track} />
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="size-4 p-0 h-6 w-4"
+                              >
+                                <Ellipsis className="size-3 text-muted-foreground" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start" side="right">
+                              <DropdownMenuItem
+                                disabled={index === 0}
+                                onClick={() => {
+                                  const { moveTrack } =
+                                    useTimelineStore.getState();
+                                  moveTrack(track.id, index - 1);
+                                }}
+                              >
+                                <ArrowUp className="size-4 mr-2" />
+                                Move track up
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                disabled={index === tracks.length - 1}
+                                onClick={() => {
+                                  const { moveTrack } =
+                                    useTimelineStore.getState();
+                                  moveTrack(track.id, index + 1);
+                                }}
+                              >
+                                <ArrowDown className="size-4 mr-2" />
+                                Move track down
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+
+                      {/* Separator after each track */}
+                      <div
+                        className="w-full relative"
                         style={{
-                          height: `${TIMELINE_CONSTANTS.TRACK_PADDING_TOP}px`,
-                          marginBottom: '0px',
+                          height: `${TIMELINE_CONSTANTS.TRACK_SPACING}px`,
                           background: 'transparent',
                         }}
-                      />
-                    )}
-
-                    <div
-                      className={cn('flex items-center px-3 group bg-input/40')}
-                      style={{ height: getTrackHeight(track.type as any) }}
-                    >
-                      <div className="flex items-center justify-center flex-1 min-w-0 gap-1">
-                        <TrackIcon track={track} />
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="size-4 p-0 h-6 w-4"
-                            >
-                              <Ellipsis className="size-3 text-muted-foreground" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start" side="right">
-                            <DropdownMenuItem
-                              disabled={index === 0}
-                              onClick={() => {
-                                const { moveTrack } =
-                                  useTimelineStore.getState();
-                                moveTrack(track.id, index - 1);
-                              }}
-                            >
-                              <ArrowUp className="size-4 mr-2" />
-                              Move track up
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              disabled={index === tracks.length - 1}
-                              onClick={() => {
-                                const { moveTrack } =
-                                  useTimelineStore.getState();
-                                moveTrack(track.id, index + 1);
-                              }}
-                            >
-                              <ArrowDown className="size-4 mr-2" />
-                              Move track down
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                      ></div>
                     </div>
-
-                    {/* Separator after each track */}
-                    <div
-                      className="w-full relative"
-                      style={{
-                        height: `${TIMELINE_CONSTANTS.TRACK_SPACING}px`,
-                        background: 'transparent',
-                      }}
-                    ></div>
-                  </div>
-                ))}
-                {/* Spacer to match canvas extraMarginY */}
-                <div style={{ height: '15px', flexShrink: 0 }} />
+                  ))}
+                  {/* Spacer to match canvas extraMarginY */}
+                  <div style={{ height: '15px', flexShrink: 0 }} />
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Timeline Tracks Content */}
-          <div className="flex-1 relative overflow-hidden">
-            <div id="timeline-canvas" className="w-full h-full" />
+            {/* Timeline Tracks Content */}
+            <div className="flex-1 relative overflow-hidden">
+              <div id="timeline-canvas" className="w-full h-full" />
+            </div>
           </div>
         </div>
-      </div>
+      </TimelineDropZone>
     </div>
   );
 }

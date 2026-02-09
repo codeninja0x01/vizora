@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Studio, fontManager } from 'openvideo';
 import { useStudioStore } from '@/stores/studio-store';
 import { editorFont } from './constants';
+import { CanvasDropZone } from './canvas/canvas-drop-zone';
 
 // Canvas configuration constants
 const DEFAULT_CANVAS_SIZE = {
@@ -107,22 +108,24 @@ export function CanvasPanel({ onReady }: CanvasPanelProps) {
 
   return (
     <div className="h-full w-full flex flex-col min-h-0 min-w-0 bg-card rounded-sm relative">
-      <div
-        style={{
-          flex: 1,
-          position: 'relative', // Ensure relative positioning for absolute children if needed
-          overflow: 'hidden', // Hide anything outside (though canvas masks it too)
-        }}
-      >
-        <canvas
-          ref={canvasRef}
+      <CanvasDropZone>
+        <div
           style={{
-            display: 'block',
-            width: '100%',
-            height: '100%',
+            flex: 1,
+            position: 'relative', // Ensure relative positioning for absolute children if needed
+            overflow: 'hidden', // Hide anything outside (though canvas masks it too)
           }}
-        />
-      </div>
+        >
+          <canvas
+            ref={canvasRef}
+            style={{
+              display: 'block',
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        </div>
+      </CanvasDropZone>
     </div>
   );
 }
