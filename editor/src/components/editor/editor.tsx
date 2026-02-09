@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { MediaPanel } from '@/components/editor/media-panel';
 import { CanvasPanel } from '@/components/editor/canvas-panel';
 import { Timeline } from '@/components/editor/timeline';
@@ -9,12 +10,16 @@ import {
   ResizableHandle,
 } from '@/components/ui/resizable';
 import { usePanelStore } from '@/stores/panel-store';
+import { useStudioStore } from '@/stores/studio-store';
+import { useTemplateStore } from '@/stores/template-store';
 import Header from '@/components/editor/header';
 import { Loading } from '@/components/editor/loading';
 import FloatingControl from '@/components/editor/floating-controls/floating-control';
 import { Compositor } from 'openvideo';
 import { WebCodecsUnsupportedModal } from '@/components/editor/webcodecs-unsupported-modal';
 import Assistant from './assistant/assistant';
+import { TemplateBar } from './template-mode/template-bar';
+import { getTemplateById } from '@/app/(protected)/dashboard/templates/actions';
 
 export default function Editor() {
   const {
@@ -29,8 +34,14 @@ export default function Editor() {
     isCopilotVisible,
   } = usePanelStore();
 
+  const { studio } = useStudioStore();
+  const { isTemplateMode, enterTemplateMode, setMarkedFields } =
+    useTemplateStore();
+  const searchParams = useSearchParams();
+
   const [isReady, setIsReady] = useState(false);
   const [isWebCodecsSupported, setIsWebCodecsSupported] = useState(true);
+  const [templateLoadAttempted, setTemplateLoadAttempted] = useState(false);
 
   useEffect(() => {
     const checkSupport = async () => {
@@ -40,6 +51,51 @@ export default function Editor() {
     checkSupport();
   }, []);
 
+  // Load template from URL parameter
+  useEffect(() => {
+    const loadTemplate = async () => {
+      const templateId = searchParams.get('templateId');
+
+      if (!templateId || !studio || templateLoadAttempted) {
+        return;
+      }
+
+      setTemplateLoadAttempted(true);
+
+      try {
+        const template = await getTemplateById(templateId);
+
+        if (!template) {
+          console.error('Template not found');
+          return;
+        }
+
+        // Load project data into studio
+        await studio.loadFromJSON(template.projectData as any);
+
+        // Enter template mode
+        enterTemplateMode(template.id, template.name);
+
+        // Set marked fields from template merge fields
+        const markedFields = template.mergeFields.map((field: any) => ({
+          elementId: field.elementId,
+          property: field.property,
+        }));
+        setMarkedFields(markedFields);
+      } catch (error) {
+        console.error('Failed to load template:', error);
+      }
+    };
+
+    loadTemplate();
+  }, [
+    searchParams,
+    studio,
+    templateLoadAttempted,
+    enterTemplateMode,
+    setMarkedFields,
+  ]);
+
   return (
     <div className="h-screen w-screen flex flex-col bg-background overflow-hidden">
       {!isReady && (
@@ -47,6 +103,7 @@ export default function Editor() {
           <Loading />
         </div>
       )}
+      {isTemplateMode && <TemplateBar />}
       <Header />
       <div className="flex-1 min-h-0 min-w-0">
         <ResizablePanelGroup

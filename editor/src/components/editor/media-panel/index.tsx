@@ -14,9 +14,11 @@ import PanelVoiceovers from './panel/voiceovers';
 import PanelSFX from './panel/sfx';
 import PanelElements from './panel/elements';
 import { PropertiesPanel } from '../properties-panel';
+import { MergeFieldPanel } from '../template-mode/merge-field-panel';
 import type { IClip } from 'openvideo';
 import { useEffect, useState } from 'react';
 import { useStudioStore } from '@/stores/studio-store';
+import { useTemplateStore } from '@/stores/template-store';
 
 const viewMap: Record<Tab, React.ReactNode> = {
   uploads: <PanelUploads />,
@@ -36,6 +38,7 @@ export function MediaPanel() {
   const { activeTab, isPanelOpen } = useMediaPanelStore();
   const [selectedClips, setSelectedClips] = useState<IClip[]>([]);
   const { studio, setSelectedClips: setStudioSelectedClips } = useStudioStore();
+  const { isTemplateMode } = useTemplateStore();
   const [showProperties, setShowProperties] = useState(false);
 
   useEffect(() => {
@@ -76,12 +79,16 @@ export function MediaPanel() {
 
       {/* Panel Content - conditionally visible based on isPanelOpen */}
       {isPanelOpen && (
-        <div className="flex-1 min-h-0 min-w-0 overflow-hidden bg-[var(--panel-background)]">
-          {selectedClips.length > 0 && showProperties ? (
-            <PropertiesPanel selectedClips={selectedClips} />
-          ) : (
-            <>{viewMap[activeTab]}</>
-          )}
+        <div className="flex-1 min-h-0 min-w-0 overflow-hidden bg-[var(--panel-background)] flex flex-col">
+          <div className="flex-1 min-h-0 overflow-auto">
+            {selectedClips.length > 0 && showProperties ? (
+              <PropertiesPanel selectedClips={selectedClips} />
+            ) : (
+              <>{viewMap[activeTab]}</>
+            )}
+          </div>
+          {/* Merge Field Panel - shows when in template mode with a selected clip */}
+          {isTemplateMode && selectedClips.length > 0 && <MergeFieldPanel />}
         </div>
       )}
     </div>
