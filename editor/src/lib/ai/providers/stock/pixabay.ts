@@ -77,7 +77,7 @@ export class PixabayProvider implements IStockProvider {
 
       const data: PixabayResponse = await response.json();
 
-      const clips: StockClip[] = data.hits
+      const clips = data.hits
         .map((v) => {
           // Prefer large, fallback to medium
           const videoUrl = v.videos.large?.url || v.videos.medium?.url;
@@ -102,7 +102,7 @@ export class PixabayProvider implements IStockProvider {
             provider: 'pixabay' as const,
           };
         })
-        .filter((clip): clip is StockClip => clip !== null);
+        .filter((clip): clip is NonNullable<typeof clip> => clip !== null);
 
       // Filter by minimum duration if specified
       if (options.minDuration !== undefined) {

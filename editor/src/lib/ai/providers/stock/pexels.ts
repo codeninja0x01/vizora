@@ -75,7 +75,7 @@ export class PexelsProvider implements IStockProvider {
 
       const data: PexelsResponse = await response.json();
 
-      const clips: StockClip[] = data.videos
+      const clips = data.videos
         .map((v) => {
           // Prefer HD quality, fallback to first available
           const videoFile =
@@ -98,7 +98,7 @@ export class PexelsProvider implements IStockProvider {
             attribution: `Video by ${v.user.name} from Pexels`,
           };
         })
-        .filter((clip): clip is StockClip => clip !== null);
+        .filter((clip): clip is NonNullable<typeof clip> => clip !== null);
 
       // Filter by minimum duration if specified
       if (options.minDuration !== undefined) {

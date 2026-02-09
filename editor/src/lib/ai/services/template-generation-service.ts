@@ -11,13 +11,13 @@ import {
 export interface GeneratedTemplate {
   template: any;
   mergeFields: MergeFieldSuggestion[];
-  conversationHistory: Array<{ role: string; content: any }>;
+  conversationHistory: Anthropic.MessageParam[];
 }
 
 /**
  * Template element schema for Claude tool calling
  */
-const TOOL_SCHEMA = {
+const TOOL_SCHEMA: Anthropic.Tool = {
   name: 'generate_template',
   description: 'Generate a video template as structured JSON',
   input_schema: {
@@ -290,9 +290,9 @@ Generate a production-ready template with this style applied.`;
       const mergeFields = detectMergeFields(templateData.clips);
 
       // Build conversation history
-      const conversationHistory = [
-        { role: 'user', content: userMessage },
-        { role: 'assistant', content: response.content },
+      const conversationHistory: Anthropic.MessageParam[] = [
+        { role: 'user' as const, content: userMessage },
+        { role: 'assistant' as const, content: response.content },
       ];
 
       return {
@@ -315,7 +315,7 @@ Generate a production-ready template with this style applied.`;
   async refine(
     existingTemplate: any,
     refinementPrompt: string,
-    conversationHistory: Array<{ role: string; content: any }>
+    conversationHistory: Anthropic.MessageParam[]
   ): Promise<GeneratedTemplate> {
     const userMessage = `Modify the existing template based on this request: ${refinementPrompt}
 
@@ -361,10 +361,10 @@ Make the requested changes while maintaining the overall template structure.`;
       const mergeFields = detectMergeFields(templateData.clips);
 
       // Extend conversation history
-      const updatedHistory = [
+      const updatedHistory: Anthropic.MessageParam[] = [
         ...conversationHistory,
-        { role: 'user', content: userMessage },
-        { role: 'assistant', content: response.content },
+        { role: 'user' as const, content: userMessage },
+        { role: 'assistant' as const, content: response.content },
       ];
 
       return {
