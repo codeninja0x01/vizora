@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { IClip } from 'openvideo';
+import type { IClip } from 'openvideo';
 import {
   InputGroup,
   InputGroupAddon,
@@ -10,6 +10,7 @@ import { GL_TRANSITION_OPTIONS, Transition } from 'openvideo';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useStudioStore } from '@/stores/studio-store';
 import { Loader2, Timer } from 'lucide-react';
+import { PropertySection } from './index';
 interface TransitionPropertiesProps {
   clip: IClip;
 }
@@ -142,105 +143,111 @@ export function TransitionProperties({ clip }: TransitionPropertiesProps) {
   const minDurationInSeconds = minDurationMicro / 1_000_000;
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* Duration Section */}
-      <div className="flex flex-col gap-2">
-        <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-          Duration
-        </label>
-        <div className="flex items-center gap-4">
-          <Timer className="size-4 text-muted-foreground" />
-          <Slider
-            value={[localDuration]}
-            onValueChange={(v) => setLocalDuration(v[0])}
-            onValueCommit={(v) => handleUpdate({ duration: v[0] * 1_000_000 })}
-            max={maxDurationInSeconds}
-            min={minDurationInSeconds}
-            step={0.1}
-            className="flex-1"
-          />
-          <InputGroup className="w-20">
-            <InputGroupInput
-              type="number"
-              value={localDuration.toFixed(1)}
-              onChange={(e) => {
-                const val = parseFloat(e.target.value) || 0;
-                setLocalDuration(val);
-                handleUpdate({
-                  duration: val * 1_000_000,
-                });
-              }}
-              className="text-sm p-0 text-center"
+    <div className="flex flex-col gap-1">
+      <PropertySection title="Transition" defaultOpen={true}>
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-medium text-muted-foreground">
+            Duration
+          </label>
+          <div className="flex items-center gap-4">
+            <Timer className="size-4 text-muted-foreground" />
+            <Slider
+              value={[localDuration]}
+              onValueChange={(v) => setLocalDuration(v[0])}
+              onValueCommit={(v) =>
+                handleUpdate({ duration: v[0] * 1_000_000 })
+              }
+              max={maxDurationInSeconds}
+              min={minDurationInSeconds}
+              step={0.1}
+              className="flex-1"
             />
-            <InputGroupAddon align="inline-end" className="p-0 pr-2">
-              <span className="text-[10px] text-muted-foreground">s</span>
-            </InputGroupAddon>
-          </InputGroup>
-        </div>
-      </div>
-      <ScrollArea
-        ref={scrollRef}
-        onScrollCapture={() => {
-          const viewport = scrollRef.current?.querySelector(
-            '[data-radix-scroll-area-viewport]'
-          );
-          if (viewport) {
-            LAST_SCROLL_POS = viewport.scrollTop;
-          }
-        }}
-        className="h-full"
-      >
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(92px,1fr))] gap-2.5 justify-items-center">
-          {GL_TRANSITION_OPTIONS.map((effect) => {
-            const isReady =
-              loaded[effect.key]?.static && loaded[effect.key]?.dynamic;
-
-            return (
-              <div
-                key={effect.key}
-                className="flex w-full items-center gap-2 flex-col group cursor-pointer"
-                onClick={() => {
-                  if (!studio) return;
-                  handleUpdate({ key: effect.key });
+            <InputGroup className="w-20">
+              <InputGroupInput
+                type="number"
+                value={localDuration.toFixed(1)}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value) || 0;
+                  setLocalDuration(val);
+                  handleUpdate({
+                    duration: val * 1_000_000,
+                  });
                 }}
-              >
-                <div className="relative w-full aspect-video rounded-md bg-input/30 border overflow-hidden">
-                  {!isReady && (
-                    <div className="absolute inset-0 z-10 flex items-center justify-center">
-                      <Loader2 className="animate-spin text-muted-foreground" />
-                    </div>
-                  )}
+                className="text-sm p-0 text-center"
+              />
+              <InputGroupAddon align="inline-end" className="p-0 pr-2">
+                <span className="text-[10px] text-muted-foreground">s</span>
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
+        </div>
+      </PropertySection>
 
-                  <img
-                    src={effect.previewStatic}
-                    onLoad={() => markLoaded(effect.key, 'static')}
-                    loading="lazy"
-                    className="
+      <PropertySection title="Type" defaultOpen={true}>
+        <ScrollArea
+          ref={scrollRef}
+          onScrollCapture={() => {
+            const viewport = scrollRef.current?.querySelector(
+              '[data-radix-scroll-area-viewport]'
+            );
+            if (viewport) {
+              LAST_SCROLL_POS = viewport.scrollTop;
+            }
+          }}
+          className="h-full"
+        >
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(92px,1fr))] gap-2.5 justify-items-center">
+            {GL_TRANSITION_OPTIONS.map((effect) => {
+              const isReady =
+                loaded[effect.key]?.static && loaded[effect.key]?.dynamic;
+
+              return (
+                <div
+                  key={effect.key}
+                  className="flex w-full items-center gap-2 flex-col group cursor-pointer"
+                  onClick={() => {
+                    if (!studio) return;
+                    handleUpdate({ key: effect.key });
+                  }}
+                >
+                  <div className="relative w-full aspect-video rounded-md bg-input/30 border overflow-hidden">
+                    {!isReady && (
+                      <div className="absolute inset-0 z-10 flex items-center justify-center">
+                        <Loader2 className="animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+
+                    <img
+                      src={effect.previewStatic}
+                      onLoad={() => markLoaded(effect.key, 'static')}
+                      loading="lazy"
+                      className="
                       absolute inset-0 w-full h-full object-cover rounded-sm
                       transition-opacity duration-150
                       opacity-100 group-hover:opacity-0
                     "
-                  />
+                    />
 
-                  <img
-                    src={effect.previewDynamic}
-                    onLoad={() => markLoaded(effect.key, 'dynamic')}
-                    loading="lazy"
-                    className="
+                    <img
+                      src={effect.previewDynamic}
+                      onLoad={() => markLoaded(effect.key, 'dynamic')}
+                      loading="lazy"
+                      className="
                       absolute inset-0 w-full h-full object-cover rounded-sm
                       transition-opacity duration-150
                       opacity-0 group-hover:opacity-100
                     "
-                  />
-                  <div className="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black/80 to-transparent text-white text-xs font-medium truncate text-center transition-opacity duration-150 group-hover:opacity-0">
-                    {effect.label}
+                    />
+                    <div className="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black/80 to-transparent text-white text-xs font-medium truncate text-center transition-opacity duration-150 group-hover:opacity-0">
+                      {effect.label}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </ScrollArea>
+              );
+            })}
+          </div>
+        </ScrollArea>
+      </PropertySection>
     </div>
   );
 }

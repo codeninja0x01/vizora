@@ -1,5 +1,5 @@
-import * as React from "react";
-import { useEffect, useState } from "react";
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 import {
   ColorPicker,
   ColorPickerAlpha,
@@ -8,13 +8,13 @@ import {
   ColorPickerHue,
   ColorPickerOutput,
   ColorPickerSelection,
-} from "@/components/ui/color-picker";
+} from '@/components/ui/color-picker';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { IClip, AnimationOptions, KeyframeData } from "openvideo";
+} from '@/components/ui/popover';
+import { type IClip, AnimationOptions, KeyframeData } from 'openvideo';
 import {
   IconAlignLeft,
   IconAlignCenter,
@@ -35,18 +35,19 @@ import {
   IconSquare,
   IconVolume,
   IconEdit,
-} from "@tabler/icons-react";
-import { cn } from "@/lib/utils";
+} from '@tabler/icons-react';
+import { cn } from '@/lib/utils';
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
-} from "@/components/ui/input-group";
-import { Slider } from "@/components/ui/slider";
-import color from "color";
-import { NumberInput } from "@/components/ui/number-input";
-import useLayoutStore from "../store/use-layout-store";
+} from '@/components/ui/input-group';
+import { Slider } from '@/components/ui/slider';
+import color from 'color';
+import { NumberInput } from '@/components/ui/number-input';
+import useLayoutStore from '../store/use-layout-store';
+import { PropertySection } from './index';
 
 interface VideoPropertiesProps {
   clip: IClip;
@@ -65,16 +66,16 @@ export function VideoProperties({ clip }: VideoPropertiesProps) {
       setTick((t) => t + 1);
     };
 
-    videoClip.on?.("propsChange", onPropsChange);
-    videoClip.on?.("moving", onPropsChange);
-    videoClip.on?.("scaling", onPropsChange);
-    videoClip.on?.("rotating", onPropsChange);
+    videoClip.on?.('propsChange', onPropsChange);
+    videoClip.on?.('moving', onPropsChange);
+    videoClip.on?.('scaling', onPropsChange);
+    videoClip.on?.('rotating', onPropsChange);
 
     return () => {
-      videoClip.off?.("propsChange", onPropsChange);
-      videoClip.off?.("moving", onPropsChange);
-      videoClip.off?.("scaling", onPropsChange);
-      videoClip.off?.("rotating", onPropsChange);
+      videoClip.off?.('propsChange', onPropsChange);
+      videoClip.off?.('moving', onPropsChange);
+      videoClip.off?.('scaling', onPropsChange);
+      videoClip.off?.('rotating', onPropsChange);
     };
   }, [videoClip]);
 
@@ -96,7 +97,7 @@ export function VideoProperties({ clip }: VideoPropertiesProps) {
       style: {
         ...style,
         stroke: {
-          ...(style.stroke || { color: "#ffffff", width: 0 }),
+          ...(style.stroke || { color: '#ffffff', width: 0 }),
           ...strokeUpdates,
         },
       },
@@ -105,7 +106,7 @@ export function VideoProperties({ clip }: VideoPropertiesProps) {
 
   const handleShadowUpdate = (shadowUpdates: any) => {
     const currentShadow = style.dropShadow || {
-      color: "#000000",
+      color: '#000000',
       alpha: 1,
       blur: 0,
       distance: 0,
@@ -143,158 +144,157 @@ export function VideoProperties({ clip }: VideoPropertiesProps) {
   const animations = videoClip.animations || [];
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* Transform Section */}
-      <div className="flex flex-col gap-2">
-        <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-          Transform
-        </label>
-        <div className="grid grid-cols-2 gap-2">
-          <InputGroup>
-            <InputGroupAddon align="inline-start">
-              <span className="text-[10px] font-medium text-muted-foreground">
-                X
-              </span>
-            </InputGroupAddon>
-            <NumberInput
-              value={Math.round(videoClip.left || 0)}
-              onChange={(val) => handleUpdate({ left: val })}
-              className="p-0"
-            />
-          </InputGroup>
-          <InputGroup>
-            <InputGroupAddon align="inline-start">
-              <span className="text-[10px] font-medium text-muted-foreground">
-                Y
-              </span>
-            </InputGroupAddon>
-            <NumberInput
-              value={Math.round(videoClip.top || 0)}
-              onChange={(val) => handleUpdate({ top: val })}
-              className="p-0"
-            />
-          </InputGroup>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <InputGroup>
-            <InputGroupAddon align="inline-start">
-              <span className="text-[10px] font-medium text-muted-foreground">
-                W
-              </span>
-            </InputGroupAddon>
-            <NumberInput
-              value={Math.round(videoClip.width || 0)}
-              onChange={(val) => handleUpdate({ width: val })}
-              className="p-0"
-            />
-          </InputGroup>
-          <InputGroup>
-            <InputGroupAddon align="inline-start">
-              <span className="text-[10px] font-medium text-muted-foreground">
-                H
-              </span>
-            </InputGroupAddon>
-            <NumberInput
-              value={Math.round(videoClip.height || 0)}
-              onChange={(val) => handleUpdate({ height: val })}
-              className="p-0"
-            />
-          </InputGroup>
-        </div>
-      </div>
+    <div className="flex flex-col gap-1">
+      <PropertySection title="Transform" defaultOpen={true}>
+        <div className="flex flex-col gap-2.5">
+          <div className="grid grid-cols-2 gap-2">
+            <InputGroup>
+              <InputGroupAddon align="inline-start">
+                <span className="text-[10px] font-medium text-muted-foreground">
+                  X
+                </span>
+              </InputGroupAddon>
+              <NumberInput
+                value={Math.round(videoClip.left || 0)}
+                onChange={(val) => handleUpdate({ left: val })}
+                className="p-0"
+              />
+            </InputGroup>
+            <InputGroup>
+              <InputGroupAddon align="inline-start">
+                <span className="text-[10px] font-medium text-muted-foreground">
+                  Y
+                </span>
+              </InputGroupAddon>
+              <NumberInput
+                value={Math.round(videoClip.top || 0)}
+                onChange={(val) => handleUpdate({ top: val })}
+                className="p-0"
+              />
+            </InputGroup>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <InputGroup>
+              <InputGroupAddon align="inline-start">
+                <span className="text-[10px] font-medium text-muted-foreground">
+                  W
+                </span>
+              </InputGroupAddon>
+              <NumberInput
+                value={Math.round(videoClip.width || 0)}
+                onChange={(val) => handleUpdate({ width: val })}
+                className="p-0"
+              />
+            </InputGroup>
+            <InputGroup>
+              <InputGroupAddon align="inline-start">
+                <span className="text-[10px] font-medium text-muted-foreground">
+                  H
+                </span>
+              </InputGroupAddon>
+              <NumberInput
+                value={Math.round(videoClip.height || 0)}
+                onChange={(val) => handleUpdate({ height: val })}
+                className="p-0"
+              />
+            </InputGroup>
+          </div>
 
-      {/* Rotation Section */}
-      <div className="flex flex-col gap-2">
-        <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-          Rotation
-        </label>
-        <div className="flex items-center gap-4">
-          <IconRotate className="size-4 text-muted-foreground" />
-          <Slider
-            value={[Math.round(videoClip.angle ?? 0)]}
-            onValueChange={(v) => handleUpdate({ angle: v[0] })}
-            max={360}
-            step={1}
-            className="flex-1"
-          />
-          <InputGroup className="w-20">
-            <NumberInput
-              value={Math.round(videoClip.angle ?? 0)}
-              onChange={(val) => handleUpdate({ angle: val })}
-              className="p-0 text-center"
-            />
-            <InputGroupAddon align="inline-end" className="p-0 pr-2">
-              <span className="text-[10px] text-muted-foreground">°</span>
-            </InputGroupAddon>
-          </InputGroup>
+          {/* Rotation */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-medium text-muted-foreground">
+              Rotation
+            </label>
+            <div className="flex items-center gap-4">
+              <IconRotate className="size-4 text-muted-foreground" />
+              <Slider
+                value={[Math.round(videoClip.angle ?? 0)]}
+                onValueChange={(v) => handleUpdate({ angle: v[0] })}
+                max={360}
+                step={1}
+                className="flex-1"
+              />
+              <InputGroup className="w-20">
+                <NumberInput
+                  value={Math.round(videoClip.angle ?? 0)}
+                  onChange={(val) => handleUpdate({ angle: val })}
+                  className="p-0 text-center"
+                />
+                <InputGroupAddon align="inline-end" className="p-0 pr-2">
+                  <span className="text-[10px] text-muted-foreground">°</span>
+                </InputGroupAddon>
+              </InputGroup>
+            </div>
+          </div>
         </div>
-      </div>
+      </PropertySection>
 
-      {/* Audio Section */}
-      <div className="flex flex-col gap-2">
-        <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-          Volume
-        </label>
-        <div className="flex items-center gap-4">
-          <IconVolume className="size-4 text-muted-foreground" />
-          <Slider
-            value={[Math.round((videoClip.volume ?? 1) * 100)]}
-            onValueChange={(v) => handleUpdate({ volume: v[0] / 100 })}
-            max={100}
-            step={1}
-            className="flex-1"
-          />
-          <InputGroup className="w-20">
-            <NumberInput
-              value={Math.round((videoClip.volume ?? 1) * 100)}
-              onChange={(val) => handleUpdate({ volume: val / 100 })}
-              className="p-0 text-center"
+      <PropertySection title="Audio" defaultOpen={true}>
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-medium text-muted-foreground">
+            Volume
+          </label>
+          <div className="flex items-center gap-4">
+            <IconVolume className="size-4 text-muted-foreground" />
+            <Slider
+              value={[Math.round((videoClip.volume ?? 1) * 100)]}
+              onValueChange={(v) => handleUpdate({ volume: v[0] / 100 })}
+              max={100}
+              step={1}
+              className="flex-1"
             />
-            <InputGroupAddon align="inline-end" className="p-0 pr-2">
-              <span className="text-[10px] text-muted-foreground">%</span>
-            </InputGroupAddon>
-          </InputGroup>
+            <InputGroup className="w-20">
+              <NumberInput
+                value={Math.round((videoClip.volume ?? 1) * 100)}
+                onChange={(val) => handleUpdate({ volume: val / 100 })}
+                className="p-0 text-center"
+              />
+              <InputGroupAddon align="inline-end" className="p-0 pr-2">
+                <span className="text-[10px] text-muted-foreground">%</span>
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
         </div>
-      </div>
+      </PropertySection>
 
-      {/* Opacity Section */}
-      <div className="flex flex-col gap-2">
-        <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-          Opacity
-        </label>
-        <div className="flex items-center gap-4">
-          <IconCircle className="size-4 text-muted-foreground" />
-          <Slider
-            value={[Math.round((videoClip.opacity ?? 1) * 100)]}
-            onValueChange={(v) => handleUpdate({ opacity: v[0] / 100 })}
-            max={100}
-            step={1}
-            className="flex-1"
-          />
-          <InputGroup className="w-20">
-            <NumberInput
-              value={Math.round((videoClip.opacity ?? 1) * 100)}
-              onChange={(val) => handleUpdate({ opacity: val / 100 })}
-              className="p-0 text-center"
+      <PropertySection title="Appearance" defaultOpen={true}>
+        <div className="flex flex-col gap-2">
+          <label className="text-xs font-medium text-muted-foreground">
+            Opacity
+          </label>
+          <div className="flex items-center gap-4">
+            <IconCircle className="size-4 text-muted-foreground" />
+            <Slider
+              value={[Math.round((videoClip.opacity ?? 1) * 100)]}
+              onValueChange={(v) => handleUpdate({ opacity: v[0] / 100 })}
+              max={100}
+              step={1}
+              className="flex-1"
             />
-            <InputGroupAddon align="inline-end" className="p-0 pr-2">
-              <span className="text-[10px] text-muted-foreground">%</span>
-            </InputGroupAddon>
-          </InputGroup>
+            <InputGroup className="w-20">
+              <NumberInput
+                value={Math.round((videoClip.opacity ?? 1) * 100)}
+                onChange={(val) => handleUpdate({ opacity: val / 100 })}
+                className="p-0 text-center"
+              />
+              <InputGroupAddon align="inline-end" className="p-0 pr-2">
+                <span className="text-[10px] text-muted-foreground">%</span>
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
         </div>
-      </div>
+      </PropertySection>
 
-      {/* Animations Section */}
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+      <PropertySection title="Animations" defaultOpen={true}>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-xs font-medium text-muted-foreground">
             Animations
           </label>
           <button
             onClick={() => {
-              setFloatingControl("animation-properties-picker", {
+              setFloatingControl('animation-properties-picker', {
                 clipId: videoClip.id,
-                mode: "add",
+                mode: 'add',
               });
             }}
             className="text-muted-foreground hover:text-white transition-colors"
@@ -326,10 +326,10 @@ export function VideoProperties({ clip }: VideoPropertiesProps) {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => {
-                      setFloatingControl("animation-properties-picker", {
+                      setFloatingControl('animation-properties-picker', {
                         clipId: videoClip.id,
                         animationId: anim.id,
-                        mode: "edit",
+                        mode: 'edit',
                       });
                     }}
                     className="p-1 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-white transition-all"
@@ -347,208 +347,215 @@ export function VideoProperties({ clip }: VideoPropertiesProps) {
             ))
           )}
         </div>
-      </div>
+      </PropertySection>
 
-      {/* Radius Section */}
-      <div className="flex flex-col gap-2">
-        <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-          Corner Radius
-        </label>
-        <div className="flex items-center gap-4">
-          <IconSquare className="size-4 text-muted-foreground" />
-          <Slider
-            value={[style.borderRadius || 0]}
-            onValueChange={(v) => handleStyleUpdate({ borderRadius: v[0] })}
-            max={500}
-            step={1}
-            className="flex-1"
-          />
-          <InputGroup className="w-20">
-            <NumberInput
-              value={style.borderRadius || 0}
-              onChange={(val) => handleStyleUpdate({ borderRadius: val })}
-              className="p-0 text-center"
-            />
-            <InputGroupAddon align="inline-end" className="p-0 pr-2">
-              <span className="text-[10px] text-muted-foreground">px</span>
-            </InputGroupAddon>
-          </InputGroup>
+      <PropertySection title="Style" defaultOpen={false}>
+        <div className="flex flex-col gap-2.5">
+          {/* Corner Radius */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-medium text-muted-foreground">
+              Corner Radius
+            </label>
+            <div className="flex items-center gap-4">
+              <IconSquare className="size-4 text-muted-foreground" />
+              <Slider
+                value={[style.borderRadius || 0]}
+                onValueChange={(v) => handleStyleUpdate({ borderRadius: v[0] })}
+                max={500}
+                step={1}
+                className="flex-1"
+              />
+              <InputGroup className="w-20">
+                <NumberInput
+                  value={style.borderRadius || 0}
+                  onChange={(val) => handleStyleUpdate({ borderRadius: val })}
+                  className="p-0 text-center"
+                />
+                <InputGroupAddon align="inline-end" className="p-0 pr-2">
+                  <span className="text-[10px] text-muted-foreground">px</span>
+                </InputGroupAddon>
+              </InputGroup>
+            </div>
+          </div>
+
+          {/* Stroke */}
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-medium text-muted-foreground">
+                Stroke
+              </label>
+              <button className="text-muted-foreground hover:text-white transition-colors">
+                <IconMinus className="size-3" />
+              </button>
+            </div>
+
+            <div className="flex gap-2">
+              <InputGroup className="flex-2">
+                <InputGroupAddon align="inline-start" className="relative p-0">
+                  <Popover modal={true}>
+                    <PopoverTrigger asChild>
+                      <InputGroupButton
+                        variant="ghost"
+                        size="icon-xs"
+                        className="h-full w-8"
+                      >
+                        <div
+                          className="h-4 w-4 rounded-full border border-white/10 shadow-sm"
+                          style={{
+                            backgroundColor:
+                              (style.stroke?.color as string) || '#000000',
+                          }}
+                        />
+                      </InputGroupButton>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-3" align="start">
+                      <ColorPicker
+                        onChange={(colorValue) => {
+                          const hexColor = color.rgb(colorValue).hex();
+                          handleStrokeUpdate({ color: hexColor });
+                        }}
+                        className="w-72 h-72 rounded-md border bg-background p-4 shadow-sm"
+                      >
+                        <ColorPickerSelection />
+                        <div className="flex items-center gap-4">
+                          <ColorPickerEyeDropper />
+                          <div className="grid w-full gap-1">
+                            <ColorPickerHue />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <ColorPickerOutput />
+                          <ColorPickerFormat />
+                        </div>
+                      </ColorPicker>
+                    </PopoverContent>
+                  </Popover>
+                </InputGroupAddon>
+                <InputGroupInput
+                  value={style.stroke?.color?.toUpperCase() || '#000000'}
+                  onChange={(e) =>
+                    handleStrokeUpdate({ color: e.target.value })
+                  }
+                  className="text-sm p-0 text-[10px] font-mono"
+                />
+                <InputGroupAddon
+                  align="inline-end"
+                  className="border-l border-white/5 pl-2"
+                >
+                  <span className="text-[10px]">100%</span>
+                </InputGroupAddon>
+              </InputGroup>
+
+              <InputGroup className="flex-1">
+                <InputGroupAddon align="inline-start">
+                  <IconLineHeight className="size-3.5" />
+                </InputGroupAddon>
+                <NumberInput
+                  value={style.stroke?.width || 0}
+                  onChange={(val) => handleStrokeUpdate({ width: val })}
+                  className="p-0"
+                />
+              </InputGroup>
+            </div>
+          </div>
+
+          {/* Shadow */}
+          <div className="flex flex-col gap-2">
+            <label className="text-xs font-medium text-muted-foreground">
+              Shadow
+            </label>
+
+            <div className="grid grid-cols-2 gap-2">
+              <InputGroup>
+                <InputGroupAddon align="inline-start">
+                  <IconRuler2 className="size-3.5" />
+                </InputGroupAddon>
+                <NumberInput
+                  value={style.dropShadow?.distance || 0}
+                  onChange={(val) => handleShadowUpdate({ distance: val })}
+                  className="p-0"
+                />
+              </InputGroup>
+
+              <InputGroup>
+                <InputGroupAddon align="inline-start">
+                  <IconRotate className="size-3.5" />
+                </InputGroupAddon>
+                <NumberInput
+                  value={Math.round(
+                    ((style.dropShadow?.angle || 0) * 180) / Math.PI
+                  )}
+                  onChange={(val) => handleShadowUpdate({ angle: val })}
+                  className="p-0"
+                />
+              </InputGroup>
+            </div>
+
+            <div className="flex gap-2">
+              <InputGroup className="flex-1">
+                <InputGroupAddon align="inline-start">
+                  <IconBlur className="size-3.5" />
+                </InputGroupAddon>
+                <NumberInput
+                  value={style.dropShadow?.blur || 0}
+                  onChange={(val) => handleShadowUpdate({ blur: val })}
+                  className="p-0"
+                />
+              </InputGroup>
+
+              <InputGroup className="flex-1">
+                <InputGroupAddon align="inline-start" className="relative p-0">
+                  <Popover modal={true}>
+                    <PopoverTrigger asChild>
+                      <InputGroupButton
+                        variant="ghost"
+                        size="icon-xs"
+                        className="h-full w-8"
+                      >
+                        <div
+                          className="h-4 w-4 border border-white/10 shadow-sm"
+                          style={{
+                            backgroundColor:
+                              style.dropShadow?.color || '#000000',
+                          }}
+                        />
+                      </InputGroupButton>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-3" align="start">
+                      <ColorPicker
+                        onChange={(colorValue) => {
+                          const hexColor = color.rgb(colorValue).hex();
+                          handleShadowUpdate({ color: hexColor });
+                        }}
+                        className="w-72 h-72 rounded-md border bg-background p-4 shadow-sm"
+                      >
+                        <ColorPickerSelection />
+                        <div className="flex items-center gap-4">
+                          <ColorPickerEyeDropper />
+                          <div className="grid w-full gap-1">
+                            <ColorPickerHue />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <ColorPickerOutput />
+                          <ColorPickerFormat />
+                        </div>
+                      </ColorPicker>
+                    </PopoverContent>
+                  </Popover>
+                </InputGroupAddon>
+                <InputGroupInput
+                  value={style.dropShadow?.color?.toUpperCase() || '#000000'}
+                  onChange={(e) =>
+                    handleShadowUpdate({ color: e.target.value })
+                  }
+                  className="text-sm p-0 text-[10px] font-mono"
+                />
+              </InputGroup>
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Stroke Section */}
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-            Stroke
-          </label>
-          <button className="text-muted-foreground hover:text-white transition-colors">
-            <IconMinus className="size-3" />
-          </button>
-        </div>
-
-        <div className="flex gap-2">
-          <InputGroup className="flex-2">
-            <InputGroupAddon align="inline-start" className="relative p-0">
-              <Popover modal={true}>
-                <PopoverTrigger asChild>
-                  <InputGroupButton
-                    variant="ghost"
-                    size="icon-xs"
-                    className="h-full w-8"
-                  >
-                    <div
-                      className="h-4 w-4 rounded-full border border-white/10 shadow-sm"
-                      style={{
-                        backgroundColor:
-                          (style.stroke?.color as string) || "#000000",
-                      }}
-                    />
-                  </InputGroupButton>
-                </PopoverTrigger>
-                <PopoverContent className="w-64 p-3" align="start">
-                  <ColorPicker
-                    onChange={(colorValue) => {
-                      const hexColor = color.rgb(colorValue).hex();
-                      handleStrokeUpdate({ color: hexColor });
-                    }}
-                    className="w-72 h-72 rounded-md border bg-background p-4 shadow-sm"
-                  >
-                    <ColorPickerSelection />
-                    <div className="flex items-center gap-4">
-                      <ColorPickerEyeDropper />
-                      <div className="grid w-full gap-1">
-                        <ColorPickerHue />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ColorPickerOutput />
-                      <ColorPickerFormat />
-                    </div>
-                  </ColorPicker>
-                </PopoverContent>
-              </Popover>
-            </InputGroupAddon>
-            <InputGroupInput
-              value={style.stroke?.color?.toUpperCase() || "#000000"}
-              onChange={(e) => handleStrokeUpdate({ color: e.target.value })}
-              className="text-sm p-0 text-[10px] font-mono"
-            />
-            <InputGroupAddon
-              align="inline-end"
-              className="border-l border-white/5 pl-2"
-            >
-              <span className="text-[10px]">100%</span>
-            </InputGroupAddon>
-          </InputGroup>
-
-          <InputGroup className="flex-1">
-            <InputGroupAddon align="inline-start">
-              <IconLineHeight className="size-3.5" />
-            </InputGroupAddon>
-            <NumberInput
-              value={style.stroke?.width || 0}
-              onChange={(val) => handleStrokeUpdate({ width: val })}
-              className="p-0"
-            />
-          </InputGroup>
-        </div>
-      </div>
-
-      {/* Shadow Section */}
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <label className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-            Shadow
-          </label>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <InputGroup>
-            <InputGroupAddon align="inline-start">
-              <IconRuler2 className="size-3.5" />
-            </InputGroupAddon>
-            <NumberInput
-              value={style.dropShadow?.distance || 0}
-              onChange={(val) => handleShadowUpdate({ distance: val })}
-              className="p-0"
-            />
-          </InputGroup>
-
-          <InputGroup>
-            <InputGroupAddon align="inline-start">
-              <IconRotate className="size-3.5" />
-            </InputGroupAddon>
-            <NumberInput
-              value={Math.round(
-                ((style.dropShadow?.angle || 0) * 180) / Math.PI,
-              )}
-              onChange={(val) => handleShadowUpdate({ angle: val })}
-              className="p-0"
-            />
-          </InputGroup>
-        </div>
-
-        <div className="flex gap-2">
-          <InputGroup className="flex-1">
-            <InputGroupAddon align="inline-start">
-              <IconBlur className="size-3.5" />
-            </InputGroupAddon>
-            <NumberInput
-              value={style.dropShadow?.blur || 0}
-              onChange={(val) => handleShadowUpdate({ blur: val })}
-              className="p-0"
-            />
-          </InputGroup>
-
-          <InputGroup className="flex-1">
-            <InputGroupAddon align="inline-start" className="relative p-0">
-              <Popover modal={true}>
-                <PopoverTrigger asChild>
-                  <InputGroupButton
-                    variant="ghost"
-                    size="icon-xs"
-                    className="h-full w-8"
-                  >
-                    <div
-                      className="h-4 w-4 border border-white/10 shadow-sm"
-                      style={{
-                        backgroundColor: style.dropShadow?.color || "#000000",
-                      }}
-                    />
-                  </InputGroupButton>
-                </PopoverTrigger>
-                <PopoverContent className="w-64 p-3" align="start">
-                  <ColorPicker
-                    onChange={(colorValue) => {
-                      const hexColor = color.rgb(colorValue).hex();
-                      handleShadowUpdate({ color: hexColor });
-                    }}
-                    className="w-72 h-72 rounded-md border bg-background p-4 shadow-sm"
-                  >
-                    <ColorPickerSelection />
-                    <div className="flex items-center gap-4">
-                      <ColorPickerEyeDropper />
-                      <div className="grid w-full gap-1">
-                        <ColorPickerHue />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <ColorPickerOutput />
-                      <ColorPickerFormat />
-                    </div>
-                  </ColorPicker>
-                </PopoverContent>
-              </Popover>
-            </InputGroupAddon>
-            <InputGroupInput
-              value={style.dropShadow?.color?.toUpperCase() || "#000000"}
-              onChange={(e) => handleShadowUpdate({ color: e.target.value })}
-              className="text-sm p-0 text-[10px] font-mono"
-            />
-          </InputGroup>
-        </div>
-      </div>
+      </PropertySection>
     </div>
   );
 }
