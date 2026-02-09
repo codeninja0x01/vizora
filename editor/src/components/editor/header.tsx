@@ -7,8 +7,16 @@ import { ExportModal } from './export-modal';
 import { LogoIcons } from '../shared/logos';
 import Link from 'next/link';
 import { Icons } from '../shared/icons';
-import { Keyboard, FilePlus, Download, Upload, Share2 } from 'lucide-react';
+import {
+  Keyboard,
+  FilePlus,
+  Download,
+  Upload,
+  Share2,
+  Layout,
+} from 'lucide-react';
 import { ShortcutsModal } from './shortcuts-modal';
+import { SaveTemplateDialog } from './save-template-dialog';
 import { useEffect } from 'react';
 import {
   DropdownMenu,
@@ -22,6 +30,7 @@ export default function Header() {
   const { toggleCopilot, isCopilotVisible } = usePanelStore();
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
+  const [isSaveTemplateOpen, setIsSaveTemplateOpen] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
 
@@ -177,6 +186,10 @@ export default function Header() {
               <Upload className="mr-2 size-4" />
               <span>Import from JSON</span>
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setIsSaveTemplateOpen(true)}>
+              <Layout className="mr-2 size-4" />
+              <span>Save as Template</span>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={handleNew}>
               <FilePlus className="mr-2 size-4" />
               <span>Clear or New project</span>
@@ -260,6 +273,10 @@ export default function Header() {
       <ShortcutsModal
         open={isShortcutsModalOpen}
         onOpenChange={setIsShortcutsModalOpen}
+      />
+      <SaveTemplateDialog
+        open={isSaveTemplateOpen}
+        onOpenChange={setIsSaveTemplateOpen}
       />
     </header>
   );
