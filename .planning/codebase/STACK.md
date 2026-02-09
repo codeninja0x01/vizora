@@ -164,7 +164,7 @@
 
 - `editor/.next/` - Next.js build output
 - `docs/.next/` - Documentation build output
-- `packages/openvideo/dist/` - Library distribution (ES, UMD modules)
+- `packages/openvideo/dist/` - Library distribution (ES, UMD modules) — Note: `package.json` main/module/types now point to `src/index.ts` directly (development mode)
 - `packages/node/dist/` - Node.js renderer build
 
 ---

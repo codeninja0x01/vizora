@@ -120,16 +120,19 @@
   - Renders two input textures with interpolated progress
 
 **Animation:**
-- Purpose: Keyframe-based property animation (opacity, position, scale, rotation, etc.)
+- Purpose: Keyframe-based property animation (opacity, position, scale, rotation, mirror, etc.)
 - Types:
   - `GsapAnimation` - uses GSAP tweening engine
   - `KeyframeAnimation` - manual keyframe definition with easing
 - Location: `/home/solo/workspace/openvideo/packages/openvideo/src/animation/`
+- Animatable properties: x, y, scale, opacity, angle, blur, brightness, mirror
+- Mirror support (v0.1.2): `mirror` property (0 or 1) enables mirror-repeat texture tiling to fill edge gaps during animations that move/rotate/zoom clips beyond their bounds. Automatically reset to 0 when animation completes.
 
 **PixiSpriteRenderer:**
-- Purpose: Wrapper around Pixi.js Sprite for clip rendering
+- Purpose: Wrapper around Pixi.js Sprite/TilingSprite for clip rendering
 - Location: `/home/solo/workspace/openvideo/packages/openvideo/src/sprite/pixi-sprite-renderer.ts`
 - Manages sprite lifecycle, texture updates, transform application
+- Dynamically swaps between `Sprite` and `TilingSprite` based on `mirror` animation state — uses `addressMode: "mirror-repeat"` with 5x oversized tiling to cover rotation/zoom gaps
 
 ## Entry Points
 

@@ -96,6 +96,12 @@
 - Cause: No texture reuse between frames
 - Improvement path: Cache transition textures, update contents instead of recreating
 
+**Mirror Animation Sprite Swapping:**
+- Problem: When `mirror` animation property is active, `PixiSpriteRenderer` destroys and recreates sprites every time mirror state toggles (Sprite <-> TilingSprite swap). TilingSprite is sized at 5x the texture dimensions to cover rotation gaps, which increases GPU memory usage.
+- Files: `packages/openvideo/src/sprite/pixi-sprite-renderer.ts`, `packages/openvideo/src/compositor.ts`
+- Cause: Pixi.js `Sprite` and `TilingSprite` are different classes; no shared base that supports both modes
+- Improvement path: Cache both sprite types and toggle visibility instead of destroy/recreate; consider smaller tiling multiplier with dynamic sizing based on actual animation transform
+
 **Recursive async Operations:**
 - Problem: `waitEncoderQueue()` uses recursion for polling
 - Files: `packages/openvideo/src/compositor.ts` (lines 64-68)
