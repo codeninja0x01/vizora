@@ -97,6 +97,7 @@ model Organization {
   assets         Asset[]
   assetFolders   AssetFolder[]
   webhookConfigs WebhookConfig[]
+  batches        Batch[]
 }
 
 model Member {
@@ -181,6 +182,7 @@ model Template {
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   renders      Render[]
+  batches      Batch[]
 
   @@index([userId])
   @@index([organizationId])
@@ -195,6 +197,8 @@ model Render {
   templateId            String
   userId                String
   organizationId        String
+  batchId               String?
+  batchIndex            Int?
   mergeData             Json?
   outputUrl             String?
   errorCategory         String?
@@ -207,13 +211,35 @@ model Render {
   deletionWarningShown  Boolean   @default(false)
 
   // Relations
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  template     Template     @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template     Template      @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  batch        Batch?        @relation(fields: [batchId], references: [id])
 
   @@index([organizationId, status, queuedAt])
   @@index([organizationId, templateId])
   @@index([status, queuedAt])
+  @@index([batchId, status])
+}
+
+// Batch System (Bulk Generation)
+
+model Batch {
+  id             String    @id @default(cuid())
+  organizationId String
+  templateId     String
+  totalCount     Int
+  status         String    @default("queued") // queued, processing, completed, partial_failure, failed
+  createdAt      DateTime  @default(now())
+  completedAt    DateTime?
+
+  // Relations
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template     Template     @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  renders      Render[]
+
+  @@index([organizationId, status])
+  @@index([organizationId, createdAt])
 }
 
 // Asset Management
