@@ -1,0 +1,48 @@
+{
+  "name": "n8n-nodes-openvideo",
+  "version": "0.1.0",
+  "description": "n8n community node for OpenVideo - trigger video renders and receive completion events",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "openvideo",
+    "video",
+    "rendering"
+  ],
+  "license": "MIT",
+  "homepage": "https://openvideo.dev",
+  "author": {
+    "name": "OpenVideo",
+    "email": "support@openvideo.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openvideo/n8n-nodes-openvideo.git"
+  },
+  "main": "dist/nodes/OpenVideo/OpenVideo.node.js",
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/OpenVideoApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/OpenVideo/OpenVideo.node.js",
+      "dist/nodes/OpenVideo/OpenVideoTrigger.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "n8n-workflow": "^1.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
