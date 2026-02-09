@@ -30,6 +30,7 @@ model User {
   members   Member[]
   apiKeys   ApiKey[]
   templates Template[]
+  renders   Render[]
 }
 
 model Session {
@@ -90,6 +91,7 @@ model Organization {
   invitations Invitation[]
   apiKeys     ApiKey[]
   templates   Template[]
+  renders     Render[]
 }
 
 model Member {
@@ -173,8 +175,36 @@ model Template {
   // Relations
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  renders      Render[]
 
   @@index([userId])
   @@index([organizationId])
   @@index([category, isPublic, featured])
+}
+
+// Render System
+
+model Render {
+  id             String    @id @default(cuid())
+  status         String
+  templateId     String
+  userId         String
+  organizationId String
+  mergeData      Json?
+  outputUrl      String?
+  errorCategory  String?
+  errorMessage   String?
+  queuedAt       DateTime  @default(now())
+  startedAt      DateTime?
+  completedAt    DateTime?
+  failedAt       DateTime?
+
+  // Relations
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  template     Template     @relation(fields: [templateId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, status, queuedAt])
+  @@index([organizationId, templateId])
+  @@index([status, queuedAt])
 }
