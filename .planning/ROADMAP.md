@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Editor Polish** - Full visual overhaul with modern design system (completed 2026-02-09)
 - [x] **Phase 2: Foundation & Auth** - Multi-tenant infrastructure with authentication (completed 2026-02-09)
-- [ ] **Phase 3: Template System** - Template CRUD with merge fields and validation
+- [x] **Phase 3: Template System** - Template CRUD with merge fields and validation (completed 2026-02-09)
 - [ ] **Phase 4: Async Rendering** - Queue-based rendering with worker processes
 - [ ] **Phase 5: Render Progress & History** - Real-time updates and dashboard integration
 - [ ] **Phase 6: Storage Integration** - Asset uploads and video delivery via R2
@@ -98,12 +98,12 @@ Plans:
 **Plans**: 6 plans
 
 Plans:
-- [ ] 03-01-PLAN.md -- Template Prisma model, TypeScript types, and Zod schema builder
-- [ ] 03-02-PLAN.md -- Template CRUD server actions and merge field extraction logic
-- [ ] 03-03-PLAN.md -- Editor Save-as-Template flow and template mode with merge field marking
-- [ ] 03-04-PLAN.md -- Dashboard My Templates page with card grid and navigation
-- [ ] 03-05-PLAN.md -- Template gallery with category filtering and detail/preview pages
-- [ ] 03-06-PLAN.md -- Template cloning flow and REST API validation endpoint
+- [x] 03-01-PLAN.md -- Template Prisma model, TypeScript types, and Zod schema builder
+- [x] 03-02-PLAN.md -- Template CRUD server actions and merge field extraction logic
+- [x] 03-03-PLAN.md -- Editor Save-as-Template flow and template mode with merge field marking
+- [x] 03-04-PLAN.md -- Dashboard My Templates page with card grid and navigation
+- [x] 03-05-PLAN.md -- Template gallery with category filtering and detail/preview pages
+- [x] 03-06-PLAN.md -- Template cloning flow and REST API validation endpoint
 
 ---
 
@@ -278,7 +278,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 |-------|----------------|--------|-----------|
 | 1. Editor Polish | 6/6 | ✓ Complete | 2026-02-09 |
 | 2. Foundation & Auth | 5/5 | ✓ Complete | 2026-02-09 |
-| 3. Template System | 0/6 | Planned | - |
+| 3. Template System | 6/6 | ✓ Complete | 2026-02-09 |
 | 4. Async Rendering | 0/TBD | Not started | - |
 | 5. Render Progress & History | 0/TBD | Not started | - |
 | 6. Storage Integration | 0/TBD | Not started | - |
