@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Layers } from 'lucide-react';
+import { Layers, FileSpreadsheet } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import type { TemplateCategory } from '@/types/template';
 import { TEMPLATE_CATEGORIES } from '@/types/template';
 import type { getTemplates } from './actions';
@@ -79,12 +80,25 @@ export function TemplateCard({ template }: TemplateCardProps) {
             )}
           </div>
 
-          {/* Last updated time and delete button */}
+          {/* Last updated time and action buttons */}
           <div className="flex items-center justify-between">
             <p className="text-xs text-muted-foreground">
               {formatRelativeTime(template.updatedAt)}
             </p>
-            <div onClick={(e) => e.preventDefault()}>
+            <div
+              className="flex items-center gap-2"
+              onClick={(e) => e.preventDefault()}
+            >
+              <Link href={`/dashboard/bulk-generate?templateId=${template.id}`}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="size-8 p-0"
+                  title="Bulk Generate"
+                >
+                  <FileSpreadsheet className="size-4" />
+                </Button>
+              </Link>
               <DeleteButton
                 templateId={template.id}
                 templateName={template.name}
