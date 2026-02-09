@@ -145,6 +145,58 @@ export function RenderEventProvider({ children }: RenderEventProviderProps) {
         });
       });
 
+      eventSource.addEventListener('batch.progress', (event) => {
+        if (!mounted) return;
+
+        // Don't show toast for batch progress updates (too noisy)
+        // The render-list component will handle state updates via useRenderEvents
+      });
+
+      eventSource.addEventListener('batch.completed', (event) => {
+        if (!mounted) return;
+
+        const data = JSON.parse(event.data);
+        const batchProgress = data.batchProgress;
+
+        if (batchProgress) {
+          const { completed, failed, total } = batchProgress;
+          const batchId = data.batchId;
+
+          if (failed === 0) {
+            // All renders succeeded
+            toast.success(
+              `Batch complete: ${completed}/${total} renders finished`,
+              {
+                id: `batch-complete-${batchId}`,
+                duration: 5000,
+                action: {
+                  label: 'View',
+                  onClick: () => {
+                    window.location.href = '/dashboard/renders';
+                  },
+                },
+              }
+            );
+            playCompletionSound(); // Reuse existing Web Audio completion sound
+          } else {
+            // Some renders failed
+            toast.error(
+              `Batch finished: ${completed} completed, ${failed} failed out of ${total}`,
+              {
+                id: `batch-partial-${batchId}`,
+                duration: 10000,
+                action: {
+                  label: 'View details',
+                  onClick: () => {
+                    window.location.href = '/dashboard/renders';
+                  },
+                },
+              }
+            );
+          }
+        }
+      });
+
       eventSource.onerror = () => {
         if (!mounted) return;
 
