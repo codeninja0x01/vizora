@@ -4,10 +4,11 @@ import { useState, useEffect, useMemo } from 'react';
 import { Video, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { RenderCard } from '@/components/render/render-card';
+import { BatchCard } from '@/components/render/batch-card';
 import { useRenderEvents } from '@/hooks/use-render-events';
 import { useRenderFilters } from '@/hooks/use-render-filters';
 import { RenderFilters } from './render-filters';
-import { getRenders } from './actions';
+import { getRenders, getBatches } from './actions';
 
 interface RenderListProps {
   initialRenders: Awaited<ReturnType<typeof getRenders>>;
@@ -24,6 +25,9 @@ interface RenderListProps {
  */
 export function RenderList({ initialRenders }: RenderListProps) {
   const [renders, setRenders] = useState(initialRenders.items);
+  const [batches, setBatches] = useState<
+    Awaited<ReturnType<typeof getBatches>>
+  >([]);
   const [hasMore, setHasMore] = useState(initialRenders.hasMore);
   const [nextCursor, setNextCursor] = useState(initialRenders.nextCursor);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -90,6 +94,54 @@ export function RenderList({ initialRenders }: RenderListProps) {
           );
         }
         break;
+
+      case 'batch.progress':
+        // Update batch progress in state
+        if (lastEvent.data?.batchId && lastEvent.data?.batchProgress) {
+          setBatches((prev) =>
+            prev.map((b) =>
+              b.id === lastEvent.data!.batchId
+                ? {
+                    ...b,
+                    progress: {
+                      queued: lastEvent.data!.batchProgress!.queued,
+                      processing: lastEvent.data!.batchProgress!.processing,
+                      completed: lastEvent.data!.batchProgress!.completed,
+                      failed: lastEvent.data!.batchProgress!.failed,
+                    },
+                  }
+                : b
+            )
+          );
+        }
+        break;
+
+      case 'batch.completed':
+        // Update batch status in state
+        if (lastEvent.data?.batchId && lastEvent.data?.batchProgress) {
+          setBatches((prev) =>
+            prev.map((b) =>
+              b.id === lastEvent.data!.batchId
+                ? {
+                    ...b,
+                    status: (lastEvent.data!.batchProgress!.failed === 0
+                      ? 'completed'
+                      : lastEvent.data!.batchProgress!.completed === 0
+                        ? 'failed'
+                        : 'partial_failure') as any,
+                    completedAt: new Date().toISOString(),
+                    progress: {
+                      queued: lastEvent.data!.batchProgress!.queued,
+                      processing: lastEvent.data!.batchProgress!.processing,
+                      completed: lastEvent.data!.batchProgress!.completed,
+                      failed: lastEvent.data!.batchProgress!.failed,
+                    },
+                  }
+                : b
+            )
+          );
+        }
+        break;
     }
   }, [lastEvent]);
 
@@ -98,10 +150,14 @@ export function RenderList({ initialRenders }: RenderListProps) {
     const refetch = async () => {
       setIsRefetching(true);
       try {
-        const result = await getRenders({ status, search });
-        setRenders(result.items);
-        setHasMore(result.hasMore);
-        setNextCursor(result.nextCursor);
+        const [rendersResult, batchesResult] = await Promise.all([
+          getRenders({ status, search }),
+          getBatches({ status }),
+        ]);
+        setRenders(rendersResult.items);
+        setBatches(batchesResult);
+        setHasMore(rendersResult.hasMore);
+        setNextCursor(rendersResult.nextCursor);
       } catch (error) {
         console.error('[RenderList] Failed to refetch renders:', error);
       } finally {
@@ -129,16 +185,55 @@ export function RenderList({ initialRenders }: RenderListProps) {
     }
   };
 
+  // Filter standalone renders (exclude batch renders)
+  const standaloneRenders = useMemo(() => {
+    return renders.filter((r) => !r.batchId);
+  }, [renders]);
+
+  // Merge batches and standalone renders, sorted by date
+  const mergedItems = useMemo(() => {
+    const items: Array<
+      | { type: 'render'; data: (typeof renders)[0] }
+      | { type: 'batch'; data: (typeof batches)[0] }
+    > = [
+      ...standaloneRenders.map((r) => ({ type: 'render' as const, data: r })),
+      ...batches.map((b) => ({ type: 'batch' as const, data: b })),
+    ];
+
+    // Sort by createdAt descending
+    return items.sort(
+      (a, b) =>
+        new Date(b.data.createdAt).getTime() -
+        new Date(a.data.createdAt).getTime()
+    );
+  }, [standaloneRenders, batches]);
+
   // Count expiring renders (deletionWarningShown = true)
   const expiringCount = useMemo(() => {
-    return renders.filter(
+    return standaloneRenders.filter(
       (r) =>
         r.status === 'completed' &&
         r.deletionWarningShown &&
         r.expiresAt &&
         new Date(r.expiresAt) > new Date()
     ).length;
-  }, [renders]);
+  }, [standaloneRenders]);
+
+  // Refetch handler for batch updates
+  const handleBatchUpdate = () => {
+    // Trigger a refetch by updating status (will trigger the useEffect)
+    setIsRefetching(true);
+    getBatches({ status })
+      .then((result) => {
+        setBatches(result);
+      })
+      .catch((error) => {
+        console.error('[RenderList] Failed to refetch batches:', error);
+      })
+      .finally(() => {
+        setIsRefetching(false);
+      });
+  };
 
   return (
     <div className="space-y-6">
@@ -163,7 +258,7 @@ export function RenderList({ initialRenders }: RenderListProps) {
       )}
 
       {/* Render list or empty state */}
-      {renders.length === 0 ? (
+      {mergedItems.length === 0 ? (
         <div className="rounded-xl border border-border/50 bg-card/40 p-12 text-center">
           <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-muted/50">
             <Video className="size-7 text-muted-foreground/40" />
@@ -177,9 +272,17 @@ export function RenderList({ initialRenders }: RenderListProps) {
         </div>
       ) : (
         <div className={`grid gap-4 ${isRefetching ? 'opacity-50' : ''}`}>
-          {renders.map((render) => (
-            <RenderCard key={render.id} render={render} />
-          ))}
+          {mergedItems.map((item) =>
+            item.type === 'batch' ? (
+              <BatchCard
+                key={item.data.id}
+                batch={item.data}
+                onUpdate={handleBatchUpdate}
+              />
+            ) : (
+              <RenderCard key={item.data.id} render={item.data} />
+            )
+          )}
         </div>
       )}
 

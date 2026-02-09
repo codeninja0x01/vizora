@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState } from 'react';
 
 interface RenderEvent {
-  type: 'connected' | 'progress' | 'completed' | 'failed';
+  type:
+    | 'connected'
+    | 'progress'
+    | 'completed'
+    | 'failed'
+    | 'batch.progress'
+    | 'batch.completed';
   renderId?: string;
   activeCount?: number;
   data?: {
@@ -11,6 +17,15 @@ interface RenderEvent {
     outputUrl?: string;
     errorCategory?: string;
     errorMessage?: string;
+    batchId?: string;
+    batchProgress?: {
+      total: number;
+      queued: number;
+      processing: number;
+      completed: number;
+      failed: number;
+      percentComplete: number;
+    };
   };
 }
 
