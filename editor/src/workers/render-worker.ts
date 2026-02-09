@@ -11,6 +11,7 @@ import type { WebhookPayload } from '@/lib/webhooks/types';
 import { randomUUID } from 'node:crypto';
 import { R2StorageService } from '@/lib/r2';
 import { config } from '@/lib/config';
+import { refundCredits } from '@/lib/credits';
 
 // Dynamic import for ESM package
 let Renderer: any;
@@ -277,6 +278,31 @@ async function processRenderJob(job: Job) {
         failedAt: new Date().toISOString(),
       },
     });
+
+    // Auto-refund credits for system failures (not user errors)
+    // Refund for INTERNAL_ERROR and RENDER_TIMEOUT, but not for VALIDATION_ERROR or RESOURCE_MISSING
+    if (
+      (category === 'INTERNAL_ERROR' || category === 'RENDER_TIMEOUT') &&
+      job.data.creditsDeducted &&
+      job.data.creditsDeducted > 0
+    ) {
+      try {
+        await refundCredits(
+          job.data.organizationId,
+          job.data.creditsDeducted,
+          job.data.renderId
+        );
+        console.log(
+          `[Worker] Refunded ${job.data.creditsDeducted} credits for system failure on render ${job.data.renderId}`
+        );
+      } catch (refundError) {
+        // Log but don't fail - credit refund is best-effort
+        console.error(
+          `[Worker] Failed to refund credits for render ${job.data.renderId}:`,
+          refundError
+        );
+      }
+    }
 
     throw error; // Re-throw so BullMQ marks job as failed
   }
