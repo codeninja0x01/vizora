@@ -92,7 +92,7 @@ export default function Header() {
       }, 100);
     } catch (error) {
       Log.error('Export to JSON error:', error);
-      alert('Failed to export to JSON: ' + (error as Error).message);
+      alert(`Failed to export to JSON: ${(error as Error).message}`);
     }
   };
 
@@ -141,7 +141,7 @@ export default function Header() {
         await studio.loadFromJSON(validJson);
       } catch (error) {
         Log.error('Load from JSON error:', error);
-        alert('Failed to load from JSON: ' + (error as Error).message);
+        alert(`Failed to load from JSON: ${(error as Error).message}`);
       } finally {
         document.body.removeChild(input);
       }
