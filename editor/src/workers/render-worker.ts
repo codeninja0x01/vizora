@@ -6,12 +6,57 @@ import { formatRenderError } from '@/lib/error-categorization';
 import type { MergeField } from '@/types/template';
 import { mkdir } from 'fs/promises';
 import { join } from 'path';
+import { webhookQueue } from '@/lib/webhooks/queue';
+import type { WebhookPayload } from '@/lib/webhooks/types';
+import { randomUUID } from 'node:crypto';
 
 // Dynamic import for ESM package
 let Renderer: any;
 
 const RENDER_OUTPUT_DIR = process.env.RENDER_OUTPUT_DIR || '/tmp/renders';
 const RENDER_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes per user decision
+
+/**
+ * Enqueue webhook delivery jobs for all enabled webhooks in the organization
+ * Fire-and-forget: webhook failures must not affect render outcomes
+ */
+async function enqueueWebhooks(
+  renderId: string,
+  organizationId: string,
+  payload: WebhookPayload
+): Promise<void> {
+  try {
+    // Find all enabled webhooks for this organization
+    const webhooks = await prisma.webhookConfig.findMany({
+      where: { organizationId, enabled: true },
+      select: { id: true },
+    });
+
+    if (webhooks.length === 0) return;
+
+    // Enqueue a delivery job for each webhook
+    const jobs = webhooks.map((webhook) => ({
+      name: 'deliver-webhook',
+      data: {
+        webhookConfigId: webhook.id,
+        renderId,
+        webhookId: `whk_${randomUUID().replace(/-/g, '')}`,
+        payload,
+      },
+    }));
+
+    await webhookQueue.addBulk(jobs);
+    console.log(
+      `[Worker] Enqueued ${jobs.length} webhook(s) for render ${renderId}`
+    );
+  } catch (error) {
+    // Log but do NOT throw — webhook failure must not affect render status
+    console.error(
+      `[Worker] Failed to enqueue webhooks for render ${renderId}:`,
+      error
+    );
+  }
+}
 
 /**
  * Job processor function for render jobs
@@ -118,6 +163,20 @@ async function processRenderJob(job: Job) {
       `[Worker] Render ${job.data.renderId} completed -> ${outputUrl}`
     );
 
+    // Enqueue webhook notifications
+    await enqueueWebhooks(job.data.renderId, job.data.organizationId, {
+      type: 'render.completed',
+      timestamp: new Date().toISOString(),
+      data: {
+        type: 'render.completed',
+        renderId: job.data.renderId,
+        templateId: job.data.templateId,
+        status: 'done',
+        outputUrl,
+        completedAt: new Date().toISOString(),
+      },
+    });
+
     // Return result for BullMQ's completed event (include userId for event routing)
     return { outputPath, outputUrl, userId: job.data.userId };
   } catch (error) {
@@ -134,6 +193,21 @@ async function processRenderJob(job: Job) {
     console.error(
       `[Worker] Render ${job.data.renderId} failed [${category}]: ${message}`
     );
+
+    // Enqueue webhook notifications for failure
+    await enqueueWebhooks(job.data.renderId, job.data.organizationId, {
+      type: 'render.failed',
+      timestamp: new Date().toISOString(),
+      data: {
+        type: 'render.failed',
+        renderId: job.data.renderId,
+        templateId: job.data.templateId,
+        status: 'failed',
+        error: { category, message },
+        failedAt: new Date().toISOString(),
+      },
+    });
+
     throw error; // Re-throw so BullMQ marks job as failed
   }
 }
