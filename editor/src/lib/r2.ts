@@ -1,4 +1,9 @@
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  PutBucketLifecycleConfigurationCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import mime from 'mime/lite';
 
@@ -94,6 +99,7 @@ export class R2StorageService {
 
     const presignedUrl = await getSignedUrl(this.client, command, {
       expiresIn: options.expiresIn ?? 3600,
+      signableHeaders: new Set(['content-type']),
     });
 
     return {
@@ -107,5 +113,36 @@ export class R2StorageService {
 
   getUrl(fileName: string): string {
     return `${this.cdn}/${fileName}`;
+  }
+
+  async deleteObject(key: string): Promise<void> {
+    await this.client.send(
+      new DeleteObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      })
+    );
+  }
+
+  async setupLifecycleRule(): Promise<void> {
+    await this.client.send(
+      new PutBucketLifecycleConfigurationCommand({
+        Bucket: this.bucketName,
+        LifecycleConfiguration: {
+          Rules: [
+            {
+              ID: 'delete-renders-after-30-days',
+              Status: 'Enabled',
+              Filter: { Prefix: 'renders/' },
+              Expiration: { Days: 30 },
+            },
+          ],
+        },
+      })
+    );
+  }
+
+  getCdnUrl(key: string): string {
+    return this.getUrl(key);
   }
 }
