@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Editor Polish** - Full visual overhaul with modern design system (completed 2026-02-09)
 - [x] **Phase 2: Foundation & Auth** - Multi-tenant infrastructure with authentication (completed 2026-02-09)
 - [x] **Phase 3: Template System** - Template CRUD with merge fields and validation (completed 2026-02-09)
-- [ ] **Phase 4: Async Rendering** - Queue-based rendering with worker processes
+- [x] **Phase 4: Async Rendering** - Queue-based rendering with worker processes (completed 2026-02-09)
 - [ ] **Phase 5: Render Progress & History** - Real-time updates and dashboard integration
 - [ ] **Phase 6: Storage Integration** - Asset uploads and video delivery via R2
 - [ ] **Phase 7: Webhooks** - Callback system for render completion
@@ -124,9 +124,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md -- Queue infrastructure (Redis, BullMQ, Render model, error types)
-- [ ] 04-02-PLAN.md -- Render API endpoints (submit, poll, list with filtering)
-- [ ] 04-03-PLAN.md -- Render worker process (BullMQ worker with Renderer integration)
+- [x] 04-01-PLAN.md -- Queue infrastructure (Redis, BullMQ, Render model, error types)
+- [x] 04-02-PLAN.md -- Render API endpoints (submit, poll, list with filtering)
+- [x] 04-03-PLAN.md -- Render worker process (BullMQ worker with Renderer integration)
 
 ---
 
@@ -284,7 +284,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 1. Editor Polish | 6/6 | ✓ Complete | 2026-02-09 |
 | 2. Foundation & Auth | 5/5 | ✓ Complete | 2026-02-09 |
 | 3. Template System | 6/6 | ✓ Complete | 2026-02-09 |
-| 4. Async Rendering | 0/3 | Planned | - |
+| 4. Async Rendering | 3/3 | ✓ Complete | 2026-02-09 |
 | 5. Render Progress & History | 0/TBD | Not started | - |
 | 6. Storage Integration | 0/TBD | Not started | - |
 | 7. Webhooks | 0/TBD | Not started | - |
