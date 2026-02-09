@@ -1,22 +1,27 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { MergeFieldForm } from '@/components/merge-field-form';
 import { TemplatePreviewPlayer } from '@/components/template-preview-player';
 import { applyMergeData } from '@/lib/merge-fields';
 import type { Template } from '@/types/template';
-import { Copy, Edit } from 'lucide-react';
+import { Copy, Edit, Loader2 } from 'lucide-react';
+import { cloneTemplate } from './clone-action';
+import { toast } from 'sonner';
 
 interface TemplateDetailClientProps {
   template: Template;
 }
 
 export function TemplateDetailClient({ template }: TemplateDetailClientProps) {
+  const router = useRouter();
   const [previewProjectData, setPreviewProjectData] = useState<
     Record<string, unknown>
   >(template.projectData);
+  const [isCloning, setIsCloning] = useState(false);
 
   // Handle merge field form changes
   const handleMergeDataChange = useCallback(
@@ -32,6 +37,29 @@ export function TemplateDetailClient({ template }: TemplateDetailClientProps) {
     },
     [template.projectData, template.mergeFields]
   );
+
+  // Handle template cloning
+  const handleClone = useCallback(async () => {
+    setIsCloning(true);
+
+    try {
+      const result = await cloneTemplate(template.id);
+
+      // Show success toast
+      toast.success('Template cloned! Customize it in the editor.');
+
+      // Redirect to editor with the cloned template
+      router.push(`/?templateId=${result.id}`);
+    } catch (error) {
+      // Show error toast
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : 'Failed to clone template. Please try again.'
+      );
+      setIsCloning(false);
+    }
+  }, [template.id, router]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,11 +108,23 @@ export function TemplateDetailClient({ template }: TemplateDetailClientProps) {
                 Actions
               </h3>
 
-              <Button className="w-full" size="lg" asChild>
-                <Link href={`/templates/${template.id}/clone`}>
-                  <Copy className="size-4 mr-2" />
-                  Clone to My Templates
-                </Link>
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={handleClone}
+                disabled={isCloning}
+              >
+                {isCloning ? (
+                  <>
+                    <Loader2 className="size-4 mr-2 animate-spin" />
+                    Cloning...
+                  </>
+                ) : (
+                  <>
+                    <Copy className="size-4 mr-2" />
+                    Clone to My Templates
+                  </>
+                )}
               </Button>
 
               <Button variant="outline" className="w-full" size="lg" asChild>
