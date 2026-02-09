@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { IconShare } from '@tabler/icons-react';
 import { Button } from '@/components/ui/button';
 import { useStudioStore } from '@/stores/studio-store';
 import { usePanelStore } from '@/stores/panel-store';
@@ -8,14 +7,7 @@ import { ExportModal } from './export-modal';
 import { LogoIcons } from '../shared/logos';
 import Link from 'next/link';
 import { Icons } from '../shared/icons';
-import {
-  Keyboard,
-  FileJson,
-  FilePlus,
-  Download,
-  Upload,
-  MessageSquare,
-} from 'lucide-react';
+import { Keyboard, FilePlus, Download, Upload, Share2 } from 'lucide-react';
 import { ShortcutsModal } from './shortcuts-modal';
 import { useEffect } from 'react';
 import {
@@ -160,113 +152,109 @@ export default function Header() {
   };
 
   return (
-    <header className="relative flex h-[52px] w-full shrink-0 items-center justify-between px-4 bg-card z-10">
+    <header className="relative flex h-[52px] w-full shrink-0 items-center justify-between px-4 bg-[var(--panel-background)] border-b border-white/5">
       {/* Left Section */}
-      <div className="flex items-center gap-2">
-        <div className="pointer-events-auto flex h-9 w-9 bg-primary/20 items-center justify-center rounded-md ">
+      <div className="flex items-center gap-1">
+        <div className="pointer-events-auto flex size-8 bg-accent-purple-500/15 items-center justify-center rounded-lg">
           <LogoIcons.scenify width={24} />
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost">File</Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-48">
+          <DropdownMenuContent align="start" className="w-48 bg-popover">
             <DropdownMenuItem onClick={handleExportJSON}>
-              <Download className="mr-2 h-4 w-4" />
+              <Download className="mr-2 size-4" />
               <span>Export (to JSON)</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleImportJSON}>
-              <Upload className="mr-2 h-4 w-4" />
+              <Upload className="mr-2 size-4" />
               <span>Import from JSON</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleNew}>
-              <FilePlus className="mr-2 h-4 w-4" />
+              <FilePlus className="mr-2 size-4" />
               <span>Clear or New project</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className=" pointer-events-auto flex h-10 items-center px-1.5">
+        <div className="pointer-events-auto flex h-10 items-center px-1.5">
           <Button
             onClick={() => studio?.undo()}
             disabled={!canUndo}
             variant="ghost"
             size="icon"
+            className="size-8"
           >
-            <Icons.undo className="size-5" />
+            <Icons.undo className="size-4" />
           </Button>
           <Button
             onClick={() => studio?.redo()}
             disabled={!canRedo}
-            className="text-muted-foreground"
             variant="ghost"
             size="icon"
+            className="size-8"
           >
-            <Icons.redo className="size-5" />
+            <Icons.redo className="size-4" />
           </Button>
         </div>
       </div>
 
       {/* Center Section */}
-      <div className="absolute text-sm font-medium left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute left-1/2 -translate-x-1/2 text-sm font-medium text-muted-foreground">
         Untitled video
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center gap-2">
-        <div className="flex items-center mr-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-muted-foreground hover:text-foreground"
-            onClick={() => setIsShortcutsModalOpen(true)}
-          >
-            <Keyboard className="size-5" />
-          </Button>
+      <div className="flex items-center gap-1.5">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
+          onClick={() => setIsShortcutsModalOpen(true)}
+        >
+          <Keyboard className="size-4" />
+        </Button>
 
-          <Button
-            size={'sm'}
-            variant="outline"
-            onClick={toggleCopilot}
-            className="h-7"
-            title="Toggle Chat Copilot"
-          >
-            <Icons.ai className="size-5" />
-            <span className="hidden md:block">AI Chat</span>
-          </Button>
-        </div>
+        <Button
+          variant={isCopilotVisible ? 'accent' : 'outline'}
+          onClick={toggleCopilot}
+          className="h-8 px-3 gap-1.5"
+          title="Toggle Chat Copilot"
+        >
+          <Icons.ai className="size-4" />
+          <span className="hidden md:block">AI Chat</span>
+        </Button>
+
         <Link href="https://discord.gg/SCfMrQx8kr" target="_blank">
-          <Button className="h-7 rounded-lg" variant={'outline'}>
-            <LogoIcons.discord className="w-6 h-6" />
-            <span className="hidden md:block">Join Us</span>
+          <Button className="size-8" variant="ghost" size="icon">
+            <LogoIcons.discord className="size-4" />
           </Button>
         </Link>
 
-        <ExportModal
-          open={isExportModalOpen}
-          onOpenChange={setIsExportModalOpen}
-        />
-        <ShortcutsModal
-          open={isShortcutsModalOpen}
-          onOpenChange={setIsShortcutsModalOpen}
-        />
-
-        <Button
-          className="flex h-7 gap-1 border border-border"
-          variant="outline"
-          size={'sm'}
-        >
-          <IconShare width={18} />{' '}
+        <Button variant="outline" className="h-8 px-3 rounded-lg gap-1.5">
+          <Share2 className="size-4" />
           <span className="hidden md:block">Share</span>
         </Button>
+
         <Button
-          size="sm"
-          className="gap-2 rounded-full"
+          variant="default"
+          className="h-8 px-4 rounded-lg font-medium gap-1.5"
           onClick={() => setIsExportModalOpen(true)}
         >
-          Download
+          <Download className="size-5" />
+          <span>Download</span>
         </Button>
       </div>
+
+      <ExportModal
+        open={isExportModalOpen}
+        onOpenChange={setIsExportModalOpen}
+      />
+      <ShortcutsModal
+        open={isShortcutsModalOpen}
+        onOpenChange={setIsShortcutsModalOpen}
+      />
     </header>
   );
 }
