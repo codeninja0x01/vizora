@@ -6,11 +6,12 @@ import { authClient } from '@/lib/auth-client';
 import { Github } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function SignupPage() {
   const router = useRouter();
+  const id = useId();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,11 +33,14 @@ export default function SignupPage() {
       if (result.error) {
         setError(result.error.message || 'Failed to sign up');
         toast.error(result.error.message || 'Failed to sign up');
-      } else {
+      } else if (result.data?.user && !result.data.user.emailVerified) {
         toast.success(
           'Account created! Check your email to verify your account.'
         );
         router.push('/verify-email');
+      } else {
+        toast.success('Account created!');
+        router.push('/dashboard');
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to sign up';
@@ -88,11 +92,14 @@ export default function SignupPage() {
 
       <form onSubmit={handleEmailSignUp} className="space-y-4">
         <div className="space-y-2">
-          <label htmlFor="name" className="text-sm font-medium text-foreground">
+          <label
+            htmlFor={`${id}-name`}
+            className="text-sm font-medium text-foreground"
+          >
             Full name
           </label>
           <Input
-            id="name"
+            id={`${id}-name`}
             type="text"
             placeholder="John Doe"
             value={name}
@@ -105,13 +112,13 @@ export default function SignupPage() {
 
         <div className="space-y-2">
           <label
-            htmlFor="email"
+            htmlFor={`${id}-email`}
             className="text-sm font-medium text-foreground"
           >
             Email
           </label>
           <Input
-            id="email"
+            id={`${id}-email`}
             type="email"
             placeholder="you@example.com"
             value={email}
@@ -124,13 +131,13 @@ export default function SignupPage() {
 
         <div className="space-y-2">
           <label
-            htmlFor="password"
+            htmlFor={`${id}-password`}
             className="text-sm font-medium text-foreground"
           >
             Password
           </label>
           <Input
-            id="password"
+            id={`${id}-password`}
             type="password"
             placeholder="••••••••"
             value={password}

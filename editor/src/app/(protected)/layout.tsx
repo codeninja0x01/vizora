@@ -1,4 +1,5 @@
 import { auth } from '@/lib/auth';
+import { prisma } from '@/lib/db';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { SignOutButton } from './sign-out-button';
@@ -14,6 +15,37 @@ export default async function ProtectedLayout({
 
   if (!session) {
     redirect('/login');
+  }
+
+  // Auto-create personal organization if user has none
+  if (!session.session.activeOrganizationId) {
+    const existingMember = await prisma.member.findFirst({
+      where: { userId: session.user.id },
+      include: { organization: true },
+    });
+
+    let orgId: string;
+    if (existingMember) {
+      orgId = existingMember.organizationId;
+    } else {
+      const slug = `personal-${session.user.id.slice(0, 8)}`;
+      const org = await prisma.organization.create({
+        data: {
+          name: `${session.user.name || session.user.email}'s Org`,
+          slug,
+          members: {
+            create: { userId: session.user.id, role: 'owner' },
+          },
+        },
+      });
+      orgId = org.id;
+    }
+
+    // Set as active organization on the session
+    await prisma.session.update({
+      where: { id: session.session.id },
+      data: { activeOrganizationId: orgId },
+    });
   }
 
   return (
