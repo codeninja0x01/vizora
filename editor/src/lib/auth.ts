@@ -16,7 +16,13 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
-    sendVerificationEmail: async ({ user, url }) => {
+    sendVerificationEmail: async ({
+      user,
+      url,
+    }: {
+      user: { email: string; name: string };
+      url: string;
+    }) => {
       const fromEmail =
         process.env.RESEND_FROM_EMAIL || 'noreply@openvideo.dev';
 
@@ -40,7 +46,13 @@ export const auth = betterAuth({
         `,
       });
     },
-    sendResetPassword: async ({ user, url }) => {
+    sendResetPassword: async ({
+      user,
+      url,
+    }: {
+      user: { email: string; name: string };
+      url: string;
+    }) => {
       const fromEmail =
         process.env.RESEND_FROM_EMAIL || 'noreply@openvideo.dev';
 
