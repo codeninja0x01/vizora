@@ -121,10 +121,12 @@ Plans:
   4. Render workers run as separate processes from web app and can scale horizontally
   5. Completed renders return MP4 video URL, failed renders return detailed error messages
 
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- Plans to be defined during `/gsd:plan-phase 4`
+- [ ] 04-01-PLAN.md -- Queue infrastructure (Redis, BullMQ, Render model, error types)
+- [ ] 04-02-PLAN.md -- Render API endpoints (submit, poll, list with filtering)
+- [ ] 04-03-PLAN.md -- Render worker process (BullMQ worker with Renderer integration)
 
 ---
 
@@ -279,7 +281,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 1. Editor Polish | 6/6 | ✓ Complete | 2026-02-09 |
 | 2. Foundation & Auth | 5/5 | ✓ Complete | 2026-02-09 |
 | 3. Template System | 6/6 | ✓ Complete | 2026-02-09 |
-| 4. Async Rendering | 0/TBD | Not started | - |
+| 4. Async Rendering | 0/3 | Planned | - |
 | 5. Render Progress & History | 0/TBD | Not started | - |
 | 6. Storage Integration | 0/TBD | Not started | - |
 | 7. Webhooks | 0/TBD | Not started | - |
