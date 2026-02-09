@@ -62,6 +62,7 @@
     "next": "16.0.7",
     "next-themes": "^0.4.6",
     "nuqs": "^2.8.8",
+    "openai": "^6.18.0",
     "openvideo": "workspace:*",
     "opfs-tools": "^0.7.2",
     "papaparse": "^5.5.3",
