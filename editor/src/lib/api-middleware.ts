@@ -1,6 +1,9 @@
 import { validateApiKey, type ApiKeyContext } from './api-keys';
 import { rateLimit, formatRateLimitHeaders } from './ratelimit';
 
+// Re-export ApiKeyContext for convenience
+export type { ApiKeyContext } from './api-keys';
+
 export type AuthenticatedHandler = (
   request: Request,
   context: ApiKeyContext
