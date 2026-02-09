@@ -144,63 +144,65 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| AUTH-03 | — | Pending |
-| AUTH-04 | — | Pending |
-| AUTH-05 | — | Pending |
-| AUTH-06 | — | Pending |
-| AUTH-07 | — | Pending |
-| TMPL-01 | — | Pending |
-| TMPL-02 | — | Pending |
-| TMPL-03 | — | Pending |
-| TMPL-04 | — | Pending |
-| TMPL-05 | — | Pending |
-| TMPL-06 | — | Pending |
-| TMPL-07 | — | Pending |
-| TMPL-08 | — | Pending |
-| RNDR-01 | — | Pending |
-| RNDR-02 | — | Pending |
-| RNDR-03 | — | Pending |
-| RNDR-04 | — | Pending |
-| RNDR-05 | — | Pending |
-| RNDR-06 | — | Pending |
-| RNDR-07 | — | Pending |
-| STOR-01 | — | Pending |
-| STOR-02 | — | Pending |
-| STOR-03 | — | Pending |
-| STOR-04 | — | Pending |
-| WHBK-01 | — | Pending |
-| WHBK-02 | — | Pending |
-| WHBK-03 | — | Pending |
-| WHBK-04 | — | Pending |
-| WHBK-05 | — | Pending |
-| WHBK-06 | — | Pending |
-| WHBK-07 | — | Pending |
-| BULK-01 | — | Pending |
-| BULK-02 | — | Pending |
-| BULK-03 | — | Pending |
-| BULK-04 | — | Pending |
-| BILL-01 | — | Pending |
-| BILL-02 | — | Pending |
-| BILL-03 | — | Pending |
-| BILL-04 | — | Pending |
-| BILL-05 | — | Pending |
-| BILL-06 | — | Pending |
-| AI-01 | — | Pending |
-| AI-02 | — | Pending |
-| AI-03 | — | Pending |
-| AI-04 | — | Pending |
-| AI-05 | — | Pending |
-| DASH-01 | — | Pending |
-| DASH-02 | — | Pending |
-| DASH-03 | — | Pending |
+| AUTH-01 | Phase 1 | Pending |
+| AUTH-02 | Phase 1 | Pending |
+| AUTH-03 | Phase 1 | Pending |
+| AUTH-04 | Phase 1 | Pending |
+| AUTH-05 | Phase 1 | Pending |
+| AUTH-06 | Phase 1 | Pending |
+| AUTH-07 | Phase 1 | Pending |
+| TMPL-01 | Phase 2 | Pending |
+| TMPL-02 | Phase 2 | Pending |
+| TMPL-03 | Phase 2 | Pending |
+| TMPL-04 | Phase 2 | Pending |
+| TMPL-05 | Phase 2 | Pending |
+| TMPL-06 | Phase 2 | Pending |
+| TMPL-07 | Phase 2 | Pending |
+| TMPL-08 | Phase 2 | Pending |
+| RNDR-01 | Phase 3 | Pending |
+| RNDR-02 | Phase 3 | Pending |
+| RNDR-03 | Phase 3 | Pending |
+| RNDR-04 | Phase 3 | Pending |
+| RNDR-05 | Phase 4 | Pending |
+| RNDR-06 | Phase 3 | Pending |
+| RNDR-07 | Phase 3 | Pending |
+| STOR-01 | Phase 5 | Pending |
+| STOR-02 | Phase 5 | Pending |
+| STOR-03 | Phase 5 | Pending |
+| STOR-04 | Phase 5 | Pending |
+| WHBK-01 | Phase 6 | Pending |
+| WHBK-02 | Phase 6 | Pending |
+| WHBK-03 | Phase 6 | Pending |
+| WHBK-04 | Phase 6 | Pending |
+| WHBK-05 | Phase 9 | Pending |
+| WHBK-06 | Phase 9 | Pending |
+| WHBK-07 | Phase 9 | Pending |
+| BULK-01 | Phase 7 | Pending |
+| BULK-02 | Phase 7 | Pending |
+| BULK-03 | Phase 7 | Pending |
+| BULK-04 | Phase 7 | Pending |
+| BILL-01 | Phase 8 | Pending |
+| BILL-02 | Phase 8 | Pending |
+| BILL-03 | Phase 8 | Pending |
+| BILL-04 | Phase 8 | Pending |
+| BILL-05 | Phase 8 | Pending |
+| BILL-06 | Phase 8 | Pending |
+| AI-01 | Phase 10 | Pending |
+| AI-02 | Phase 10 | Pending |
+| AI-03 | Phase 10 | Pending |
+| AI-04 | Phase 10 | Pending |
+| AI-05 | Phase 10 | Pending |
+| DASH-01 | Phase 2 | Pending |
+| DASH-02 | Phase 4 | Pending |
+| DASH-03 | Phase 8 | Pending |
 
 **Coverage:**
-- v1 requirements: 42 total
-- Mapped to phases: 0
-- Unmapped: 42 (pending roadmap creation)
+- v1 requirements: 51 total
+- Mapped to phases: 51
+- Unmapped: 0
+
+**Coverage validated:** All 51 v1 requirements mapped to exactly one phase.
 
 ---
 *Requirements defined: 2026-02-09*
-*Last updated: 2026-02-09 after initial definition*
+*Last updated: 2026-02-09 after roadmap creation*
