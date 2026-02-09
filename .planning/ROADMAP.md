@@ -33,6 +33,10 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 **Requirements**: EDIT-01, EDIT-02, EDIT-03, EDIT-04, EDIT-05, EDIT-06, EDIT-07
 
+**Constraints**:
+- MUST invoke `/frontend-design` skill before starting any UI implementation work in this phase
+- All UI work in this phase follows the design direction established by the frontend-design skill
+
 **Success Criteria** (what must be TRUE):
   1. Editor uses cohesive design system with consistent color palette, typography, and spacing across all panels
   2. All panels (timeline, properties, canvas, layers) have clear visual hierarchy with refined layout
