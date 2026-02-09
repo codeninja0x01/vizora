@@ -88,6 +88,24 @@ model Organization {
   createdAt DateTime @default(now())
   metadata  String?
 
+  // Billing
+  stripeCustomerId    String?   @unique
+  stripeSubscriptionId String?  @unique
+  tier                String    @default("free") // free, pro, enterprise
+  subscriptionStatus  String?   // active, past_due, canceled, incomplete
+  cancelAtPeriodEnd   Boolean   @default(false)
+
+  // Credit tracking
+  creditBalance       Int       @default(0)
+  monthlyAllotment    Int       @default(3000) // Free tier default
+  billingCycleStart   DateTime?
+  billingCycleEnd     DateTime?
+  lastCreditReset     DateTime?
+
+  // Low credit warnings
+  lowCreditWarningShown Boolean @default(false)
+  lowCreditEmailSentAt  DateTime?
+
   // Relations
   members        Member[]
   invitations    Invitation[]
@@ -98,6 +116,8 @@ model Organization {
   assetFolders   AssetFolder[]
   webhookConfigs WebhookConfig[]
   batches        Batch[]
+  creditTransactions CreditTransaction[]
+  subscriptionEvents SubscriptionEvent[]
 }
 
 model Member {
@@ -240,6 +260,39 @@ model Batch {
 
   @@index([organizationId, status])
   @@index([organizationId, createdAt])
+}
+
+// Billing System
+
+model CreditTransaction {
+  id             String   @id @default(cuid())
+  organizationId String
+  amount         Int      // Negative for deductions, positive for additions
+  balanceBefore  Int
+  balanceAfter   Int
+  reason         String   // "render", "subscription_renewal", "credit_pack", "rollover", "refund_system_failure"
+  renderId       String?  // Null for non-render transactions
+  metadata       Json?    // Duration, pack size, rate used, etc.
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+  @@index([reason])
+}
+
+model SubscriptionEvent {
+  id              String   @id @default(cuid())
+  organizationId  String
+  stripeEventId   String   @unique // For idempotency
+  eventType       String   // checkout.session.completed, invoice.paid, etc.
+  processed       Boolean  @default(false)
+  metadata        Json?
+  createdAt       DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
 }
 
 // Asset Management
