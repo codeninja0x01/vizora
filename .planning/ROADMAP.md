@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Foundation & Auth** - Multi-tenant infrastructure with authentication (completed 2026-02-09)
 - [x] **Phase 3: Template System** - Template CRUD with merge fields and validation (completed 2026-02-09)
 - [x] **Phase 4: Async Rendering** - Queue-based rendering with worker processes (completed 2026-02-09)
-- [ ] **Phase 5: Render Progress & History** - Real-time updates and dashboard integration
+- [x] **Phase 5: Render Progress & History** - Real-time updates and dashboard integration (completed 2026-02-09)
 - [ ] **Phase 6: Storage Integration** - Asset uploads and video delivery via R2
 - [ ] **Phase 7: Webhooks** - Callback system for render completion
 - [ ] **Phase 8: Bulk Generation** - Batch rendering and CSV import
@@ -145,10 +145,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 05-01-PLAN.md -- SSE progress infrastructure (QueueEvents, SSE endpoint, worker progress)
-- [ ] 05-02-PLAN.md -- Render UI components (progress bar, status badge, video preview, render card)
-- [ ] 05-03-PLAN.md -- Render history dashboard (filters, search, card list, pagination, real-time updates)
-- [ ] 05-04-PLAN.md -- Completion notifications and navigation (toasts, sound, nav badge, dashboard card)
+- [x] 05-01-PLAN.md -- SSE progress infrastructure (QueueEvents, SSE endpoint, worker progress)
+- [x] 05-02-PLAN.md -- Render UI components (progress bar, status badge, video preview, render card)
+- [x] 05-03-PLAN.md -- Render history dashboard (filters, search, card list, pagination, real-time updates)
+- [x] 05-04-PLAN.md -- Completion notifications and navigation (toasts, sound, nav badge, dashboard card)
 
 ---
 
@@ -285,7 +285,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 2. Foundation & Auth | 5/5 | ✓ Complete | 2026-02-09 |
 | 3. Template System | 6/6 | ✓ Complete | 2026-02-09 |
 | 4. Async Rendering | 3/3 | ✓ Complete | 2026-02-09 |
-| 5. Render Progress & History | 0/TBD | Not started | - |
+| 5. Render Progress & History | 4/4 | ✓ Complete | 2026-02-09 |
 | 6. Storage Integration | 0/TBD | Not started | - |
 | 7. Webhooks | 0/TBD | Not started | - |
 | 8. Bulk Generation | 0/TBD | Not started | - |
