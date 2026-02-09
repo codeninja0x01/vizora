@@ -1,0 +1,12 @@
+[
+  {
+    "name": "renders",
+    "label": "Renders",
+    "modules": ["renderVideo", "getRenderStatus"]
+  },
+  {
+    "name": "templates",
+    "label": "Templates",
+    "modules": ["listTemplates"]
+  }
+]

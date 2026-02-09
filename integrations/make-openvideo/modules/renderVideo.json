@@ -1,0 +1,57 @@
+{
+  "name": "renderVideo",
+  "label": "Render Video",
+  "description": "Create a new video render from a template with merge data.",
+  "type_id": 4,
+  "connection": "api-key",
+  "interface": [
+    {
+      "name": "templateId",
+      "type": "select",
+      "label": "Template",
+      "required": true,
+      "help": "Select a template from your organization.",
+      "options": "rpc://listTemplatesRpc"
+    },
+    {
+      "name": "mergeData",
+      "type": "collection",
+      "label": "Merge Data",
+      "help": "Enter values for the template's merge fields.",
+      "spec": "rpc://loadMergeFields?templateId={{parameters.templateId}}"
+    }
+  ],
+  "communication": {
+    "url": "/renders",
+    "method": "POST",
+    "body": {
+      "templateId": "{{parameters.templateId}}",
+      "mergeData": "{{parameters.mergeData}}"
+    },
+    "response": {
+      "output": "{{body}}"
+    }
+  },
+  "output": [
+    {
+      "name": "id",
+      "type": "text",
+      "label": "Render ID"
+    },
+    {
+      "name": "status",
+      "type": "text",
+      "label": "Status"
+    },
+    {
+      "name": "templateId",
+      "type": "text",
+      "label": "Template ID"
+    },
+    {
+      "name": "createdAt",
+      "type": "date",
+      "label": "Created At"
+    }
+  ]
+}

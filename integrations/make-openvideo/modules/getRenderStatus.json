@@ -1,0 +1,55 @@
+{
+  "name": "getRenderStatus",
+  "label": "Get Render Status",
+  "description": "Get the current status and details of a video render.",
+  "type_id": 4,
+  "connection": "api-key",
+  "interface": [
+    {
+      "name": "renderId",
+      "type": "text",
+      "label": "Render ID",
+      "required": true,
+      "help": "The ID returned from the Render Video action."
+    }
+  ],
+  "communication": {
+    "url": "/renders/{{parameters.renderId}}",
+    "method": "GET",
+    "response": {
+      "output": "{{body}}"
+    }
+  },
+  "output": [
+    {
+      "name": "id",
+      "type": "text",
+      "label": "Render ID"
+    },
+    {
+      "name": "status",
+      "type": "text",
+      "label": "Status"
+    },
+    {
+      "name": "templateId",
+      "type": "text",
+      "label": "Template ID"
+    },
+    {
+      "name": "outputUrl",
+      "type": "url",
+      "label": "Output URL"
+    },
+    {
+      "name": "error.category",
+      "type": "text",
+      "label": "Error Category"
+    },
+    {
+      "name": "error.message",
+      "type": "text",
+      "label": "Error Message"
+    }
+  ]
+}

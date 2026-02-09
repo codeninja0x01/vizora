@@ -1,0 +1,7 @@
+{
+  "baseUrl": "https://app.openvideo.dev/api/v1",
+  "headers": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer {{connection.apiKey}}"
+  }
+}

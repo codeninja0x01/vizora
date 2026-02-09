@@ -1,0 +1,33 @@
+{
+  "label": "OpenVideo",
+  "type": "apikey",
+  "parameters": [
+    {
+      "name": "apiKey",
+      "type": "text",
+      "label": "API Key",
+      "required": true,
+      "help": "Find your API key in the OpenVideo dashboard under API Keys. Keys start with sk_live_.",
+      "sanitize": true
+    }
+  ],
+  "common": [
+    {
+      "name": "baseUrl",
+      "type": "url",
+      "label": "API Base URL",
+      "default": "https://app.openvideo.dev/api/v1",
+      "advanced": true,
+      "help": "Only change this for self-hosted OpenVideo instances."
+    }
+  ],
+  "verify": {
+    "url": "{{common.baseUrl}}/me",
+    "method": "GET",
+    "headers": {
+      "Authorization": "Bearer {{parameters.apiKey}}"
+    },
+    "condition": "{{statusCode}} === 200",
+    "error": "Invalid API key. Please check your key in the OpenVideo dashboard."
+  }
+}

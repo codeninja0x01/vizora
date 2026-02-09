@@ -1,0 +1,37 @@
+{
+  "name": "listTemplates",
+  "label": "List Templates",
+  "description": "List available templates in your organization.",
+  "type_id": 9,
+  "connection": "api-key",
+  "interface": [],
+  "communication": {
+    "url": "/templates",
+    "method": "GET",
+    "response": {
+      "output": "{{body.templates}}"
+    }
+  },
+  "output": [
+    {
+      "name": "id",
+      "type": "text",
+      "label": "Template ID"
+    },
+    {
+      "name": "name",
+      "type": "text",
+      "label": "Name"
+    },
+    {
+      "name": "description",
+      "type": "text",
+      "label": "Description"
+    },
+    {
+      "name": "category",
+      "type": "text",
+      "label": "Category"
+    }
+  ]
+}
