@@ -5,6 +5,12 @@ import { validateMergeData } from '@/lib/template-schema';
 import { queueBatchRenders } from '@/lib/batch/queue';
 import { BATCH_SIZE_LIMITS } from '@/lib/batch/types';
 import type { MergeField } from '@/types/template';
+import { calculateCredits } from '@/lib/billing';
+import {
+  deductCreditsForRender,
+  checkAndWarnLowCredits,
+  getTemplateDuration,
+} from '@/lib/credits';
 
 // Request validation schema for POST /api/v1/renders/batch
 const batchRenderSchema = z.object({
@@ -73,6 +79,7 @@ async function postHandler(
         mergeSchema: true,
         organizationId: true,
         isPublic: true,
+        projectData: true,
       },
     });
 
@@ -143,6 +150,79 @@ async function postHandler(
       );
     }
 
+    // Check subscription status and credits BEFORE creating batch
+    const org = await prisma.organization.findUniqueOrThrow({
+      where: { id: context.organizationId },
+      select: {
+        subscriptionStatus: true,
+        tier: true,
+        creditBalance: true,
+        monthlyAllotment: true,
+      },
+    });
+
+    // Block renders if subscription is past_due
+    if (org.subscriptionStatus === 'past_due') {
+      return Response.json(
+        {
+          error: 'subscription_past_due',
+          message:
+            'Rendering suspended due to failed payment. Please update your payment method.',
+          details: {
+            action: {
+              type: 'update_payment',
+              url: '/dashboard/billing',
+            },
+          },
+        },
+        { status: 402 }
+      );
+    }
+
+    // Calculate credits required per render based on template duration
+    const durationSeconds = getTemplateDuration(
+      template.projectData as Record<string, any>
+    );
+    const perRenderCredits = calculateCredits(durationSeconds || 30);
+    const totalCredits = perRenderCredits * mergeDataArray.length;
+
+    // Atomically deduct total batch credits in ONE transaction
+    const deductResult = await deductCreditsForRender(
+      context.organizationId,
+      totalCredits
+    );
+
+    if (!deductResult.success) {
+      return Response.json(
+        {
+          error: 'insufficient_credits',
+          code: 402,
+          message: 'Not enough credits for this batch render',
+          details: {
+            required: deductResult.required,
+            available: deductResult.available,
+            shortfall: deductResult.required - deductResult.available,
+            batchSize: mergeDataArray.length,
+            perRenderCredits,
+            durationSeconds: durationSeconds || 30,
+            actions: [
+              {
+                type: 'upgrade',
+                label: 'Upgrade Plan',
+                url: '/dashboard/billing',
+              },
+              {
+                type: 'buy_credits',
+                label: 'Buy Credit Pack',
+                url: '/dashboard/billing?tab=credits',
+              },
+            ],
+          },
+        },
+        { status: 402 }
+      );
+    }
+
     // Create Batch record in database
     const batch = await prisma.batch.create({
       data: {
@@ -182,7 +262,8 @@ async function postHandler(
         batch.id,
         templateId,
         context.userId,
-        context.organizationId
+        context.organizationId,
+        perRenderCredits
       );
     } catch (queueError) {
       console.error('Failed to queue batch renders:', queueError);
@@ -212,6 +293,11 @@ async function postHandler(
       );
     }
 
+    // Fire-and-forget low-credit warning check (don't block response)
+    checkAndWarnLowCredits(context.organizationId).catch((error) => {
+      console.error('Low-credit check failed:', error);
+    });
+
     // Return 202 Accepted with batch details
     return Response.json(
       {
@@ -220,6 +306,8 @@ async function postHandler(
         totalCount: mergeDataArray.length,
         templateId: templateId,
         createdAt: batch.createdAt.toISOString(),
+        creditsDeducted: totalCredits,
+        creditsRemaining: deductResult.newBalance,
       },
       {
         status: 202,

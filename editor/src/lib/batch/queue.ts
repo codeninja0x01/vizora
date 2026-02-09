@@ -34,6 +34,7 @@ function chunkArray<T>(array: T[], size: number): T[][] {
  * @param templateId - Template to render
  * @param userId - User ID creating the batch
  * @param organizationId - Organization ID
+ * @param creditsDeducted - Credits deducted per render (for refund tracking)
  * @returns Array of queued job IDs
  */
 export async function queueBatchRenders(
@@ -45,7 +46,8 @@ export async function queueBatchRenders(
   batchId: string,
   templateId: string,
   userId: string,
-  organizationId: string
+  organizationId: string,
+  creditsDeducted?: number
 ): Promise<string[]> {
   // Prepare all jobs with actual render IDs from database
   const jobs = renders.map((render) => {
@@ -59,6 +61,7 @@ export async function queueBatchRenders(
         batchIndex: render.batchIndex,
         userId,
         organizationId,
+        creditsDeducted,
       },
       opts: {
         jobId: render.id,

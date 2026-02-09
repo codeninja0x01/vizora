@@ -5,6 +5,12 @@ import { prisma } from '@/lib/db';
 import { renderQueue } from '@/lib/queue';
 import { validateMergeData } from '@/lib/template-schema';
 import type { MergeField } from '@/types/template';
+import { calculateCredits } from '@/lib/billing';
+import {
+  deductCreditsForRender,
+  checkAndWarnLowCredits,
+  getTemplateDuration,
+} from '@/lib/credits';
 
 // Request validation schema for POST /api/v1/renders
 const submitRenderSchema = z.object({
@@ -58,6 +64,7 @@ async function postHandler(
         mergeSchema: true,
         organizationId: true,
         isPublic: true,
+        projectData: true,
       },
     });
 
@@ -114,6 +121,76 @@ async function postHandler(
       );
     }
 
+    // Check subscription status and credits BEFORE creating render record
+    const org = await prisma.organization.findUniqueOrThrow({
+      where: { id: context.organizationId },
+      select: {
+        subscriptionStatus: true,
+        tier: true,
+        creditBalance: true,
+        monthlyAllotment: true,
+      },
+    });
+
+    // Block renders if subscription is past_due
+    if (org.subscriptionStatus === 'past_due') {
+      return Response.json(
+        {
+          error: 'subscription_past_due',
+          message:
+            'Rendering suspended due to failed payment. Please update your payment method.',
+          details: {
+            action: {
+              type: 'update_payment',
+              url: '/dashboard/billing',
+            },
+          },
+        },
+        { status: 402 }
+      );
+    }
+
+    // Calculate credits required based on template duration
+    const durationSeconds = getTemplateDuration(
+      template.projectData as Record<string, any>
+    );
+    const creditsRequired = calculateCredits(durationSeconds || 30);
+
+    // Atomically deduct credits
+    const deductResult = await deductCreditsForRender(
+      context.organizationId,
+      creditsRequired
+    );
+
+    if (!deductResult.success) {
+      return Response.json(
+        {
+          error: 'insufficient_credits',
+          code: 402,
+          message: 'Not enough credits for this render',
+          details: {
+            required: deductResult.required,
+            available: deductResult.available,
+            shortfall: deductResult.required - deductResult.available,
+            durationSeconds: durationSeconds || 30,
+            actions: [
+              {
+                type: 'upgrade',
+                label: 'Upgrade Plan',
+                url: '/dashboard/billing',
+              },
+              {
+                type: 'buy_credits',
+                label: 'Buy Credit Pack',
+                url: '/dashboard/billing?tab=credits',
+              },
+            ],
+          },
+        },
+        { status: 402 }
+      );
+    }
+
     // Create render record in DB first (source of truth)
     const render = await prisma.render.create({
       data: {
@@ -136,9 +213,15 @@ async function postHandler(
         options: options || {},
         userId: context.userId,
         organizationId: context.organizationId,
+        creditsDeducted: creditsRequired,
       },
       { jobId: render.id }
     );
+
+    // Fire-and-forget low-credit warning check (don't block response)
+    checkAndWarnLowCredits(context.organizationId).catch((error) => {
+      console.error('Low-credit check failed:', error);
+    });
 
     // Return 202 Accepted with Location header
     return Response.json(
@@ -147,6 +230,8 @@ async function postHandler(
         status: 'queued',
         templateId: templateId,
         createdAt: render.queuedAt.toISOString(),
+        creditsDeducted: creditsRequired,
+        creditsRemaining: deductResult.newBalance,
       },
       {
         status: 202,
