@@ -142,10 +142,13 @@ Plans:
   2. User can view dashboard showing all their renders with status and download links
   3. User can filter render history by status (completed, failed, in-progress) and search by template
 
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- Plans to be defined during `/gsd:plan-phase 5`
+- [ ] 05-01-PLAN.md -- SSE progress infrastructure (QueueEvents, SSE endpoint, worker progress)
+- [ ] 05-02-PLAN.md -- Render UI components (progress bar, status badge, video preview, render card)
+- [ ] 05-03-PLAN.md -- Render history dashboard (filters, search, card list, pagination, real-time updates)
+- [ ] 05-04-PLAN.md -- Completion notifications and navigation (toasts, sound, nav badge, dashboard card)
 
 ---
 
