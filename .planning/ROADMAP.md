@@ -70,10 +70,14 @@ Plans:
   4. User can revoke API keys and subsequent requests with revoked keys receive 401 response
   5. API requests are rate limited per tier with 429 responses including Retry-After header
 
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- Plans to be defined during `/gsd:plan-phase 2`
+- [ ] 02-01-PLAN.md -- Database schema and Better Auth core configuration
+- [ ] 02-02-PLAN.md -- Authentication UI pages and route protection
+- [ ] 02-03-PLAN.md -- API key management utilities and dashboard
+- [ ] 02-04-PLAN.md -- Rate limiting and API auth middleware
+- [ ] 02-05-PLAN.md -- Integration verification checkpoint
 
 ---
 
@@ -268,7 +272,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Editor Polish | 6/6 | ✓ Complete | 2026-02-09 |
-| 2. Foundation & Auth | 0/TBD | Not started | - |
+| 2. Foundation & Auth | 0/5 | Planned | - |
 | 3. Template System | 0/TBD | Not started | - |
 | 4. Async Rendering | 0/TBD | Not started | - |
 | 5. Render Progress & History | 0/TBD | Not started | - |
