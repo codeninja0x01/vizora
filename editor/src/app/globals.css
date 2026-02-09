@@ -45,6 +45,32 @@
   /* Panel */
   --color-panel: var(--panel-background);
   --color-panel-accent: var(--panel-accent);
+  --color-panel-darker: var(--panel-darker);
+  --color-panel-canvas: var(--panel-canvas);
+
+  /* Purple accent scale */
+  --color-accent-purple-50: oklch(0.95 0.05 300);
+  --color-accent-purple-100: oklch(0.90 0.08 300);
+  --color-accent-purple-200: oklch(0.82 0.12 300);
+  --color-accent-purple-300: oklch(0.75 0.16 300);
+  --color-accent-purple-400: oklch(0.68 0.20 300);
+  --color-accent-purple-500: oklch(0.62 0.24 300);
+  --color-accent-purple-600: oklch(0.55 0.22 300);
+  --color-accent-purple-700: oklch(0.48 0.19 300);
+  --color-accent-purple-800: oklch(0.40 0.15 300);
+  --color-accent-purple-900: oklch(0.32 0.11 300);
+
+  /* Clip type colors */
+  --color-clip-video: oklch(0.60 0.20 250);
+  --color-clip-audio: oklch(0.65 0.18 145);
+  --color-clip-text: oklch(0.75 0.15 80);
+  --color-clip-effect: oklch(0.60 0.22 300);
+  --color-clip-caption: oklch(0.70 0.15 55);
+  --color-clip-transition: oklch(0.55 0.15 200);
+
+  /* Animation easings */
+  --ease-subtle: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
 }
 
 :root {
@@ -87,41 +113,67 @@
 }
 
 .dark {
-  --background: oklch(0.1448 0 0);
-  --foreground: oklch(0.9702 0 0);
-  --card: oklch(0.2090 0 0);
-  --card-foreground: oklch(0.9702 0 0);
-  --popover: oklch(0.1822 0 0);
-  --popover-foreground: oklch(0.9702 0 0);
-  --primary: oklch(0.6333 0.0309 154.9039);
-  --primary-foreground: oklch(0 0 0);
-  --secondary: oklch(0.2850 0 0);
-  --secondary-foreground: oklch(0.9702 0 0);
-  --muted: oklch(0.2178 0 0);
-  --muted-foreground: oklch(0.7058 0 0);
-  --accent: oklch(0.3709 0.0248 153.9823);
-  --accent-foreground: oklch(0.9702 0 0);
+  /* Main canvas - softest dark (#242424 equivalent) */
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.97 0 0);
+
+  /* Card/panel areas - slightly lighter */
+  --card: oklch(0.185 0 0);
+  --card-foreground: oklch(0.97 0 0);
+
+  /* Popover/dropdown background */
+  --popover: oklch(0.175 0 0);
+  --popover-foreground: oklch(0.97 0 0);
+
+  /* Primary purple accent */
+  --primary: oklch(0.60 0.23 300);
+  --primary-foreground: oklch(1 0 0);
+
+  /* Secondary surface */
+  --secondary: oklch(0.27 0 0);
+  --secondary-foreground: oklch(0.97 0 0);
+
+  /* Muted area background */
+  --muted: oklch(0.21 0 0);
+  --muted-foreground: oklch(0.62 0 0);
+
+  /* Accent purple-tinted */
+  --accent: oklch(0.25 0.03 300);
+  --accent-foreground: oklch(0.97 0 0);
+
+  /* Destructive (keep existing red) */
   --destructive: oklch(0.6368 0.2078 25.3313);
   --destructive-foreground: oklch(1.0000 0 0);
+
+  /* Borders and inputs */
   --border: oklch(0.3171 0 0);
   --input: oklch(0.3171 0 0);
-  --ring: oklch(0.6333 0.0309 154.9039);
-  --chart-1: oklch(0.6333 0.0309 154.9039);
-  --chart-2: oklch(0.7209 0.0489 120.9474);
-  --chart-3: oklch(0.6744 0.0427 136.0110);
-  --chart-4: oklch(0.5510 0.0234 264.3637);
-  --chart-5: oklch(0.5096 0.0289 152.3460);
-  --sidebar: oklch(0.1684 0 0);
-  --sidebar-foreground: oklch(0.9702 0 0);
-  --sidebar-primary: oklch(0.6333 0.0309 154.9039);
-  --sidebar-primary-foreground: oklch(1.0000 0 0);
-  --sidebar-accent: oklch(0.2178 0 0);
-  --sidebar-accent-foreground: oklch(0.9702 0 0);
-  --sidebar-border: oklch(0.2850 0 0);
-  --sidebar-ring: oklch(0.6333 0.0309 154.9039);
 
-  --panel-background: oklch(0.2050 0 0);
-  --panel-accent: oklch(0.21 0.01 286);
+  /* Ring matches primary purple */
+  --ring: oklch(0.60 0.23 300);
+
+  /* Charts - keep existing for now */
+  --chart-1: oklch(0.60 0.20 250);
+  --chart-2: oklch(0.65 0.18 145);
+  --chart-3: oklch(0.6744 0.0427 136.0110);
+  --chart-4: oklch(0.60 0.22 300);
+  --chart-5: oklch(0.5096 0.0289 152.3460);
+
+  /* Sidebar with purple primary */
+  --sidebar: oklch(0.1684 0 0);
+  --sidebar-foreground: oklch(0.97 0 0);
+  --sidebar-primary: oklch(0.60 0.23 300);
+  --sidebar-primary-foreground: oklch(1.0 0 0);
+  --sidebar-accent: oklch(0.21 0 0);
+  --sidebar-accent-foreground: oklch(0.97 0 0);
+  --sidebar-border: oklch(0.285 0 0);
+  --sidebar-ring: oklch(0.60 0.23 300);
+
+  /* Panel shades for seamless layout */
+  --panel-background: oklch(0.205 0 0);
+  --panel-accent: oklch(0.21 0 0);
+  --panel-darker: oklch(0.19 0 0);
+  --panel-canvas: oklch(0.145 0 0);
 }
 
 @layer base {
