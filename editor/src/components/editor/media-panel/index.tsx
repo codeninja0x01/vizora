@@ -1,8 +1,7 @@
 'use client';
 
-import { TabBar } from './tabbar';
+import { ActivityBar } from './tabbar';
 import { useMediaPanelStore, type Tab } from './store';
-import { Separator } from '@/components/ui/separator';
 import PanelUploads from './panel/uploads';
 import PanelImages from './panel/images';
 import PanelVideos from './panel/videos';
@@ -34,7 +33,7 @@ const viewMap: Record<Tab, React.ReactNode> = {
 };
 
 export function MediaPanel() {
-  const { activeTab } = useMediaPanelStore();
+  const { activeTab, isPanelOpen } = useMediaPanelStore();
   const [selectedClips, setSelectedClips] = useState<IClip[]>([]);
   const { studio, setSelectedClips: setStudioSelectedClips } = useStudioStore();
   const [showProperties, setShowProperties] = useState(false);
@@ -71,18 +70,20 @@ export function MediaPanel() {
   }, [activeTab]);
 
   return (
-    <div className="h-full flex flex-col bg-card rounded-sm overflow-hidden w-full">
-      <div className="flex-none">
-        <TabBar />
-      </div>
-      <Separator orientation="horizontal" />
-      <div className="flex-1 min-h-0 min-w-0 overflow-hidden">
-        {selectedClips.length > 0 && showProperties ? (
-          <PropertiesPanel selectedClips={selectedClips} />
-        ) : (
-          <>{viewMap[activeTab]}</>
-        )}
-      </div>
+    <div className="h-full flex overflow-hidden w-full">
+      {/* Activity Bar - always visible */}
+      <ActivityBar />
+
+      {/* Panel Content - conditionally visible based on isPanelOpen */}
+      {isPanelOpen && (
+        <div className="flex-1 min-h-0 min-w-0 overflow-hidden bg-[var(--panel-background)]">
+          {selectedClips.length > 0 && showProperties ? (
+            <PropertiesPanel selectedClips={selectedClips} />
+          ) : (
+            <>{viewMap[activeTab]}</>
+          )}
+        </div>
+      )}
     </div>
   );
 }

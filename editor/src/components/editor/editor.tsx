@@ -41,14 +41,14 @@ export default function Editor() {
   }, []);
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-background overflow-hidden space-y-1.5">
+    <div className="h-screen w-screen flex flex-col bg-background overflow-hidden">
       {!isReady && (
         <div className="absolute inset-0 z-50">
           <Loading />
         </div>
       )}
       <Header />
-      <div className="flex-1 min-h-0 min-w-0 px-2 pb-2">
+      <div className="flex-1 min-h-0 min-w-0">
         <ResizablePanelGroup
           direction="horizontal"
           className="h-full w-full gap-0"
@@ -59,13 +59,13 @@ export default function Editor() {
             minSize={15}
             maxSize={40}
             onResize={setToolsPanel}
-            className="max-w-7xl relative overflow-visible! bg-card min-w-0"
+            className="max-w-7xl relative overflow-visible! bg-[var(--panel-background)] min-w-0"
           >
             <MediaPanel />
             <FloatingControl />
           </ResizablePanel>
 
-          <ResizableHandle className="bg-transparent w-1.5" />
+          <ResizableHandle className="w-0.5 bg-transparent hover:bg-accent-purple-500/30 transition-colors" />
 
           {/* Middle Column: Preview + Timeline */}
           <ResizablePanel
@@ -75,7 +75,7 @@ export default function Editor() {
                 : 100 - toolsPanel
             }
             minSize={40}
-            className="min-w-0 min-h-0"
+            className="min-w-0 min-h-0 bg-background"
           >
             <ResizablePanelGroup
               direction="vertical"
@@ -87,7 +87,7 @@ export default function Editor() {
                 minSize={30}
                 maxSize={85}
                 onResize={setMainContent}
-                className="min-h-0"
+                className="min-h-0 bg-background"
               >
                 <CanvasPanel
                   onReady={() => {
@@ -96,7 +96,7 @@ export default function Editor() {
                 />
               </ResizablePanel>
 
-              <ResizableHandle className="bg-transparent !h-1.5" />
+              <ResizableHandle className="h-0.5 bg-transparent hover:bg-accent-purple-500/30 transition-colors" />
 
               {/* Timeline Panel */}
               <ResizablePanel
@@ -104,7 +104,7 @@ export default function Editor() {
                 minSize={15}
                 maxSize={70}
                 onResize={setTimeline}
-                className="min-h-0"
+                className="min-h-0 bg-background"
               >
                 <Timeline />
               </ResizablePanel>
@@ -112,14 +112,14 @@ export default function Editor() {
           </ResizablePanel>
           {isCopilotVisible && (
             <>
-              <ResizableHandle className="bg-transparent w-1.5" />
+              <ResizableHandle className="w-0.5 bg-transparent hover:bg-accent-purple-500/30 transition-colors" />
               {/* Right Column: Chat Copilot */}
               <ResizablePanel
                 defaultSize={copilotPanel}
                 minSize={15}
                 maxSize={40}
                 onResize={setCopilotPanel}
-                className="max-w-7xl relative overflow-visible! bg-card min-w-0"
+                className="max-w-7xl relative overflow-visible! bg-[var(--panel-background)] min-w-0"
               >
                 {/* Chat copilot */}
                 <Assistant />
