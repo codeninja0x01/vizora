@@ -214,11 +214,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 08-01-PLAN.md -- Batch foundation (Batch model, batchId on Render, utilities, dependencies)
-- [ ] 08-02-PLAN.md -- Batch REST API (submit, status polling, retry failed)
-- [ ] 08-03-PLAN.md -- Batch SSE events and streaming ZIP download
-- [ ] 08-04-PLAN.md -- Bulk Generate dashboard page (CSV upload, field mapping, preview)
-- [ ] 08-05-PLAN.md -- Batch progress in renders dashboard (grouped entries, retry, download)
+- [x] 08-01-PLAN.md -- Batch foundation (Batch model, batchId on Render, utilities, dependencies)
+- [x] 08-02-PLAN.md -- Batch REST API (submit, status polling, retry failed)
+- [x] 08-03-PLAN.md -- Batch SSE events and streaming ZIP download
+- [x] 08-04-PLAN.md -- Bulk Generate dashboard page (CSV upload, field mapping, preview)
+- [x] 08-05-PLAN.md -- Batch progress in renders dashboard (grouped entries, retry, download)
 
 ---
 
@@ -236,10 +236,14 @@ Plans:
   4. User can manage subscription via Stripe Customer Portal (upgrade, downgrade, cancel)
   5. Failed payments suspend rendering access with email notification and retry prompts
 
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- Plans to be defined during `/gsd:plan-phase 9`
+- [ ] 09-01-PLAN.md -- Billing schema, tier configuration, Stripe client, and credit utilities
+- [ ] 09-02-PLAN.md -- Stripe webhook endpoint and subscription lifecycle handlers
+- [ ] 09-03-PLAN.md -- Credit enforcement in render and batch APIs with auto-refund
+- [ ] 09-04-PLAN.md -- Billing dashboard page with server actions and usage analytics
+- [ ] 09-05-PLAN.md -- Low-credit notification banner and sidebar navigation
 
 ---
 
@@ -299,6 +303,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. Storage Integration | 4/4 | ✓ Complete | 2026-02-09 |
 | 7. Webhooks | 4/4 | ✓ Complete | 2026-02-09 |
 | 8. Bulk Generation | 5/5 | ✓ Complete | 2026-02-09 |
-| 9. Billing & Usage | 0/TBD | Not started | - |
+| 9. Billing & Usage | 0/5 | Not started | - |
 | 10. External Integrations | 0/TBD | Not started | - |
 | 11. AI Features | 0/TBD | Not started | - |
