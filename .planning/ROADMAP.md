@@ -13,7 +13,7 @@ OpenVideo transforms from an open-source rendering library into a production Saa
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Editor Polish** - Full visual overhaul with modern design system (completed 2026-02-09)
-- [ ] **Phase 2: Foundation & Auth** - Multi-tenant infrastructure with authentication
+- [x] **Phase 2: Foundation & Auth** - Multi-tenant infrastructure with authentication (completed 2026-02-09)
 - [ ] **Phase 3: Template System** - Template CRUD with merge fields and validation
 - [ ] **Phase 4: Async Rendering** - Queue-based rendering with worker processes
 - [ ] **Phase 5: Render Progress & History** - Real-time updates and dashboard integration
@@ -73,11 +73,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 02-01-PLAN.md -- Database schema and Better Auth core configuration
-- [ ] 02-02-PLAN.md -- Authentication UI pages and route protection
-- [ ] 02-03-PLAN.md -- API key management utilities and dashboard
-- [ ] 02-04-PLAN.md -- Rate limiting and API auth middleware
-- [ ] 02-05-PLAN.md -- Integration verification checkpoint
+- [x] 02-01-PLAN.md -- Database schema and Better Auth core configuration
+- [x] 02-02-PLAN.md -- Authentication UI pages and route protection
+- [x] 02-03-PLAN.md -- API key management utilities and dashboard
+- [x] 02-04-PLAN.md -- Rate limiting and API auth middleware
+- [x] 02-05-PLAN.md -- Integration verification checkpoint
 
 ---
 
@@ -277,7 +277,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Editor Polish | 6/6 | ✓ Complete | 2026-02-09 |
-| 2. Foundation & Auth | 0/5 | Planned | - |
+| 2. Foundation & Auth | 5/5 | ✓ Complete | 2026-02-09 |
 | 3. Template System | 0/6 | Planned | - |
 | 4. Async Rendering | 0/TBD | Not started | - |
 | 5. Render Progress & History | 0/TBD | Not started | - |
