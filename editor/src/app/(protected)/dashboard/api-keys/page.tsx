@@ -1,13 +1,10 @@
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { KeyRound, Plus } from 'lucide-react';
+import { KeyRound, Plus, Shield } from 'lucide-react';
 import { CreateApiKeyDialog } from './create-dialog';
 import { RevokeButton } from './revoke-button';
 
-/**
- * Format date to relative time (e.g., "2 days ago") or absolute date
- */
 function formatDate(date: Date | null): string {
   if (!date) return 'Never';
 
@@ -31,7 +28,6 @@ function formatDate(date: Date | null): string {
 }
 
 export default async function ApiKeysPage() {
-  // Get authenticated session
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -44,26 +40,25 @@ export default async function ApiKeysPage() {
     );
   }
 
-  // Get active organization from session
   const activeOrgId = session.session.activeOrganizationId;
 
-  // If no active organization, show message
   if (!activeOrgId) {
     return (
-      <div className="mx-auto max-w-5xl p-8">
-        <div className="mb-8">
-          <h1 className="mb-2 text-3xl font-bold">API Keys</h1>
-          <p className="text-muted-foreground">
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight font-heading">
+            API Keys
+          </h1>
+          <p className="mt-1 text-muted-foreground">
             Manage API keys for programmatic access to OpenVideo
           </p>
         </div>
-
-        <div className="border-border bg-card text-card-foreground rounded-lg border p-12 text-center">
-          <KeyRound className="text-muted-foreground mx-auto mb-4 size-12" />
+        <div className="rounded-xl border border-border/50 bg-card/40 p-12 text-center">
+          <KeyRound className="mx-auto mb-4 size-12 text-muted-foreground/30" />
           <h2 className="mb-2 text-xl font-semibold">
             No Organization Selected
           </h2>
-          <p className="text-muted-foreground mb-4">
+          <p className="text-muted-foreground">
             Please create or select an organization to manage API keys.
           </p>
         </div>
@@ -71,7 +66,6 @@ export default async function ApiKeysPage() {
     );
   }
 
-  // Query active API keys for the organization
   const apiKeys = await prisma.apiKey.findMany({
     where: {
       organizationId: activeOrgId,
@@ -90,12 +84,17 @@ export default async function ApiKeysPage() {
   });
 
   return (
-    <div className="mx-auto max-w-5xl p-8">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="mb-8 flex items-start justify-between">
+      <div
+        className="flex items-start justify-between animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
+        style={{ animationFillMode: 'both' }}
+      >
         <div>
-          <h1 className="mb-2 text-3xl font-bold">API Keys</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl font-bold tracking-tight font-heading">
+            API Keys
+          </h1>
+          <p className="mt-1 text-muted-foreground">
             Manage API keys for programmatic access to OpenVideo
           </p>
         </div>
@@ -103,76 +102,101 @@ export default async function ApiKeysPage() {
       </div>
 
       {/* API Keys List */}
-      {apiKeys.length === 0 ? (
-        <div className="border-border bg-card text-card-foreground rounded-lg border p-12 text-center">
-          <KeyRound className="text-muted-foreground mx-auto mb-4 size-12" />
-          <h2 className="mb-2 text-xl font-semibold">No API Keys Yet</h2>
-          <p className="text-muted-foreground mb-4">
-            Create your first API key to get started with programmatic access.
-          </p>
-          <CreateApiKeyDialog>
-            <span className="flex items-center gap-2">
-              <Plus className="size-4" />
-              Create API Key
-            </span>
-          </CreateApiKeyDialog>
-        </div>
-      ) : (
-        <div className="border-border rounded-lg border">
-          <table className="w-full">
-            <thead>
-              <tr className="border-border border-b">
-                <th className="p-4 text-left text-sm font-medium">Name</th>
-                <th className="p-4 text-left text-sm font-medium">Key</th>
-                <th className="p-4 text-left text-sm font-medium">Created</th>
-                <th className="p-4 text-left text-sm font-medium">Last Used</th>
-                <th className="p-4 text-right text-sm font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {apiKeys.map((key) => (
-                <tr
-                  key={key.id}
-                  className="border-border hover:bg-white/5 border-b last:border-0 transition-colors"
-                >
-                  <td className="p-4 font-medium">{key.name}</td>
-                  <td className="p-4">
-                    <code className="rounded bg-white/5 px-2 py-1 text-xs font-mono">
-                      {key.keyPrefix}...
-                    </code>
-                  </td>
-                  <td className="text-muted-foreground p-4 text-sm">
-                    {formatDate(key.createdAt)}
-                  </td>
-                  <td className="text-muted-foreground p-4 text-sm">
-                    {formatDate(key.lastUsedAt)}
-                  </td>
-                  <td className="p-4 text-right">
-                    <RevokeButton keyId={key.id} keyName={key.name} />
-                  </td>
+      <div
+        className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
+        style={{ animationDelay: '100ms', animationFillMode: 'both' }}
+      >
+        {apiKeys.length === 0 ? (
+          <div className="rounded-xl border border-border/50 bg-card/40 p-12 text-center">
+            <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-muted/50">
+              <KeyRound className="size-7 text-muted-foreground/40" />
+            </div>
+            <h2 className="mb-2 text-xl font-semibold">No API Keys Yet</h2>
+            <p className="mb-5 text-muted-foreground">
+              Create your first API key to get started with programmatic access.
+            </p>
+            <CreateApiKeyDialog>
+              <span className="flex items-center gap-2">
+                <Plus className="size-4" />
+                Create API Key
+              </span>
+            </CreateApiKeyDialog>
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-xl border border-border/50">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border/50 bg-card/30">
+                  <th className="p-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Name
+                  </th>
+                  <th className="p-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Key
+                  </th>
+                  <th className="p-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Created
+                  </th>
+                  <th className="p-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Last Used
+                  </th>
+                  <th className="p-4 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {apiKeys.map((key) => (
+                  <tr
+                    key={key.id}
+                    className="border-b border-border/30 transition-colors last:border-0 hover:bg-white/[0.02]"
+                  >
+                    <td className="p-4 font-medium">{key.name}</td>
+                    <td className="p-4">
+                      <code className="rounded-md bg-white/[0.04] px-2 py-1 font-mono text-xs text-muted-foreground">
+                        {key.keyPrefix}...
+                      </code>
+                    </td>
+                    <td className="p-4 text-sm tabular-nums text-muted-foreground">
+                      {formatDate(key.createdAt)}
+                    </td>
+                    <td className="p-4 text-sm tabular-nums text-muted-foreground">
+                      {formatDate(key.lastUsedAt)}
+                    </td>
+                    <td className="p-4 text-right">
+                      <RevokeButton keyId={key.id} keyName={key.name} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {/* Security Notice */}
-      <div className="border-border bg-white/5 mt-8 rounded-lg border p-4">
-        <h3 className="mb-2 text-sm font-semibold">Security Best Practices</h3>
-        <ul className="text-muted-foreground space-y-1 text-sm">
-          <li>
-            • API keys are shown only once during creation - copy them
-            immediately
-          </li>
-          <li>
-            • Store API keys securely and never commit them to version control
-          </li>
-          <li>• Revoke keys immediately if they are compromised</li>
-          <li>
-            • Use separate API keys for different applications or environments
-          </li>
-        </ul>
+      <div
+        className="flex gap-3 rounded-xl border border-border/40 bg-card/20 p-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
+        style={{ animationDelay: '200ms', animationFillMode: 'both' }}
+      >
+        <Shield className="mt-0.5 size-5 flex-shrink-0 text-muted-foreground/50" />
+        <div>
+          <h3 className="mb-2 text-sm font-semibold">
+            Security Best Practices
+          </h3>
+          <ul className="space-y-1 text-[13px] text-muted-foreground">
+            <li>
+              API keys are shown only once during creation - copy them
+              immediately
+            </li>
+            <li>
+              Store API keys securely and never commit them to version control
+            </li>
+            <li>Revoke keys immediately if they are compromised</li>
+            <li>
+              Use separate API keys for different applications or environments
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );

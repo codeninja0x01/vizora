@@ -1,5 +1,6 @@
 import {
   DeleteObjectCommand,
+  PutBucketCorsCommand,
   PutBucketLifecycleConfigurationCommand,
   PutObjectCommand,
   S3Client,

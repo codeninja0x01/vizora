@@ -9,7 +9,12 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 // Prisma 7 requires a driver adapter for the default "client" engine
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const connectionString =
+  process.env.DATABASE_URL?.replace(
+    /sslmode=(require|prefer|verify-ca)(?=&|$)/,
+    'sslmode=verify-full'
+  ) ?? process.env.DATABASE_URL;
+const adapter = new PrismaPg({ connectionString });
 
 export const prisma =
   globalForPrisma.prisma ??
