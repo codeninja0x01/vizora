@@ -26,7 +26,7 @@
 [
   {
     "AllowedOrigins": ["https://yourdomain.com", "https://www.yourdomain.com"],
-    "AllowedMethods": ["GET", "HEAD"],
+    "AllowedMethods": ["GET", "HEAD", "PUT"],
     "AllowedHeaders": ["*"],
     "ExposeHeaders": ["ETag", "Content-Length", "Content-Type"],
     "MaxAgeSeconds": 86400

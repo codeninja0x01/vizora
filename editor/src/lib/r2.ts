@@ -157,7 +157,7 @@ export class R2StorageService {
           CORSRules: [
             {
               AllowedOrigins: allowedOrigins,
-              AllowedMethods: ['GET', 'HEAD'],
+              AllowedMethods: ['GET', 'HEAD', 'PUT'],
               AllowedHeaders: ['*'],
               ExposeHeaders: ['ETag', 'Content-Length', 'Content-Type'],
               MaxAgeSeconds: 3600,

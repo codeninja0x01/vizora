@@ -21,7 +21,7 @@ async function setupR2Cors() {
       '  - Allowed Origins:',
       process.env.ALLOWED_ORIGINS || 'http://localhost:3000 (default)'
     );
-    console.log('  - Allowed Methods: GET, HEAD');
+    console.log('  - Allowed Methods: GET, HEAD, PUT');
     console.log('  - Allowed Headers: * (all)');
     console.log('  - Max Age: 3600 seconds');
     console.log('');
