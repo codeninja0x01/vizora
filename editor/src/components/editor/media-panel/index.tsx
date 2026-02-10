@@ -13,7 +13,6 @@ import PanelMusic from './panel/music';
 import PanelVoiceovers from './panel/voiceovers';
 import PanelSFX from './panel/sfx';
 import PanelElements from './panel/elements';
-import { TemplateChat } from '../ai/template-chat';
 import { PropertiesPanel } from '../properties-panel';
 import { MergeFieldPanel } from '../template-mode/merge-field-panel';
 import type { IClip } from 'openvideo';
@@ -23,7 +22,6 @@ import { useTemplateStore } from '@/stores/template-store';
 
 const viewMap: Record<Tab, React.ReactNode> = {
   uploads: <PanelUploads />,
-  'ai-generate': <TemplateChat />,
   images: <PanelImages />,
   videos: <PanelVideos />,
   music: <PanelMusic />,
@@ -86,7 +84,7 @@ export function MediaPanel() {
             {selectedClips.length > 0 && showProperties ? (
               <PropertiesPanel selectedClips={selectedClips} />
             ) : (
-              <>{viewMap[activeTab]}</>
+              viewMap[activeTab]
             )}
           </div>
           {/* Merge Field Panel - shows when in template mode with a selected clip */}

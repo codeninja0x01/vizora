@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm';
 import { ArrowUpIcon, Wand2, MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStudioStore } from '@/stores/studio-store';
-import { Studio } from 'openvideo';
+import type { Studio } from 'openvideo';
 import { streamFlow } from '@genkit-ai/next/client';
 import * as ToolHandlers from './tools';
 import {
@@ -18,9 +18,9 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { usePlaybackStore } from '@/stores/playback-store';
 import { useTimelineStore } from '@/stores/timeline-store';
-import { IClip } from '@/types/timeline';
-import { chatFlow } from '@/genkit/chat-flow';
-import { ImportAsset } from '@/genkit/type';
+import type { IClip } from '@/types/timeline';
+import type { chatFlow } from '@/genkit/chat-flow';
+import type { ImportAsset } from '@/genkit/type';
 
 interface Message {
   role: 'user' | 'model';
@@ -34,10 +34,12 @@ interface Suggestion {
 }
 
 const SUGGESTIONS: Suggestion[] = [
+  { text: 'Generate a minimal product launch template' },
+  { text: 'Generate a bold social media ad template' },
+  { text: 'Generate a corporate presentation template' },
   { text: 'Search and add futurist city video' },
   { text: 'Generate voiceover "Welcome"' },
   { text: 'Auto-caption video' },
-  { text: 'Make text yellow and bigger' },
 ];
 
 export default function Assistant() {
@@ -108,6 +110,7 @@ export default function Assistant() {
     }
   }, [messages]);
 
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: handleSubmit handles async chat flow with multiple event types
   const handleSubmit = async (suggestionText?: string) => {
     const messageText = suggestionText || input.trim();
     if (!messageText || isLoading) return;
@@ -227,6 +230,9 @@ export default function Assistant() {
         case 'generate_captions':
           await ToolHandlers.handleGenerateCaptions(input, studio);
           break;
+        case 'generate_template':
+          await ToolHandlers.handleGenerateTemplate(input, studio);
+          break;
         default:
           console.log('Unhandled tool action:', action);
       }
@@ -265,6 +271,7 @@ export default function Assistant() {
                 {SUGGESTIONS.map((suggestion, idx) => (
                   <button
                     key={idx}
+                    type="button"
                     onClick={() => handleSuggestionClick(suggestion)}
                     className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border bg-background/50 hover:bg-background transition-colors text-left group"
                   >

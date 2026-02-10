@@ -16,7 +16,6 @@ import { create } from 'zustand';
 
 export type Tab =
   | 'uploads'
-  | 'ai-generate'
   | 'images'
   | 'videos'
   | 'music'
@@ -34,10 +33,6 @@ export const tabs: {
   uploads: {
     icon: IconFolder,
     label: 'Uploads',
-  },
-  'ai-generate': {
-    icon: IconSparkles,
-    label: 'AI Generate',
   },
   images: {
     icon: IconPhoto,
