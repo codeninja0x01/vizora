@@ -373,6 +373,35 @@ export function getTools() {
     }
   );
 
+  const generate_template = ai.defineTool(
+    {
+      name: 'generate_template',
+      description:
+        'Generate a complete video template from a description and optional style. Use this when the user asks to create, generate, or make a video template. Available styles: minimal, bold, corporate, playful, cinematic, social, retro, neon, elegant, tech, nature, luxury.',
+      inputSchema: z.object({
+        prompt: z
+          .string()
+          .describe(
+            'Description of the template to generate (e.g. "product launch video", "restaurant social media ad")'
+          ),
+        styleId: z
+          .string()
+          .default('corporate')
+          .describe(
+            'Style preset ID. One of: minimal, bold, corporate, playful, cinematic, social, retro, neon, elegant, tech, nature, luxury'
+          ),
+      }),
+      outputSchema: z.object({
+        message: z.string(),
+      }),
+    },
+    async ({ prompt, styleId }) => {
+      return {
+        message: `Generating ${styleId} template: "${prompt}"`,
+      };
+    }
+  );
+
   const fallback = ai.defineTool(
     {
       name: 'fallback',
@@ -410,6 +439,7 @@ export function getTools() {
     generate_voiceover,
     seek_to_time,
     generate_captions,
+    generate_template,
     fallback,
   ];
 

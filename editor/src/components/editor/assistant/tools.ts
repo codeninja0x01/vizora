@@ -379,3 +379,75 @@ export const handleGenerateCaptions = async (input: any, studio: Studio) => {
     console.error('Failed to generate captions:', error);
   }
 };
+
+export const handleGenerateTemplate = async (input: any, studio: Studio) => {
+  const { prompt, styleId } = input;
+
+  try {
+    const response = await fetch('/api/ai/template', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt,
+        styleId: styleId || 'corporate',
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate template');
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.template) {
+      // Clear existing clips
+      const allClipIds = studio.clips.map((c) => c.id);
+      for (const clipId of allClipIds) {
+        await studio.removeClipById(clipId);
+      }
+
+      // Remove all tracks
+      const allTracks = studio.getTracks();
+      for (const track of allTracks) {
+        studio.removeTrack(track.id);
+      }
+
+      // Add tracks from template
+      if (data.template.tracks && Array.isArray(data.template.tracks)) {
+        for (const track of data.template.tracks) {
+          studio.addTrack({
+            id: track.id,
+            name: track.name,
+            type: track.type,
+          });
+        }
+      }
+
+      // Add clips from template
+      if (data.template.clips && Array.isArray(data.template.clips)) {
+        for (const clipData of data.template.clips) {
+          try {
+            // Convert clip data to proper format
+            const clip = await jsonToClip(clipData);
+
+            // Find the track for this clip
+            const trackId = data.template.tracks?.find((t: any) =>
+              t.clipIds?.includes(clipData.id)
+            )?.id;
+
+            if (trackId) {
+              await studio.addClip(clip, { trackId });
+            } else {
+              // If no specific track, add to first compatible track
+              await studio.addClip(clip);
+            }
+          } catch (error) {
+            console.error('Failed to add clip:', error);
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Failed to generate template:', error);
+  }
+};
