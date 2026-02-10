@@ -4,9 +4,9 @@ import {
   Image,
   Text,
   Audio,
-  Studio,
+  type Studio,
   Effect,
-  IClip,
+  type IClip,
   fontManager,
   jsonToClip,
 } from 'openvideo';
@@ -30,7 +30,7 @@ export const handleAddClip = async (input: any, studio: Studio) => {
   const from = input.from ?? 0;
   const to = input.to ? (input.to - from < 1 ? 1 : input.to) : from + 5;
 
-  let clip;
+  let clip: any;
   const type =
     assetType ||
     (action === 'add_text'
@@ -205,7 +205,7 @@ export const handleDuplicateClip = async (input: any, studio: Studio) => {
 
 export const handleSearchAndAddMedia = async (input: any, studio: Studio) => {
   const { query, type, targetId, from: fromTime } = input;
-  const from = fromTime ?? usePlaybackStore.getState().currentTime / 1000;
+  const _from = fromTime ?? usePlaybackStore.getState().currentTime / 1000;
   console.log({ input });
   try {
     const response = await fetch(
@@ -213,7 +213,7 @@ export const handleSearchAndAddMedia = async (input: any, studio: Studio) => {
     );
     const data = await response.json();
 
-    let clip;
+    let clip: any;
     if (type === 'image') {
       const imageUrl = data.photos?.[0]?.src?.large;
       if (imageUrl) {
@@ -244,14 +244,18 @@ export const handleSearchAndAddMedia = async (input: any, studio: Studio) => {
 };
 
 export const handleGenerateVoiceover = async (input: any, studio: Studio) => {
-  const { text, voiceId, targetId, from: fromTime } = input;
+  const { text, voiceId, provider, targetId, from: fromTime } = input;
   const from = fromTime ?? usePlaybackStore.getState().currentTime / 1000;
 
   try {
-    const response = await fetch('/api/elevenlabs/voiceover', {
+    const response = await fetch('/api/ai/tts', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, voiceId }),
+      body: JSON.stringify({
+        text,
+        voiceId: voiceId || '21m00Tcm4TlvDq8ikWAM',
+        provider: provider || 'elevenlabs',
+      }),
     });
     const data = await response.json();
 
@@ -271,7 +275,7 @@ export const handleGenerateVoiceover = async (input: any, studio: Studio) => {
   }
 };
 
-export const handleSeekToTime = async (input: any, studio: Studio) => {
+export const handleSeekToTime = async (input: any, _studio: Studio) => {
   const { time } = input;
   usePlaybackStore.getState().seek(time * 1000); // seeks uses ms
 };

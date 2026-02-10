@@ -317,10 +317,15 @@ export function getTools() {
   const generate_voiceover = ai.defineTool(
     {
       name: 'generate_voiceover',
-      description: 'Generate a voiceover using ElevenLabs',
+      description:
+        'Generate a voiceover using multi-provider TTS (ElevenLabs or OpenAI)',
       inputSchema: z.object({
         text: z.string().describe('Text to convert to speech'),
         voiceId: z.string().optional().describe('Optional voice ID to use'),
+        provider: z
+          .enum(['elevenlabs', 'openai'])
+          .optional()
+          .describe('TTS provider to use (default: elevenlabs)'),
         targetId: z.string().optional().describe('Unique ID for the new clip'),
         from: z.number().optional().describe('Start time in seconds'),
       }),
