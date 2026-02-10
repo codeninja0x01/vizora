@@ -16,11 +16,12 @@ import { create } from 'zustand';
 
 export type Tab =
   | 'uploads'
+  | 'ai-generate'
   | 'images'
   | 'videos'
   | 'music'
   | 'text'
-  | 'captions'
+  | 'subtitles'
   | 'effects'
   | 'elements'
   | 'voiceovers'
@@ -33,6 +34,10 @@ export const tabs: {
   uploads: {
     icon: IconFolder,
     label: 'Uploads',
+  },
+  'ai-generate': {
+    icon: IconSparkles,
+    label: 'AI Generate',
   },
   images: {
     icon: IconPhoto,
@@ -50,9 +55,9 @@ export const tabs: {
     icon: IconCircleSquare,
     label: 'Elements',
   },
-  captions: {
+  subtitles: {
     icon: IconSubtitles,
-    label: 'Captions',
+    label: 'Subtitles',
   },
   music: {
     icon: IconMusic,
@@ -91,7 +96,8 @@ interface MediaPanelStore {
 export const useMediaPanelStore = create<MediaPanelStore>((set, get) => ({
   activeTab: 'uploads',
   isPanelOpen: true,
-  setActiveTab: (tab) => set({ activeTab: tab, showProperties: false, isPanelOpen: true }),
+  setActiveTab: (tab) =>
+    set({ activeTab: tab, showProperties: false, isPanelOpen: true }),
   togglePanel: (tab) => {
     const currentTab = get().activeTab;
     const currentOpen = get().isPanelOpen;

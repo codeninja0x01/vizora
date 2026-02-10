@@ -8,11 +8,12 @@ import PanelVideos from './panel/videos';
 import PanelEffect from './panel/effects';
 import PanelTransition from './panel/transition';
 import PanelText from './panel/text';
-import PanelCaptions from './panel/captions';
+import { SubtitlePanel } from './subtitle-panel';
 import PanelMusic from './panel/music';
 import PanelVoiceovers from './panel/voiceovers';
 import PanelSFX from './panel/sfx';
 import PanelElements from './panel/elements';
+import { TemplateChat } from '../ai/template-chat';
 import { PropertiesPanel } from '../properties-panel';
 import { MergeFieldPanel } from '../template-mode/merge-field-panel';
 import type { IClip } from 'openvideo';
@@ -22,13 +23,14 @@ import { useTemplateStore } from '@/stores/template-store';
 
 const viewMap: Record<Tab, React.ReactNode> = {
   uploads: <PanelUploads />,
+  'ai-generate': <TemplateChat />,
   images: <PanelImages />,
   videos: <PanelVideos />,
   music: <PanelMusic />,
   voiceovers: <PanelVoiceovers />,
   sfx: <PanelSFX />,
   text: <PanelText />,
-  captions: <PanelCaptions />,
+  subtitles: <SubtitlePanel />,
   transitions: <PanelTransition />,
   effects: <PanelEffect />,
   elements: <PanelElements />,
