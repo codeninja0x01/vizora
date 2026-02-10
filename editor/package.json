@@ -9,7 +9,8 @@
     "start": "next start",
     "worker": "tsx src/workers/render-worker.ts",
     "webhook-worker": "tsx src/workers/webhook-worker.ts",
-    "worker:deletion": "tsx src/workers/deletion-warning-worker.ts"
+    "worker:deletion": "tsx src/workers/deletion-warning-worker.ts",
+    "setup:r2-cors": "tsx scripts/setup-r2-cors.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.74.0",
