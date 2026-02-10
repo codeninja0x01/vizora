@@ -254,7 +254,7 @@ export default function Assistant() {
 
   const handleStyleSelect = (_styleId: string, styleName: string) => {
     setStylesOpen(false);
-    handleSubmit(`Generate a ${styleName.toLowerCase()} template`);
+    setInput(`Generate a ${styleName.toLowerCase()} template`);
   };
 
   return (
@@ -477,7 +477,7 @@ export default function Assistant() {
                 <div className="p-3 border-b">
                   <h3 className="font-semibold text-sm">Template Styles</h3>
                   <p className="text-xs text-muted-foreground">
-                    Click a style to generate a template
+                    Click a style to prefill your prompt
                   </p>
                 </div>
                 <ScrollArea className="max-h-[360px]">
