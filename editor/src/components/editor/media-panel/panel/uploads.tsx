@@ -398,8 +398,8 @@ export default function PanelUploads() {
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-b from-background to-background/50">
-      {/* Search Header */}
-      {hasAssets ? (
+      {/* Search Header - Only show when has assets */}
+      {hasAssets && (
         <div className="p-3 shrink-0">
           <InputGroup className="shadow-sm">
             <InputGroupAddon className="bg-muted/50 pointer-events-none text-muted-foreground w-9 justify-center">
@@ -413,16 +413,6 @@ export default function PanelUploads() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </InputGroup>
-        </div>
-      ) : (
-        <div className="p-3 shrink-0">
-          <Button
-            onClick={() => document.getElementById('dropzone-input')?.click()}
-            variant={'default'}
-            className="w-full h-9 gap-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-lg shadow-primary/25"
-          >
-            <Upload size={16} /> Upload Files
-          </Button>
         </div>
       )}
 
