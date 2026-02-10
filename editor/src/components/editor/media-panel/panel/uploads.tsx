@@ -504,7 +504,7 @@ export default function PanelUploads() {
 
           {/* Assets grid */}
           {hasAssets && (
-            <div className="space-y-4">
+            <div className="space-y-3 pt-3">
               {/* Clickable drop zone hint when has assets */}
               {!isDragActive && (
                 <button
@@ -512,7 +512,7 @@ export default function PanelUploads() {
                   onClick={() =>
                     document.getElementById('dropzone-input')?.click()
                   }
-                  className="w-full rounded-xl border-2 border-dashed border-border/30 bg-muted/20 p-4 text-center hover:border-primary/50 hover:bg-muted/30 transition-all cursor-pointer group"
+                  className="w-full rounded-xl border-2 border-dashed border-border/30 bg-muted/20 p-3.5 text-center hover:border-primary/50 hover:bg-muted/30 transition-all cursor-pointer group"
                 >
                   <div className="flex items-center justify-center gap-2">
                     <Upload
