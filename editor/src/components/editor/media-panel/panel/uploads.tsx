@@ -477,23 +477,23 @@ export default function PanelUploads() {
 
           {/* Empty state with improved design */}
           {!hasAssets && !isDragActive && (
-            <div className="flex flex-col items-center justify-center py-16 text-center gap-6 animate-in fade-in duration-300 pointer-events-none">
+            <div className="flex flex-col items-center justify-center py-12 text-center gap-4 animate-in fade-in duration-300 pointer-events-none">
               <div className="relative">
-                <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 flex items-center justify-center shadow-lg border-2 border-border/50">
-                  <Upload size={42} className="text-primary" strokeWidth={2} />
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 flex items-center justify-center shadow-lg border-2 border-border/50">
+                  <Upload size={36} className="text-primary" strokeWidth={2} />
                 </div>
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg animate-bounce">
-                  <span className="text-white text-sm font-bold">+</span>
+                <div className="absolute -bottom-1.5 -right-1.5 w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg animate-bounce">
+                  <span className="text-white text-xs font-bold">+</span>
                 </div>
               </div>
-              <div className="space-y-3 max-w-[240px]">
-                <span className="text-base font-bold text-foreground">
+              <div className="space-y-2 max-w-[220px]">
+                <div className="text-sm font-semibold text-foreground">
                   No assets yet
-                </span>
-                <span className="text-xs text-muted-foreground leading-relaxed">
+                </div>
+                <div className="text-[11px] text-muted-foreground leading-relaxed">
                   Drag & drop your media files anywhere, or click the button
                   below
-                </span>
+                </div>
               </div>
               {/* Clickable upload zone */}
               <button
@@ -501,18 +501,18 @@ export default function PanelUploads() {
                 onClick={() =>
                   document.getElementById('dropzone-input')?.click()
                 }
-                className="mt-4 px-8 py-4 rounded-xl border-2 border-dashed border-primary/50 bg-primary/5 hover:bg-primary/10 hover:border-primary transition-all cursor-pointer pointer-events-auto group"
+                className="mt-2 px-6 py-3 rounded-xl border-2 border-dashed border-primary/50 bg-primary/5 hover:bg-primary/10 hover:border-primary transition-all cursor-pointer pointer-events-auto group"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                   <Upload
-                    size={20}
+                    size={18}
                     className="text-primary group-hover:scale-110 transition-transform"
                   />
                   <div className="text-left">
                     <p className="text-sm font-semibold text-foreground">
                       Click to upload
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[10px] text-muted-foreground">
                       or drag and drop
                     </p>
                   </div>
