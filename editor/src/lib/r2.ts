@@ -1,5 +1,6 @@
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   PutBucketCorsCommand,
   PutBucketLifecycleConfigurationCommand,
   PutObjectCommand,
@@ -69,12 +70,9 @@ export class R2StorageService {
       const url = this.getUrl(fileName);
       return url;
     } catch (error) {
-      console.error('[R2] Failed to upload file:', fileName);
-      console.error(
-        '[R2] Error stack:',
-        error instanceof Error ? error.stack : error
+      throw new Error(
+        `Failed to upload to R2: ${error instanceof Error ? error.message : 'Unknown error'}`
       );
-      throw new Error('Failed to upload to R2');
     }
   }
 
@@ -143,7 +141,87 @@ export class R2StorageService {
     );
   }
 
+  /**
+   * Configures CORS rules for the R2 bucket
+   * @throws {Error} If CORS configuration fails
+   */
+  async setupCors(): Promise<void> {
+    const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
+      'http://localhost:3000',
+    ];
+
+    await this.client.send(
+      new PutBucketCorsCommand({
+        Bucket: this.bucketName,
+        CORSConfiguration: {
+          CORSRules: [
+            {
+              AllowedOrigins: allowedOrigins,
+              AllowedMethods: ['GET', 'HEAD'],
+              AllowedHeaders: ['*'],
+              ExposeHeaders: ['ETag', 'Content-Length', 'Content-Type'],
+              MaxAgeSeconds: 3600,
+            },
+          ],
+        },
+      })
+    );
+  }
+
   getCdnUrl(key: string): string {
     return this.getUrl(key);
+  }
+
+  /**
+   * Generates a presigned URL for downloading a file
+   * @param key - The file key in the bucket
+   * @param expiresIn - URL expiration time in seconds (default: 3600)
+   * @returns Presigned download URL
+   */
+  async getPresignedDownloadUrl(
+    key: string,
+    expiresIn: number = 3600
+  ): Promise<string> {
+    const command = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    return await getSignedUrl(this.client, command, { expiresIn });
+  }
+
+  /**
+   * Get the public URL for an asset
+   * Uses direct CDN access (requires CORS configuration)
+   * Falls back to API proxy if R2_SERVE_MODE=proxy is set
+   * @param fileName - The file name/path in the bucket
+   * @param origin - Optional origin header for proxy mode URL construction
+   * @returns Public URL for the asset (either CDN or proxy URL)
+   * @throws {Error} If R2_SERVE_MODE has an invalid value
+   */
+  getAssetUrl(fileName: string, origin?: string): string {
+    const mode = process.env.R2_SERVE_MODE || 'cdn';
+
+    if (!['cdn', 'proxy'].includes(mode)) {
+      throw new Error(
+        `Invalid R2_SERVE_MODE: ${mode}. Must be 'cdn' or 'proxy'`
+      );
+    }
+
+    if (mode === 'proxy') {
+      // Use API proxy (for development or when CORS isn't configured)
+      // Validate origin against allowlist if provided
+      const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || [];
+      const validatedOrigin =
+        origin && ALLOWED_ORIGINS.includes(origin) ? origin : undefined;
+      const baseUrl =
+        validatedOrigin ||
+        process.env.NEXT_PUBLIC_APP_URL ||
+        'http://localhost:3000';
+      return `${baseUrl}/api/assets/${fileName}`;
+    }
+
+    // Use direct CDN (production, requires CORS)
+    return this.getUrl(fileName);
   }
 }

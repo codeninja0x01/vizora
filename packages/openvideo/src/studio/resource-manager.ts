@@ -1,4 +1,4 @@
-import { file } from 'opfs-tools';
+import type { file } from 'opfs-tools';
 import { AssetManager } from '../utils/asset-manager';
 
 export enum ResourceStatus {
@@ -50,29 +50,35 @@ export class ResourceManager {
       if (originFile) return originFile.stream();
     }
 
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch: ${response.status} ${response.statusText}`
-      );
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const stream = response.body;
+      if (!stream) throw new Error('Response body is null');
+
+      // Skip caching for data/blob URLs
+      if (url.startsWith('data:') || url.startsWith('blob:')) {
+        return stream;
+      }
+
+      const [s1, s2] = stream.tee();
+
+      // Background cache
+      AssetManager.put(url, s2).catch(() => {
+        // Silent fail for background cache
+      });
+
+      return s1;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to fetch resource from ${url}: ${errorMessage}`);
     }
-
-    const stream = response.body;
-    if (!stream) throw new Error('Response body is null');
-
-    // Skip caching for data/blob URLs
-    if (url.startsWith('data:') || url.startsWith('blob:')) {
-      return stream;
-    }
-
-    const [s1, s2] = stream.tee();
-
-    // Background cache
-    AssetManager.put(url, s2).catch((err) => {
-      console.error(`ResourceManager: Failed to cache ${url}`, err);
-    });
-
-    return s1;
   }
 
   /**

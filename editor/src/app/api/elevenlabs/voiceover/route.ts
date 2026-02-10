@@ -1,5 +1,5 @@
 import { R2StorageService } from '@/lib/r2';
-import { NextRequest, NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 const r2 = new R2StorageService({
   bucketName: process.env.R2_BUCKET_NAME || '',
@@ -55,11 +55,14 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
 
     const fileName = `voiceovers/${Date.now()}.mp3`;
-    const publicUrl = await r2.uploadData(fileName, buffer, 'audio/mpeg');
+    await r2.uploadData(fileName, buffer, 'audio/mpeg');
 
-    return NextResponse.json({ url: publicUrl });
+    // Get asset URL (direct CDN or proxy based on R2_SERVE_MODE)
+    const origin = req.headers.get('origin') || undefined;
+    const assetUrl = r2.getAssetUrl(fileName, origin);
+
+    return NextResponse.json({ url: assetUrl });
   } catch (error) {
-    console.error('Voiceover generation error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

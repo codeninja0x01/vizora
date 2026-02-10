@@ -42,9 +42,20 @@ export const VoiceSelector = ({ value, onChange }: VoiceSelectorProps) => {
       try {
         setLoading(true);
         const response = await fetch('/api/ai/voices');
+
         if (!response.ok) {
-          throw new Error('Failed to fetch voices');
+          let errorMessage = 'Failed to fetch voices';
+          try {
+            const data = await response.json();
+            errorMessage = data.error || errorMessage;
+            const details = data.details ? ` (${data.details.join(', ')})` : '';
+            errorMessage += details;
+          } catch {
+            // Non-JSON error response, use default message
+          }
+          throw new Error(errorMessage);
         }
+
         const data = await response.json();
         setVoices(data.voices || []);
 
@@ -59,8 +70,9 @@ export const VoiceSelector = ({ value, onChange }: VoiceSelectorProps) => {
           });
         }
       } catch (err) {
-        console.error('Failed to fetch voices:', err);
-        setError('Failed to load voices');
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to load voices';
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }

@@ -87,7 +87,11 @@ export async function POST(req: NextRequest) {
     // Upload to R2
     const fileName = `voiceovers/${orgId}/${randomUUID()}.mp3`;
     const buffer = Buffer.from(audioBuffer);
-    const publicUrl = await r2.uploadData(fileName, buffer, 'audio/mpeg');
+    await r2.uploadData(fileName, buffer, 'audio/mpeg');
+
+    // Get asset URL (direct CDN or proxy based on R2_SERVE_MODE)
+    const origin = req.headers.get('origin') || undefined;
+    const assetUrl = r2.getAssetUrl(fileName, origin);
 
     // Calculate approximate duration (rough estimate based on text length)
     // Average speaking rate is ~150 words per minute
@@ -95,13 +99,11 @@ export async function POST(req: NextRequest) {
     const durationSeconds = (wordCount / 150) * 60;
 
     return NextResponse.json({
-      url: publicUrl,
+      url: assetUrl,
       duration: Math.round(durationSeconds * 1000) / 1000,
       provider,
     });
   } catch (error) {
-    console.error('TTS synthesis error:', error);
-
     if (error instanceof Error) {
       // Check for specific provider errors
       if (error.message.includes('not configured')) {
