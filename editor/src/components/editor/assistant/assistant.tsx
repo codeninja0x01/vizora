@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { ArrowUpIcon, Wand2, MessageCircle } from 'lucide-react';
+import { ArrowUpIcon, Wand2, MessageCircle, Palette } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useStudioStore } from '@/stores/studio-store';
 import type { Studio } from 'openvideo';
@@ -21,6 +21,12 @@ import { useTimelineStore } from '@/stores/timeline-store';
 import type { IClip } from '@/types/timeline';
 import type { chatFlow } from '@/genkit/chat-flow';
 import type { ImportAsset } from '@/genkit/type';
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from '@/components/ui/popover';
+import { TEMPLATE_STYLE_PRESETS } from '@/lib/ai/presets/template-style-presets';
 
 interface Message {
   role: 'user' | 'model';
@@ -49,6 +55,7 @@ export default function Assistant() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [stylesOpen, setStylesOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const mapClipsToAssets = useCallback(
@@ -243,6 +250,11 @@ export default function Assistant() {
 
   const handleSuggestionClick = (suggestion: Suggestion) => {
     setInput(suggestion.text);
+  };
+
+  const handleStyleSelect = (_styleId: string, styleName: string) => {
+    setStylesOpen(false);
+    handleSubmit(`Generate a ${styleName.toLowerCase()} template`);
   };
 
   return (
@@ -446,6 +458,64 @@ export default function Assistant() {
               <Wand2 className="w-4 h-4" />
               <span className="ml-1 text-xs">Suggestions</span>
             </InputGroupButton>
+            <Popover open={stylesOpen} onOpenChange={setStylesOpen}>
+              <PopoverTrigger asChild>
+                <InputGroupButton
+                  variant="ghost"
+                  className="rounded-lg"
+                  disabled={isLoading}
+                >
+                  <Palette className="w-4 h-4" />
+                  <span className="ml-1 text-xs">Styles</span>
+                </InputGroupButton>
+              </PopoverTrigger>
+              <PopoverContent
+                side="top"
+                align="start"
+                className="w-[420px] p-0"
+              >
+                <div className="p-3 border-b">
+                  <h3 className="font-semibold text-sm">Template Styles</h3>
+                  <p className="text-xs text-muted-foreground">
+                    Click a style to generate a template
+                  </p>
+                </div>
+                <ScrollArea className="max-h-[360px]">
+                  <div className="grid grid-cols-3 gap-2 p-3">
+                    {TEMPLATE_STYLE_PRESETS.map((preset) => (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() =>
+                          handleStyleSelect(preset.id, preset.name)
+                        }
+                        className="p-2.5 rounded-lg border border-border bg-background hover:bg-accent hover:border-accent-foreground/20 transition-colors text-left group"
+                      >
+                        <div className="space-y-1.5">
+                          <div className="font-semibold text-xs">
+                            {preset.name}
+                          </div>
+                          <div className="flex gap-1">
+                            {preset.colorPalette
+                              .slice(0, 4)
+                              .map((color, idx) => (
+                                <div
+                                  key={idx}
+                                  className="w-2.5 h-2.5 rounded-full border border-border/50"
+                                  style={{ backgroundColor: color }}
+                                />
+                              ))}
+                          </div>
+                          <div className="text-[10px] text-muted-foreground leading-tight">
+                            {preset.mood.split(',')[0]}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </PopoverContent>
+            </Popover>
             <InputGroupButton
               variant="default"
               className="rounded-full ml-auto bg-foreground hover:bg-foreground/90 text-background"
