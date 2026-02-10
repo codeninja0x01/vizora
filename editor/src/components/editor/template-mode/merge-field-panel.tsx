@@ -113,22 +113,22 @@ export function MergeFieldPanel() {
 
   return (
     <div className="bg-[var(--panel-background)] border-t border-white/5">
-      <div className="p-4">
-        <div className="flex items-center gap-2 mb-3">
+      <div className="p-3">
+        <div className="flex items-center gap-2 mb-2">
           <Tag className="size-4 text-primary" />
           <h3 className="text-sm font-medium text-foreground">Merge Fields</h3>
         </div>
-        <p className="text-xs text-muted-foreground mb-4">
+        <p className="text-xs text-muted-foreground mb-3">
           Toggle properties to make them editable when using this template.
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {Object.entries(groupedProperties).map(([category, properties]) => (
             <div key={category}>
-              <h4 className="text-xs font-medium text-muted-foreground mb-2 uppercase tracking-wider">
+              <h4 className="text-xs font-medium text-muted-foreground mb-1.5 uppercase tracking-wider">
                 {category}
               </h4>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {properties.map((property) => {
                   const isMarked = isFieldMarked(elementId, property);
                   const currentValue = getPropertyValue(
@@ -139,16 +139,16 @@ export function MergeFieldPanel() {
                   return (
                     <div
                       key={property}
-                      className="flex items-center justify-between py-2 px-2 rounded hover:bg-white/5 transition-colors"
+                      className="flex items-center justify-between py-1.5 px-2 rounded hover:bg-white/5 transition-colors"
                     >
-                      <div className="flex-1 min-w-0 mr-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-foreground">
+                      <div className="flex-1 min-w-0 mr-2">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-foreground font-medium">
                             {getPropertyDisplayName(property)}
                           </span>
                           {isMarked && <Tag className="size-3 text-primary" />}
                         </div>
-                        <div className="text-xs text-muted-foreground truncate mt-0.5">
+                        <div className="text-[10px] text-muted-foreground truncate">
                           {formatPropertyValue(currentValue)}
                         </div>
                       </div>

@@ -64,37 +64,47 @@ function UploadingAssetCard({
   const isError = asset.status === 'error';
 
   return (
-    <div className="flex flex-col gap-1.5 group relative">
-      <div className="relative aspect-square rounded-sm overflow-hidden bg-foreground/20 border border-transparent flex items-center justify-center">
+    <div className="flex flex-col gap-2 group relative">
+      <div className="relative aspect-square rounded-xl overflow-hidden bg-muted/50 border-2 border-dashed border-border/50 flex items-center justify-center shadow-sm">
         {/* Preview if available */}
         {/* biome-ignore lint/performance/noImgElement: blob URL preview during upload */}
         {asset.previewUrl && !isError && (
           <img
             src={asset.previewUrl}
             alt={asset.name}
-            className="max-w-full max-h-full object-contain opacity-60"
+            className="max-w-full max-h-full object-contain opacity-50"
           />
         )}
 
         {/* Error indicator */}
         {isError && (
-          <div className="w-full h-full flex items-center justify-center">
-            <AlertTriangle className="text-destructive" size={32} />
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2 p-4">
+            <AlertTriangle
+              className="text-destructive"
+              size={28}
+              strokeWidth={2}
+            />
+            <p className="text-[10px] text-destructive text-center font-medium">
+              Upload failed
+            </p>
           </div>
         )}
 
         {/* Loading indicator */}
         {!isError && asset.status !== 'complete' && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-            <Loader2 className="text-white animate-spin" size={24} />
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/60 backdrop-blur-sm">
+            <Loader2 className="text-primary animate-spin" size={24} />
+            <p className="text-[10px] text-muted-foreground font-medium">
+              {Math.round(asset.progress)}%
+            </p>
           </div>
         )}
 
         {/* Progress bar at bottom */}
         {!isError && asset.status === 'uploading' && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/60">
+          <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-muted/80">
             <div
-              className="h-full bg-indigo-500 transition-all duration-300"
+              className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300"
               style={{ width: `${asset.progress}%` }}
             />
           </div>
@@ -104,7 +114,7 @@ function UploadingAssetCard({
         {isError && (
           <button
             type="button"
-            className="absolute top-1 right-1 p-1 rounded bg-black/60 hover:bg-destructive transition-colors"
+            className="absolute top-2 right-2 p-1.5 rounded-lg bg-destructive/90 hover:bg-destructive transition-colors shadow-lg"
             onClick={() => onRemove(asset.id)}
           >
             <Trash2 size={12} className="text-white" />
@@ -113,13 +123,13 @@ function UploadingAssetCard({
       </div>
 
       {/* Label */}
-      <p className="text-[10px] text-muted-foreground truncate px-0.5">
+      <p className="text-[11px] text-foreground/70 font-medium truncate px-1 text-center">
         {asset.name}
       </p>
 
       {/* Error message */}
       {isError && asset.error && (
-        <p className="text-[9px] text-destructive truncate px-0.5">
+        <p className="text-[9px] text-destructive/80 truncate px-1 text-center">
           {asset.error}
         </p>
       )}
@@ -137,12 +147,32 @@ function AssetCard({
   onAdd: (asset: Asset) => void;
   onDelete: (id: string) => void;
 }) {
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'image':
+        return 'from-blue-500/10 to-cyan-500/10 border-blue-500/30 group-hover:border-blue-500/50';
+      case 'audio':
+        return 'from-emerald-500/10 to-green-500/10 border-emerald-500/30 group-hover:border-emerald-500/50';
+      case 'video':
+        return 'from-purple-500/10 to-pink-500/10 border-purple-500/30 group-hover:border-purple-500/50';
+      default:
+        return 'from-muted/50 to-muted/30 border-border/50 group-hover:border-primary/50';
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent any parent handlers
+    onAdd(asset);
+  };
+
   return (
     <div
-      className="flex flex-col gap-1.5 group cursor-pointer"
-      onClick={() => onAdd(asset)}
+      className="flex flex-col gap-2 group cursor-pointer"
+      onClick={handleClick}
     >
-      <div className="relative aspect-square rounded-sm overflow-hidden bg-foreground/20 border border-transparent group-hover:border-primary/50 transition-all flex items-center justify-center">
+      <div
+        className={`relative aspect-square rounded-xl overflow-hidden bg-gradient-to-br border-2 transition-all flex items-center justify-center shadow-sm group-hover:shadow-md group-hover:scale-[1.02] ${getCategoryColor(asset.category)}`}
+      >
         {/* biome-ignore lint/performance/noImgElement: CDN URL from R2, not Next.js optimized */}
         {asset.category === 'image' ? (
           <img
@@ -153,14 +183,15 @@ function AssetCard({
         ) : asset.category === 'audio' ? (
           <div className="w-full h-full flex items-center justify-center relative">
             <Music
-              className="text-[#2dc28c]"
-              size={32}
-              fill="#2dc28c"
+              className="text-emerald-500"
+              size={36}
+              strokeWidth={1.5}
+              fill="currentColor"
               fillOpacity={0.2}
             />
           </div>
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-black/40 relative">
+          <div className="w-full h-full flex items-center justify-center bg-black/20 relative">
             {/* biome-ignore lint/a11y/useKeyWithMouseEvents: video preview on hover for visual feedback */}
             <video
               src={asset.cdnUrl}
@@ -175,10 +206,15 @@ function AssetCard({
           </div>
         )}
 
-        {/* Remove Button (Minimalist on Hover) */}
+        {/* Category badge */}
+        <div className="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-background/90 backdrop-blur-sm text-[9px] font-semibold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
+          {asset.category}
+        </div>
+
+        {/* Remove Button */}
         <button
           type="button"
-          className="absolute top-1 right-1 p-1 rounded bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive"
+          className="absolute top-2 right-2 p-1.5 rounded-lg bg-destructive/90 hover:bg-destructive opacity-0 group-hover:opacity-100 transition-all shadow-lg hover:scale-110"
           onClick={(e) => {
             e.stopPropagation();
             onDelete(asset.id);
@@ -186,10 +222,17 @@ function AssetCard({
         >
           <Trash2 size={12} className="text-white" />
         </button>
+
+        {/* Click hint overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+          <div className="absolute bottom-2 left-0 right-0 text-center text-white text-[10px] font-semibold">
+            Click to add
+          </div>
+        </div>
       </div>
 
-      {/* Label (External) */}
-      <p className="text-[10px] text-muted-foreground group-hover:text-foreground truncate transition-colors px-0.5">
+      {/* Label */}
+      <p className="text-[11px] text-foreground/80 group-hover:text-foreground font-medium truncate transition-colors px-1 text-center">
         {asset.name}
       </p>
     </div>
@@ -258,7 +301,8 @@ export default function PanelUploads() {
       'image/*': ALLOWED_FILE_TYPES.image.extensions.map((ext) => `.${ext}`),
       'audio/*': ALLOWED_FILE_TYPES.audio.extensions.map((ext) => `.${ext}`),
     },
-    noClick: false,
+    noClick: true, // Disable click on the entire area
+    noKeyboard: true,
   });
 
   // Handle delete with confirmation
@@ -353,18 +397,18 @@ export default function PanelUploads() {
     assets.length > 0 || uploadingArray.length > 0 || folders.length > 0;
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-gradient-to-b from-background to-background/50">
       {/* Search and Upload Header */}
       {hasAssets ? (
-        <div className="p-4 flex gap-2">
-          <InputGroup>
-            <InputGroupAddon className="bg-secondary/30 pointer-events-none text-muted-foreground w-8 justify-center">
+        <div className="p-3 flex gap-2 shrink-0">
+          <InputGroup className="flex-1 shadow-sm">
+            <InputGroupAddon className="bg-muted/50 pointer-events-none text-muted-foreground w-9 justify-center">
               <Search size={14} />
             </InputGroupAddon>
 
             <InputGroupInput
               placeholder="Search assets..."
-              className="bg-secondary/30 border-0 h-full text-xs box-border pl-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+              className="bg-muted/50 border-border/50 h-9 text-xs box-border pl-0 focus-visible:ring-1 focus-visible:ring-primary/20 focus-visible:border-primary/50"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -372,18 +416,21 @@ export default function PanelUploads() {
           <Button
             onClick={() => document.getElementById('dropzone-input')?.click()}
             variant={'outline'}
+            size="icon"
+            className="h-9 w-9 shrink-0"
+            title="Upload files"
           >
-            <Upload size={14} />
+            <Upload size={16} />
           </Button>
         </div>
       ) : (
-        <div className="p-4 flex gap-2">
+        <div className="p-3 shrink-0">
           <Button
             onClick={() => document.getElementById('dropzone-input')?.click()}
-            variant={'outline'}
-            className="w-full"
+            variant={'default'}
+            className="w-full h-9 gap-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-lg shadow-primary/25"
           >
-            <Upload size={14} /> Upload
+            <Upload size={16} /> Upload Files
           </Button>
         </div>
       )}
@@ -396,63 +443,140 @@ export default function PanelUploads() {
         onFolderCreated={handleFolderCreated}
       />
 
-      {/* Drop zone wrapper */}
-      <ScrollArea className="flex-1 px-4">
-        <div {...getRootProps()} className="relative min-h-full">
-          {/* biome-ignore lint/correctness/useUniqueElementIds: single instance in uploads panel */}
+      {/* Drop zone wrapper - Only drag and drop, no click */}
+      <ScrollArea className="flex-1 px-3">
+        <div
+          {...getRootProps()}
+          className="relative min-h-full pb-3 outline-none"
+        >
+          {/* Hidden file input */}
           <input {...getInputProps()} id="dropzone-input" />
 
-          {/* Drag overlay */}
+          {/* Drag overlay with improved visual design */}
           {isDragActive && (
-            <div className="absolute inset-0 z-50 flex items-center justify-center bg-primary/5 border-2 border-dashed border-primary/30 rounded-lg">
-              <div className="text-center">
-                <Upload size={32} className="mx-auto mb-2 text-primary" />
-                <p className="text-sm text-muted-foreground">Drop files here</p>
+            <div className="absolute inset-x-0 top-4 bottom-0 z-50 flex items-center justify-center bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-2 border-dashed border-primary rounded-2xl backdrop-blur-md animate-in fade-in duration-200 m-2 pointer-events-none">
+              <div className="text-center space-y-6 p-10 rounded-2xl bg-background/90 backdrop-blur-sm border-2 border-primary/30 shadow-2xl shadow-primary/20">
+                <div className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center animate-pulse">
+                  <Upload
+                    size={40}
+                    className="text-primary"
+                    strokeWidth={2.5}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-lg font-bold text-foreground">
+                    Drop your files here
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Videos, images, and audio supported
+                  </p>
+                </div>
               </div>
             </div>
           )}
 
-          {/* Empty state */}
+          {/* Empty state with improved design */}
           {!hasAssets && !isDragActive && (
-            <div className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-2">
-              <Upload size={32} className="opacity-50" />
-              <span className="text-sm">No assets yet</span>
-              <span className="text-xs opacity-70">
-                Drag & drop files or click upload
-              </span>
+            <div className="flex flex-col items-center justify-center py-16 text-center gap-6 animate-in fade-in duration-300 pointer-events-none">
+              <div className="relative">
+                <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 flex items-center justify-center shadow-lg border-2 border-border/50">
+                  <Upload size={42} className="text-primary" strokeWidth={2} />
+                </div>
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center shadow-lg animate-bounce">
+                  <span className="text-white text-sm font-bold">+</span>
+                </div>
+              </div>
+              <div className="space-y-3 max-w-[240px]">
+                <span className="text-base font-bold text-foreground">
+                  No assets yet
+                </span>
+                <span className="text-xs text-muted-foreground leading-relaxed">
+                  Drag & drop your media files anywhere, or click the button
+                  below
+                </span>
+              </div>
+              {/* Clickable upload zone */}
+              <button
+                type="button"
+                onClick={() =>
+                  document.getElementById('dropzone-input')?.click()
+                }
+                className="mt-4 px-8 py-4 rounded-xl border-2 border-dashed border-primary/50 bg-primary/5 hover:bg-primary/10 hover:border-primary transition-all cursor-pointer pointer-events-auto group"
+              >
+                <div className="flex items-center gap-3">
+                  <Upload
+                    size={20}
+                    className="text-primary group-hover:scale-110 transition-transform"
+                  />
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-foreground">
+                      Click to upload
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      or drag and drop
+                    </p>
+                  </div>
+                </div>
+              </button>
             </div>
           )}
 
           {/* Assets grid */}
           {hasAssets && (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-x-3 gap-y-4 pb-4">
-              {/* Uploading assets at top */}
-              {uploadingArray.map((upload) => (
-                <UploadingAssetCard
-                  key={upload.id}
-                  asset={upload}
-                  onRemove={removeUploading}
-                />
-              ))}
+            <div className="space-y-4">
+              {/* Clickable drop zone hint when has assets */}
+              {!isDragActive && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    document.getElementById('dropzone-input')?.click()
+                  }
+                  className="w-full rounded-xl border-2 border-dashed border-border/30 bg-muted/20 p-4 text-center hover:border-primary/50 hover:bg-muted/30 transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <Upload
+                      size={16}
+                      className="text-muted-foreground group-hover:text-primary transition-colors"
+                    />
+                    <p className="text-xs text-muted-foreground group-hover:text-foreground font-medium transition-colors">
+                      Drag & drop files here or{' '}
+                      <span className="text-primary font-semibold">
+                        click to upload
+                      </span>
+                    </p>
+                  </div>
+                </button>
+              )}
 
-              {/* Folders (above assets) */}
-              {folders.map((folder) => (
-                <FolderCard
-                  key={folder.id}
-                  folder={folder}
-                  onClick={() => setCurrentFolderId(folder.id)}
-                />
-              ))}
+              <div className="grid grid-cols-[repeat(auto-fill,minmax(90px,1fr))] gap-2.5">
+                {/* Uploading assets at top */}
+                {uploadingArray.map((upload) => (
+                  <UploadingAssetCard
+                    key={upload.id}
+                    asset={upload}
+                    onRemove={removeUploading}
+                  />
+                ))}
 
-              {/* DB assets */}
-              {filteredAssets.map((asset) => (
-                <AssetCard
-                  key={asset.id}
-                  asset={asset}
-                  onAdd={addItemToCanvas}
-                  onDelete={handleDeleteClick}
-                />
-              ))}
+                {/* Folders (above assets) */}
+                {folders.map((folder) => (
+                  <FolderCard
+                    key={folder.id}
+                    folder={folder}
+                    onClick={() => setCurrentFolderId(folder.id)}
+                  />
+                ))}
+
+                {/* DB assets */}
+                {filteredAssets.map((asset) => (
+                  <AssetCard
+                    key={asset.id}
+                    asset={asset}
+                    onAdd={addItemToCanvas}
+                    onDelete={handleDeleteClick}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </div>
