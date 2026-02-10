@@ -16,6 +16,7 @@ import {
   X,
   FileSpreadsheet,
   CreditCard,
+  Sparkles,
 } from 'lucide-react';
 import { useRenderEventContext } from '@/components/render/render-event-provider';
 import { authClient } from '@/lib/auth-client';
@@ -42,6 +43,11 @@ const mainNav = [
     href: '/dashboard/bulk-generate',
     icon: FileSpreadsheet,
     label: 'Bulk Generate',
+  },
+  {
+    href: '/dashboard/text-to-video',
+    icon: Sparkles,
+    label: 'Text to Video',
   },
   {
     href: '/dashboard/billing',
