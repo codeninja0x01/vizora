@@ -20,6 +20,7 @@ import { WebCodecsUnsupportedModal } from '@/components/editor/webcodecs-unsuppo
 import Assistant from './assistant/assistant';
 import { TemplateBar } from './template-mode/template-bar';
 import { getTemplateById } from '@/app/(protected)/dashboard/templates/actions';
+import { DesktopOnlyModal } from './desktop-only-modal';
 
 export default function Editor() {
   const {
@@ -188,6 +189,9 @@ export default function Editor() {
 
       {/* WebCodecs Support Check Modal */}
       <WebCodecsUnsupportedModal open={!isWebCodecsSupported} />
+
+      {/* Desktop-only enforcement */}
+      <DesktopOnlyModal />
     </div>
   );
 }
