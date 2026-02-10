@@ -7,6 +7,9 @@ export interface GeneratedAsset {
   text: string; // The prompt
   type: 'voiceover' | 'sfx' | 'music';
   createdAt: number;
+  provider?: string;
+  voiceId?: string;
+  voiceName?: string;
 }
 
 interface GeneratedState {
