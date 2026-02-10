@@ -291,15 +291,6 @@ export const handleGenerateCaptions = async (input: any, studio: Studio) => {
   console.log({ clipIds, targetIds });
 
   try {
-    const fontName = 'Bangers-Regular';
-    const fontUrl =
-      'https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLCz7V1tvFP-KUEg.ttf';
-
-    await fontManager.addFont({
-      name: fontName,
-      url: fontUrl,
-    });
-
     const captionTrackId = `track_captions_${Date.now()}`;
     const clipsToAdd: IClip[] = [];
 
@@ -309,6 +300,40 @@ export const handleGenerateCaptions = async (input: any, studio: Studio) => {
       if (!clip || !clip.src) continue;
 
       try {
+        // Try new subtitle API first
+        const subtitleResponse = await fetch('/api/ai/subtitles', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            audioUrl: clip.src,
+            presetId: 'modern-karaoke',
+            format: 'clips',
+            videoWidth: (studio as any).opts?.width || 1920,
+            videoHeight: (studio as any).opts?.height || 1080,
+          }),
+        });
+
+        if (subtitleResponse.ok) {
+          const subtitleData = await subtitleResponse.json();
+          if (subtitleData.success && subtitleData.data?.clips) {
+            for (const clipJson of subtitleData.data.clips) {
+              const captionClip = await jsonToClip(clipJson);
+              clipsToAdd.push(captionClip);
+            }
+            continue; // Success, skip to next clip
+          }
+        }
+
+        // Fallback to old approach
+        const fontName = 'Bangers-Regular';
+        const fontUrl =
+          'https://fonts.gstatic.com/s/poppins/v15/pxiByp8kv8JHgFVrLCz7V1tvFP-KUEg.ttf';
+
+        await fontManager.addFont({
+          name: fontName,
+          url: fontUrl,
+        });
+
         const response = await fetch('/api/transcribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
