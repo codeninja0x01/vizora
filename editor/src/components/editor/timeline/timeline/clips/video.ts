@@ -2,12 +2,7 @@ import { BaseTimelineClip, type BaseClipProps } from './base';
 import type { Control } from 'fabric';
 import { createTrimControls } from '../controls';
 import { editorFont } from '@/components/editor/constants';
-import {
-  TIMELINE_CONSTANTS,
-  CLIP_COLORS,
-  SELECTION_COLOR,
-  SELECTION_BORDER_WIDTH,
-} from '@/components/editor/timeline/timeline-constants';
+import { TIMELINE_CONSTANTS } from '@/components/editor/timeline/timeline-constants';
 import { useStudioStore } from '@/stores/studio-store';
 import type { Video as VideoClip } from 'openvideo';
 import ThumbnailCache from '../utils/thumbnail-cache';
@@ -16,7 +11,8 @@ import { unitsToTimeMs } from '../utils/filmstrip';
 const MICROSECONDS_IN_SECOND = 1_000_000;
 const DEFAULT_THUMBNAIL_HEIGHT = 52;
 const DEFAULT_ASPECT_RATIO = 16 / 9;
-const FALLBACK_COLOR = CLIP_COLORS.video; // Blue
+const FALLBACK_COLOR = '#1e1b4b'; // Deep Indigo
+const _THUMBNAIL_STEP_US = 1_000_000; // 1fps
 
 export class Video extends BaseTimelineClip {
   static createControls(): { controls: Record<string, Control> } {
@@ -38,13 +34,13 @@ export class Video extends BaseTimelineClip {
   private _thumbnailCache: ThumbnailCache = new ThumbnailCache();
 
   static ownDefaults = {
-    rx: 4,
-    ry: 4,
+    rx: 6,
+    ry: 6,
     objectCaching: false,
     borderColor: 'transparent',
     stroke: 'transparent',
     strokeWidth: 0,
-    fill: CLIP_COLORS.video,
+    fill: '#312e81',
     borderOpacityWhenMoving: 1,
     hoverCursor: 'default',
   };
@@ -114,11 +110,18 @@ export class Video extends BaseTimelineClip {
     this.canvas?.requestRenderAll();
   }
 
-  public onScrollChange(_opts: { scrollLeft: number; force?: boolean }) {
+  public onScrollChange({
+    scrollLeft,
+    force,
+  }: {
+    scrollLeft: number;
+    force?: boolean;
+  }) {
     // No-op for thumbnail loading now, as we load all at once.
+    // We might want to use scrollLeft for culling in drawFilmstrip if we wanted to optimization,
+    // but the requirement is to simplify.
   }
 
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: canvas thumbnail pipeline with abort handling
   public async loadAndRenderThumbnails() {
     if (this._isFetchingThumbnails) return;
 
@@ -260,7 +263,7 @@ export class Video extends BaseTimelineClip {
     ctx.clip();
 
     // Draw background fill manually (instead of using super._render with pattern)
-    ctx.fillStyle = (this.fill as string) || CLIP_COLORS.video;
+    ctx.fillStyle = (this.fill as string) || '#312e81';
     ctx.fillRect(-this.width / 2, -this.height / 2, this.width, this.height);
 
     // Translate for filmstrip and identity drawing
@@ -275,7 +278,6 @@ export class Video extends BaseTimelineClip {
     this.updateSelected(ctx);
   }
 
-  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: canvas filmstrip rendering with dual zoom strategies
   private drawFilmstrip(ctx: CanvasRenderingContext2D) {
     const height = this.height || DEFAULT_THUMBNAIL_HEIGHT;
     const thumbnailWidth = Math.round(height * this._aspectRatio);
@@ -447,11 +449,9 @@ export class Video extends BaseTimelineClip {
   }
 
   public updateSelected(ctx: CanvasRenderingContext2D) {
-    const borderColor = this.isSelected
-      ? SELECTION_COLOR
-      : 'rgba(255, 255, 255, 0.1)';
-    const borderWidth = SELECTION_BORDER_WIDTH;
-    const radius = 4;
+    const borderColor = this.isSelected ? '#ffffff' : '#3730a3';
+    const borderWidth = 2;
+    const radius = 6;
 
     ctx.save();
     ctx.fillStyle = borderColor;

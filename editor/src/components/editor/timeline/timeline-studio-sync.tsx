@@ -44,9 +44,9 @@ export const TimelineStudioSync = ({
       // Find or create track
       // Note: setTracks in store might be needed.
       // Complex part: Studio has the authoritative "Clip" object. Store needs it.
-      const newClips = { ...storeState.clips, [clip.id]: clip };
+      const _newClips = { ...storeState.clips, [clip.id]: clip };
       // Update track
-      const newTracks = storeState._tracks.map((t) => {
+      const _newTracks = storeState._tracks.map((t) => {
         if (t.id === trackId) {
           return { ...t, clipIds: [...t.clipIds, clip.id] };
         }

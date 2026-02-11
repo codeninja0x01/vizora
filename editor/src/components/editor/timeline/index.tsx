@@ -60,6 +60,9 @@ export function Timeline() {
     downTime: 0,
   });
 
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const [viewportWidth, setViewportWidth] = useState(0);
+
   // Timeline zoom functionality
   const { zoomLevel, setZoomLevel, handleWheel } = useTimelineZoom({
     containerRef: timelineRef,
@@ -82,6 +85,18 @@ export function Timeline() {
   const timelineCanvasRef = useRef<TimelineCanvas | null>(null);
   const isUpdatingRef = useRef(false);
 
+  // Handle scroll changes from playhead
+  const handleScrollChange = useCallback(
+    (scrollX: number) => {
+      setScrollLeft(scrollX);
+      if (rulerScrollRef.current) {
+        rulerScrollRef.current.scrollLeft = scrollX;
+      }
+      timelineCanvasRef.current?.setScroll(scrollX, undefined);
+    },
+    [timelineCanvasRef]
+  );
+
   // Timeline playhead ruler handlers
   const { handleRulerMouseDown } = useTimelinePlayheadRuler({
     duration,
@@ -91,6 +106,7 @@ export function Timeline() {
     rulerScrollRef,
     tracksScrollRef,
     playheadRef,
+    onScrollChange: handleScrollChange,
   });
 
   // Timeline content click to seek handler
@@ -191,6 +207,23 @@ export function Timeline() {
     setDuration(totalDuration);
   }, [tracks, clips, setDuration, getTotalDuration]);
 
+  // Track viewport width
+  useEffect(() => {
+    if (!timelineRef.current) return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setViewportWidth(entry.contentRect.width);
+      }
+    });
+
+    observer.observe(timelineRef.current);
+    // Initial width
+    setViewportWidth(timelineRef.current.clientWidth);
+
+    return () => observer.disconnect();
+  }, []);
+
   // --- Scroll synchronization effect ---
   // Horizontal scroll synchronization (Ruler -> Canvas) is now handled via canvas.initScrollbars
   // but we still need to keep the UI in sync when the canvas scrolls.
@@ -204,10 +237,15 @@ export function Timeline() {
       if (isUpdatingRef.current) return;
       isUpdatingRef.current = true;
 
-      if (typeof scrollX === 'number' && rulerScrollRef.current) {
-        rulerScrollRef.current.scrollLeft = scrollX;
+      if (typeof scrollX === 'number') {
+        setScrollLeft(scrollX);
+        if (rulerScrollRef.current) {
+          rulerScrollRef.current.scrollLeft = scrollX;
+        }
       } else if (deltaX !== 0 && rulerScrollRef.current) {
-        rulerScrollRef.current.scrollLeft += deltaX;
+        const newX = rulerScrollRef.current.scrollLeft + deltaX;
+        setScrollLeft(newX);
+        rulerScrollRef.current.scrollLeft = newX;
       }
 
       if (typeof scrollY === 'number' && trackLabelsRef.current) {
@@ -293,24 +331,24 @@ export function Timeline() {
   });
 
   return (
-    <div
-      className={
-        'h-full flex flex-col transition-colors duration-200 relative bg-card rounded-sm overflow-hidden'
-      }
-      onMouseEnter={() => setIsInTimeline(true)}
-      onMouseLeave={() => setIsInTimeline(false)}
-    >
-      <TimelineToolbar
-        zoomLevel={zoomLevel}
-        setZoomLevel={setZoomLevel}
-        onDelete={handleDelete}
-        onDuplicate={handleDuplicate}
-        onSplit={handleSplit}
-      />
-      <TimelineStudioSync timelineCanvas={timelineCanvasRef.current} />
+    <TimelineDropZone>
+      <div
+        className={
+          'h-full flex flex-col transition-colors duration-200 relative bg-card rounded-sm overflow-hidden'
+        }
+        onMouseEnter={() => setIsInTimeline(true)}
+        onMouseLeave={() => setIsInTimeline(false)}
+      >
+        <TimelineToolbar
+          zoomLevel={zoomLevel}
+          setZoomLevel={setZoomLevel}
+          onDelete={handleDelete}
+          onDuplicate={handleDuplicate}
+          onSplit={handleSplit}
+        />
+        <TimelineStudioSync timelineCanvas={timelineCanvasRef.current} />
 
-      {/* Timeline Container */}
-      <TimelineDropZone>
+        {/* Timeline Container */}
         <div
           className="flex-1 flex flex-col overflow-hidden relative bg-[#121212]"
           ref={timelineRef}
@@ -327,6 +365,8 @@ export function Timeline() {
             timelineRef={timelineRef}
             playheadRef={playheadRef}
             isSnappingToPlayhead={false}
+            scrollLeft={scrollLeft}
+            onScrollChange={handleScrollChange}
           />
 
           {/* Timeline Header with Ruler */}
@@ -363,6 +403,7 @@ export function Timeline() {
                   isUpdatingRef.current = true;
                   const scrollX = (e.currentTarget as HTMLDivElement)
                     .scrollLeft;
+                  setScrollLeft(scrollX);
                   timelineCanvasRef.current?.setScroll(scrollX, undefined);
                   isUpdatingRef.current = false;
                 }}
@@ -375,11 +416,20 @@ export function Timeline() {
                   }}
                   onMouseDown={handleRulerMouseDown}
                 >
-                  <TimelineRuler
-                    zoomLevel={zoomLevel}
-                    duration={duration}
-                    width={dynamicTimelineWidth}
-                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      transform: `translateX(${scrollLeft}px)`,
+                      width: viewportWidth ? `${viewportWidth - 64}px` : '100%',
+                    }}
+                  >
+                    <TimelineRuler
+                      zoomLevel={zoomLevel}
+                      duration={duration}
+                      width={viewportWidth ? viewportWidth - 64 : 1000}
+                      scrollLeft={scrollLeft}
+                    />
+                  </div>
                 </div>
               </ScrollArea>
             </div>
@@ -477,8 +527,8 @@ export function Timeline() {
             </div>
           </div>
         </div>
-      </TimelineDropZone>
-    </div>
+      </div>
+    </TimelineDropZone>
   );
 }
 

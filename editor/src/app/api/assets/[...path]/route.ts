@@ -11,11 +11,12 @@ const s3Client = new S3Client({
 });
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { path: string[] } }
+  _req: NextRequest,
+  { params }: { params: Promise<{ path: string[] }> }
 ) {
   try {
-    const path = params.path.join('/');
+    const { path: pathArray } = await params;
+    const path = pathArray.join('/');
 
     // Fetch from R2
     const command = new GetObjectCommand({

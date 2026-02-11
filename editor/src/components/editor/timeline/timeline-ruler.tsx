@@ -7,12 +7,14 @@ interface TimelineRulerProps {
   zoomLevel: number;
   duration: number;
   width: number;
+  scrollLeft: number;
 }
 
 export function TimelineRuler({
   zoomLevel,
   duration,
   width,
+  scrollLeft,
 }: TimelineRulerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -41,18 +43,28 @@ export function TimelineRuler({
 
     const pixelsPerSecond = TIMELINE_CONSTANTS.PIXELS_PER_SECOND * zoomLevel;
 
-    // Background - seamless blend with timeline
+    // Background for valid duration (darker)
     const durationX = duration * pixelsPerSecond;
     if (durationX > 0) {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0)'; // Transparent - seamless blend
-      ctx.fillRect(0, 0, Math.min(width, durationX), 24);
+      ctx.fillStyle = 'rgba(33, 33, 33, 1)';
+      // We only fill visible part
+      const visibleStart = Math.max(0, scrollLeft);
+      const visibleEnd = Math.min(scrollLeft + width, durationX);
+      if (visibleEnd > visibleStart) {
+        ctx.fillRect(
+          visibleStart - scrollLeft,
+          0,
+          visibleEnd - visibleStart,
+          24
+        );
+      }
     }
 
     // Drawing settings
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.50)'; // text-muted-foreground equivalent
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.10)'; // Minor ticks
+    ctx.fillStyle = '#9ca3af'; // text-gray-400
+    ctx.strokeStyle = '#374151'; // border-gray-700
     ctx.lineWidth = 1;
-    ctx.font = '11px Inter, sans-serif';
+    ctx.font = '12px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
 
@@ -76,7 +88,7 @@ export function TimelineRuler({
       // If interval is sub-second, show decimal
       if (mainInterval < 1) {
         // Avoid long floating point errors
-        return seconds.toFixed(1) + 's';
+        return `${seconds.toFixed(1)}s`;
       }
 
       const m = Math.floor(seconds / 60);
@@ -106,18 +118,26 @@ export function TimelineRuler({
       subInterval = mainInterval; // No sub ticks
     }
 
-    const rangeEnd = Math.max(duration, width / pixelsPerSecond);
-    const count = Math.ceil(rangeEnd / subInterval) + 1;
+    // Determine range to draw based on scrollLeft and width
+    const startTime =
+      Math.floor(scrollLeft / pixelsPerSecond / subInterval) * subInterval;
+    const endTime = (scrollLeft + width) / pixelsPerSecond;
+
+    const count = Math.ceil((endTime - startTime) / subInterval) + 1;
 
     for (let i = 0; i < count; i++) {
-      const time = i * subInterval;
-      const x = Math.floor(time * pixelsPerSecond) + 0.5;
+      const time = startTime + i * subInterval;
+      if (time < 0) continue;
+
+      const x = Math.floor(time * pixelsPerSecond - scrollLeft) + 0.5;
 
       if (x > width) break;
+      if (x < -20) continue; // Skip if far left
 
       const isBeyondDuration = time > duration + 0.001;
       ctx.globalAlpha = isBeyondDuration ? 0.4 : 1.0;
 
+      ctx.beginPath();
       // Check if main interval
       // Use epsilon for float comparison
       const isMain =
@@ -125,30 +145,25 @@ export function TimelineRuler({
         Math.abs((time % mainInterval) - mainInterval) < 0.001;
 
       if (isMain) {
-        // Main Tick - more visible
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.20)';
-        ctx.beginPath();
+        // Main Tick (Botom)
         ctx.moveTo(x, 18);
         ctx.lineTo(x, 24);
-        ctx.stroke();
 
         // Text (Top)
         const text = formatTime(time);
         ctx.fillText(text, x, 4);
       } else {
-        // Sub Tick (Bottom, shorter) - less visible
+        // Sub Tick (Bottom, shorter)
         // Only draw sub ticks if there's enough space
         if (subInterval !== mainInterval) {
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.10)';
-          ctx.beginPath();
           ctx.moveTo(x, 21);
           ctx.lineTo(x, 24);
-          ctx.stroke();
         }
       }
+      ctx.stroke();
     }
     ctx.globalAlpha = 1.0;
-  }, [zoomLevel, duration, width]);
+  }, [zoomLevel, duration, width, scrollLeft]);
 
   return (
     <canvas
