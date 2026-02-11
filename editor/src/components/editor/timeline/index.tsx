@@ -331,24 +331,24 @@ export function Timeline() {
   });
 
   return (
-    <TimelineDropZone>
-      <div
-        className={
-          'h-full flex flex-col transition-colors duration-200 relative bg-card rounded-sm overflow-hidden'
-        }
-        onMouseEnter={() => setIsInTimeline(true)}
-        onMouseLeave={() => setIsInTimeline(false)}
-      >
-        <TimelineToolbar
-          zoomLevel={zoomLevel}
-          setZoomLevel={setZoomLevel}
-          onDelete={handleDelete}
-          onDuplicate={handleDuplicate}
-          onSplit={handleSplit}
-        />
-        <TimelineStudioSync timelineCanvas={timelineCanvasRef.current} />
+    <div
+      className={
+        'h-full flex flex-col transition-colors duration-200 relative bg-card rounded-sm overflow-hidden'
+      }
+      onMouseEnter={() => setIsInTimeline(true)}
+      onMouseLeave={() => setIsInTimeline(false)}
+    >
+      <TimelineToolbar
+        zoomLevel={zoomLevel}
+        setZoomLevel={setZoomLevel}
+        onDelete={handleDelete}
+        onDuplicate={handleDuplicate}
+        onSplit={handleSplit}
+      />
+      <TimelineStudioSync timelineCanvas={timelineCanvasRef.current} />
 
-        {/* Timeline Container */}
+      {/* Timeline Container */}
+      <TimelineDropZone>
         <div
           className="flex-1 flex flex-col overflow-hidden relative bg-[#121212]"
           ref={timelineRef}
@@ -527,8 +527,8 @@ export function Timeline() {
             </div>
           </div>
         </div>
-      </div>
-    </TimelineDropZone>
+      </TimelineDropZone>
+    </div>
   );
 }
 
