@@ -23,6 +23,17 @@ import { DEFAULT_FPS } from '@/stores/project-store';
 import { formatTimeCode } from '@/lib/time';
 import { EditableTimecode } from '@/components/ui/editable-timecode';
 
+/**
+ * Timeline toolbar component providing playback controls, editing tools,
+ * and zoom controls. Includes play/pause, skip, split, duplicate, delete,
+ * and timeline zoom functionality.
+ *
+ * @param zoomLevel - Current zoom level value
+ * @param setZoomLevel - Function to update zoom level
+ * @param onDelete - Optional callback for delete action
+ * @param onDuplicate - Optional callback for duplicate action
+ * @param onSplit - Optional callback for split action
+ */
 export function TimelineToolbar({
   zoomLevel,
   setZoomLevel,

@@ -5,7 +5,8 @@ import { usePlaybackStore } from '@/stores/playback-store';
 import type { ITimelineTrack, IClip, TrackType } from '@/types/timeline';
 import type { TimelineCanvas } from './timeline';
 import { generateUUID } from '@/utils/id';
-import { clipToJSON, type IClip as StudioClip } from 'openvideo';
+import { clipToJSON, type IClip as StudioClip, Log } from 'openvideo';
+import { toast } from 'sonner';
 
 interface TimelineStudioSyncProps {
   timelineCanvas?: TimelineCanvas | null;
@@ -93,7 +94,7 @@ export const TimelineStudioSync = ({
         .setDuration(studio.getMaxDuration() / 1_000_000);
 
       useTimelineStore.setState((state) => {
-        const { [clipId]: removed, ...restClips } = state.clips;
+        const { [clipId]: _removed, ...restClips } = state.clips;
         // Remove from tracks
         const updatedTracks = state._tracks.map((t) => ({
           ...t,
@@ -118,7 +119,9 @@ export const TimelineStudioSync = ({
 
       useTimelineStore.setState((state) => {
         const newClips = { ...state.clips };
-        clipIds.forEach((id) => delete newClips[id]);
+        for (const id of clipIds) {
+          delete newClips[id];
+        }
 
         // Remove from tracks
         const updatedTracks = state._tracks.map((t) => ({
@@ -139,7 +142,7 @@ export const TimelineStudioSync = ({
       track,
       index,
     }: {
-      track: any;
+      track: any; // Studio uses StudioTrack which has different type signature
       index?: number;
     }) => {
       useTimelineStore.setState((state) => {
@@ -160,7 +163,11 @@ export const TimelineStudioSync = ({
       });
     };
 
-    const handleTrackOrderChanged = ({ tracks }: { tracks: any[] }) => {
+    const handleTrackOrderChanged = ({
+      tracks,
+    }: {
+      tracks: any[]; // Studio uses StudioTrack[] which has different type signature
+    }) => {
       useTimelineStore.setState((state) => ({
         ...state,
         _tracks: tracks,
@@ -291,7 +298,7 @@ export const TimelineStudioSync = ({
       }
 
       // 2. Map clips to store format
-      const newClipsMap: Record<string, any> = {};
+      const newClipsMap: Record<string, IClip> = {};
       clips.forEach((c) => {
         const serialized = clipToJSON(c as unknown as StudioClip);
         newClipsMap[c.id] = {
@@ -399,30 +406,35 @@ export const TimelineStudioSync = ({
       duration: number;
       trim?: { from: number; to: number };
     }) => {
-      // TimelineCanvas Events are ALREADY in MICROSECONDS
+      try {
+        // TimelineCanvas Events are ALREADY in MICROSECONDS
 
-      // Update Store
-      updateClip(clipId, { displayFrom, duration, trim });
+        // Update Store
+        updateClip(clipId, { displayFrom, duration, trim });
 
-      if (!studio) return;
+        if (!studio) return;
 
-      // Update Studio
-      // Calculate new display.to based on from + duration
-      const displayTo = displayFrom + duration;
-      const display = { from: displayFrom, to: displayTo };
+        // Update Studio
+        // Calculate new display.to based on from + duration
+        const displayTo = displayFrom + duration;
+        const display = { from: displayFrom, to: displayTo };
 
-      await studio.updateClip(clipId, {
-        display,
-        // We can redundant set duration for clarity, though our logic handles it
-        duration,
-        trim,
-      });
+        await studio.updateClip(clipId, {
+          display,
+          // We can redundant set duration for clarity, though our logic handles it
+          duration,
+          trim,
+        });
 
-      // Update store duration (max duration might have changed)
-      // Convert µs -> s
-      usePlaybackStore
-        .getState()
-        .setDuration(studio.getMaxDuration() / 1_000_000);
+        // Update store duration (max duration might have changed)
+        // Convert µs -> s
+        usePlaybackStore
+          .getState()
+          .setDuration(studio.getMaxDuration() / 1_000_000);
+      } catch (error) {
+        Log.error('Failed to modify clip:', error);
+        toast.error('Failed to update clip');
+      }
     };
 
     const handleClipsModified = async ({
@@ -435,55 +447,60 @@ export const TimelineStudioSync = ({
         trim?: { from: number; to: number };
       }>;
     }) => {
-      // TimelineCanvas Events are ALREADY in MICROSECONDS
+      try {
+        // TimelineCanvas Events are ALREADY in MICROSECONDS
 
-      // Update Store
-      updateClips(clips);
+        // Update Store
+        updateClips(clips);
 
-      if (!studio) return;
+        if (!studio) return;
 
-      // Update Studio for each clip
-      await Promise.all(
-        clips.map(async (clip) => {
-          const updates: any = {};
+        // Update Studio for each clip
+        await Promise.all(
+          clips.map(async (clip) => {
+            const updates: Record<string, unknown> = {};
 
-          // Inputs are already µs
-          const displayFromUs = clip.displayFrom;
-          const durationUs = clip.duration;
+            // Inputs are already µs
+            const displayFromUs = clip.displayFrom;
+            const durationUs = clip.duration;
 
-          // Note regarding storeClip:
-          // We need the current state to calculate 'to'.
-          // We can get it from Studio directly to be safe, or Store.
-          // Studio is authoritative for engine state.
+            // Note regarding storeClip:
+            // We need the current state to calculate 'to'.
+            // We can get it from Studio directly to be safe, or Store.
+            // Studio is authoritative for engine state.
 
-          if (displayFromUs !== undefined) {
-            // Access store instead of private studio.clips
-            const storeClip = useTimelineStore.getState().clips[clip.clipId];
-            // currentClip duration is already in µs
-            const currentDuration = durationUs ?? storeClip?.duration ?? 0;
-            const displayToUs = displayFromUs + currentDuration;
+            if (displayFromUs !== undefined) {
+              // Access store instead of private studio.clips
+              const storeClip = useTimelineStore.getState().clips[clip.clipId];
+              // currentClip duration is already in µs
+              const currentDuration = durationUs ?? storeClip?.duration ?? 0;
+              const displayToUs = displayFromUs + currentDuration;
 
-            updates.display = {
-              from: displayFromUs,
-              to: displayToUs,
-            };
-          }
-          if (durationUs !== undefined) {
-            updates.duration = durationUs;
-          }
+              updates.display = {
+                from: displayFromUs,
+                to: displayToUs,
+              };
+            }
+            if (durationUs !== undefined) {
+              updates.duration = durationUs;
+            }
 
-          if (clip.trim !== undefined) {
-            updates.trim = clip.trim;
-          }
-          await studio.updateClip(clip.clipId, updates);
-        })
-      );
+            if (clip.trim !== undefined) {
+              updates.trim = clip.trim;
+            }
+            await studio.updateClip(clip.clipId, updates);
+          })
+        );
 
-      // Update store duration (max duration might have changed)
-      // Convert µs -> s
-      usePlaybackStore
-        .getState()
-        .setDuration(studio.getMaxDuration() / 1_000_000);
+        // Update store duration (max duration might have changed)
+        // Convert µs -> s
+        usePlaybackStore
+          .getState()
+          .setDuration(studio.getMaxDuration() / 1_000_000);
+      } catch (error) {
+        Log.error('Failed to modify clips:', error);
+        toast.error('Failed to update clips');
+      }
     };
 
     const handleClipMovedToTrack = ({
@@ -594,19 +611,29 @@ export const TimelineStudioSync = ({
     };
 
     const handleClipsRemoved = async ({ clipIds }: { clipIds: string[] }) => {
-      // 1. Update Store
-      removeClips(clipIds);
+      try {
+        // 1. Update Store
+        removeClips(clipIds);
 
-      // 2. Update Studio
-      if (!studio) return;
+        // 2. Update Studio
+        if (!studio) return;
 
-      // Use batch removal method
-      await studio.removeClipsById(clipIds);
+        // Use batch removal method
+        await studio.removeClipsById(clipIds);
+      } catch (error) {
+        Log.error('Failed to remove clips:', error);
+        toast.error('Failed to remove clips');
+      }
     };
 
     const handleSelectionDuplicated = async () => {
-      if (!studio) return;
-      await studio.duplicateSelected();
+      try {
+        if (!studio) return;
+        await studio.duplicateSelected();
+      } catch (error) {
+        Log.error('Failed to duplicate selection:', error);
+        toast.error('Failed to duplicate selection');
+      }
     };
 
     const handleSelectionSplit = async ({
@@ -614,8 +641,13 @@ export const TimelineStudioSync = ({
     }: {
       splitTime: number;
     }) => {
-      if (!studio) return;
-      await studio.splitSelected(splitTime);
+      try {
+        if (!studio) return;
+        await studio.splitSelected(splitTime);
+      } catch (error) {
+        Log.error('Failed to split selection:', error);
+        toast.error('Failed to split selection');
+      }
     };
 
     const handleTransitionAdd = async ({
@@ -625,24 +657,34 @@ export const TimelineStudioSync = ({
       fromClipId: string;
       toClipId: string;
     }) => {
-      if (!studio) return;
-      const fromClip = studio.timeline.getClipById(fromClipId);
-      const toClip = studio.timeline.getClipById(toClipId);
+      try {
+        if (!studio) return;
+        const fromClip = studio.timeline.getClipById(fromClipId);
+        const toClip = studio.timeline.getClipById(toClipId);
 
-      const minDuration = Math.min(
-        fromClip?.duration ?? Infinity,
-        toClip?.duration ?? Infinity
-      );
+        const minDuration = Math.min(
+          fromClip?.duration ?? Infinity,
+          toClip?.duration ?? Infinity
+        );
 
-      const duration =
-        minDuration === Infinity ? 2_000_000 : minDuration * 0.25;
+        const duration =
+          minDuration === Infinity ? 2_000_000 : minDuration * 0.25;
 
-      await studio.addTransition('GridFlip', duration, fromClipId, toClipId);
+        await studio.addTransition('GridFlip', duration, fromClipId, toClipId);
+      } catch (error) {
+        Log.error('Failed to add transition:', error);
+        toast.error('Failed to add transition');
+      }
     };
 
     const handleSelectionDelete = async () => {
-      if (!studio) return;
-      await studio.deleteSelected();
+      try {
+        if (!studio) return;
+        await studio.deleteSelected();
+      } catch (error) {
+        Log.error('Failed to delete selection:', error);
+        toast.error('Failed to delete selection');
+      }
     };
 
     timelineCanvas.on('clip:modified', handleClipModified);

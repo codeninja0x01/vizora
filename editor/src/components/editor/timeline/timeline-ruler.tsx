@@ -10,6 +10,16 @@ interface TimelineRulerProps {
   scrollLeft: number;
 }
 
+/**
+ * Timeline ruler component that renders time markers and labels using canvas.
+ * Dynamically adjusts marker intervals based on zoom level and viewport width
+ * to maintain readable spacing.
+ *
+ * @param zoomLevel - Current zoom level multiplier affecting pixels per second
+ * @param duration - Total duration of the timeline in seconds
+ * @param width - Visible width of the ruler viewport in pixels
+ * @param scrollLeft - Current horizontal scroll position
+ */
 export function TimelineRuler({
   zoomLevel,
   duration,

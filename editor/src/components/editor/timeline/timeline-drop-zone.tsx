@@ -13,6 +13,13 @@ interface TimelineDropZoneProps {
   children: React.ReactNode;
 }
 
+/**
+ * Timeline drop zone component that handles file drag-and-drop operations.
+ * Validates file types (video, audio, image) and size (max 500MB) before uploading.
+ * Automatically adds uploaded assets to the timeline at the current playhead position.
+ *
+ * @param children - Child components to render within the drop zone
+ */
 export function TimelineDropZone({ children }: TimelineDropZoneProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const { uploadFile } = useAssetStore();
@@ -114,11 +121,31 @@ export function TimelineDropZone({ children }: TimelineDropZoneProps) {
 
     const files = Array.from(e.dataTransfer.files);
 
+    // Validate and upload files
     for (const file of files) {
-      // Upload file and auto-add to timeline
-      await uploadFile(file, {
-        onComplete: addAssetToTimeline,
-      });
+      // Validate file type
+      const validTypes = ['video/', 'audio/', 'image/'];
+      if (!validTypes.some((type) => file.type.startsWith(type))) {
+        toast.error(`Invalid file type: ${file.name}`);
+        continue;
+      }
+
+      // Validate file size (500MB limit)
+      const maxSize = 500 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast.error(`File too large (max 500MB): ${file.name}`);
+        continue;
+      }
+
+      try {
+        // Upload file and auto-add to timeline
+        await uploadFile(file, {
+          onComplete: addAssetToTimeline,
+        });
+      } catch (error) {
+        Log.error('Failed to upload file:', error);
+        toast.error(`Failed to upload: ${file.name}`);
+      }
     }
   };
 
