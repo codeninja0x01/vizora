@@ -86,10 +86,20 @@ export function TimelineDropZone({ children }: TimelineDropZoneProps) {
     e.preventDefault();
     e.stopPropagation();
 
-    // Only clear if leaving the drop zone entirely (not just child elements)
-    if (e.currentTarget === e.target) {
+    // Check if we're actually leaving the drop zone (not just entering a child)
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+
+    // If cursor is outside the drop zone bounds, clear the state
+    if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
       setIsDragOver(false);
     }
+  };
+
+  const handleDragEnd = () => {
+    // Always clear on drag end (handles canceled drags)
+    setIsDragOver(false);
   };
 
   const handleDrop = async (e: React.DragEvent) => {
@@ -118,6 +128,7 @@ export function TimelineDropZone({ children }: TimelineDropZoneProps) {
       onDragOver={handleDragOver}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
+      onDragEnd={handleDragEnd}
       onDrop={handleDrop}
     >
       {children}
