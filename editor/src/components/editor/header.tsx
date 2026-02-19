@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { useStudioStore } from '@/stores/studio-store';
 import { usePanelStore } from '@/stores/panel-store';
 import { useProjectStore } from '@/stores/project-store';
+import { DEFAULT_CANVAS_PRESETS } from '@/lib/editor-utils';
 import { Log, type IClip } from 'openvideo';
 import { ExportModal } from './export-modal';
 import { LogoIcons } from '../shared/logos';
@@ -254,6 +255,44 @@ export default function Header() {
             <LogoIcons.discord className="size-4" />
           </Button>
         </Link>
+
+        {studio && (
+          <div className="flex items-center gap-1 border-x border-border/50 px-2 h-8 mx-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-xs font-semibold"
+                >
+                  <Icons.crop className="mr-1.5 h-3.5 w-3.5 text-muted-foreground" />
+                  {aspectRatio}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-32">
+                {DEFAULT_CANVAS_PRESETS.map((preset) => (
+                  <DropdownMenuItem
+                    key={preset.name}
+                    onClick={() =>
+                      setCanvasSize(
+                        { width: preset.width, height: preset.height },
+                        preset.name
+                      )
+                    }
+                    className="text-xs"
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span>{preset.name}</span>
+                      {aspectRatio === preset.name && (
+                        <Icons.check className="h-3 w-3" />
+                      )}
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
 
         <Button variant="outline" className="h-8 px-3 rounded-lg gap-1.5">
           <Share2 className="size-4" />
