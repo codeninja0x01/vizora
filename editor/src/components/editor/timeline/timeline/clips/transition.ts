@@ -1,10 +1,5 @@
 import { BaseTimelineClip, type BaseClipProps } from './base';
 import { type Control, Path } from 'fabric';
-import {
-  CLIP_COLORS,
-  SELECTION_COLOR,
-  SELECTION_BORDER_WIDTH,
-} from '@/components/editor/timeline/timeline-constants';
 
 export class Transition extends BaseTimelineClip {
   isSelected: boolean;
@@ -21,7 +16,7 @@ export class Transition extends BaseTimelineClip {
     borderColor: 'transparent',
     stroke: 'transparent',
     strokeWidth: 0,
-    fill: CLIP_COLORS.transition,
+    fill: '#ffffff', // White
     borderOpacityWhenMoving: 1,
     hoverCursor: 'default',
   };
@@ -30,7 +25,7 @@ export class Transition extends BaseTimelineClip {
     super(options);
     Object.assign(this, Transition.ownDefaults);
     this.set({
-      fill: CLIP_COLORS.transition,
+      fill: options.fill || Transition.ownDefaults.fill,
     });
 
     // Arrow Left Right icon (Lucide-like)
@@ -84,9 +79,9 @@ export class Transition extends BaseTimelineClip {
 
   public updateSelected(ctx: CanvasRenderingContext2D) {
     const borderColor = this.isSelected
-      ? SELECTION_COLOR
-      : 'rgba(255, 255, 255, 0.1)';
-    const borderWidth = SELECTION_BORDER_WIDTH;
+      ? 'rgba(200, 200, 200, 1.0)'
+      : 'rgba(0, 0, 0, 0.5)';
+    const borderWidth = 2;
     const radius = 4;
     const size = 20;
 

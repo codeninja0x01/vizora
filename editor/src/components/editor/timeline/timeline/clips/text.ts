@@ -2,11 +2,6 @@ import { BaseTimelineClip, type BaseClipProps } from './base';
 import type { Control } from 'fabric';
 import { createResizeControls } from '../controls';
 import { editorFont } from '@/components/editor/constants';
-import {
-  CLIP_COLORS,
-  SELECTION_COLOR,
-  SELECTION_BORDER_WIDTH,
-} from '@/components/editor/timeline/timeline-constants';
 
 export interface TextClipProps extends BaseClipProps {}
 
@@ -18,13 +13,13 @@ export class Text extends BaseTimelineClip {
     return { controls: createResizeControls() };
   }
   static ownDefaults = {
-    rx: 4,
-    ry: 4,
+    rx: 10,
+    ry: 10,
     objectCaching: false,
     borderColor: 'transparent',
     stroke: 'transparent',
     strokeWidth: 0,
-    fill: CLIP_COLORS.text,
+    fill: '#134e4a',
     borderOpacityWhenMoving: 1,
     hoverCursor: 'default',
   };
@@ -34,7 +29,7 @@ export class Text extends BaseTimelineClip {
     Object.assign(this, Text.ownDefaults);
     this.text = options.text;
     this.set({
-      fill: CLIP_COLORS.text,
+      // fill: TRACK_COLORS.text.solid,
     });
   }
 
@@ -69,11 +64,9 @@ export class Text extends BaseTimelineClip {
   }
 
   public updateSelected(ctx: CanvasRenderingContext2D) {
-    const borderColor = this.isSelected
-      ? SELECTION_COLOR
-      : 'rgba(255, 255, 255, 0.1)';
-    const borderWidth = SELECTION_BORDER_WIDTH;
-    const radius = 4;
+    const borderColor = this.isSelected ? '#0f766e' : '#115e59';
+    const borderWidth = 2;
+    const radius = 10;
 
     ctx.save();
     ctx.fillStyle = borderColor;

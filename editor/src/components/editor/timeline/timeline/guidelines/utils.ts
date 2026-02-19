@@ -8,8 +8,10 @@ export const clearAuxiliaryObjects = (
   canvas: Canvas,
   allObjects: FabricObject[]
 ) => {
-  //@ts-expect-error
-  allObjects.forEach((obj) => obj.isAlignmentAuxiliary && canvas.remove(obj));
+  // @ts-expect-error - isAlignmentAuxiliary is a custom property
+  allObjects.forEach((obj) => {
+    if (obj.isAlignmentAuxiliary) canvas.remove(obj);
+  });
 };
 
 interface LineGuide {

@@ -22,25 +22,6 @@ interface TimelinePlayheadProps {
   onScrollChange?: (scrollX: number) => void;
 }
 
-/**
- * Timeline playhead component that displays the current playback position
- * and allows seeking by dragging. The playhead is rendered as a vertical line
- * with a draggable handle at the top.
- *
- * @param duration - Total duration of the timeline in seconds
- * @param zoomLevel - Current zoom level multiplier
- * @param tracks - Array of timeline tracks
- * @param seek - Function to seek to a specific time position
- * @param rulerRef - Reference to the ruler container element
- * @param rulerScrollRef - Reference to the ruler scroll container
- * @param tracksScrollRef - Reference to the tracks scroll container
- * @param trackLabelsRef - Optional reference to track labels container
- * @param timelineRef - Reference to the main timeline container
- * @param playheadRef - Optional external reference to playhead element
- * @param isSnappingToPlayhead - Whether snapping to playhead is enabled
- * @param scrollLeft - Current horizontal scroll position
- * @param onScrollChange - Callback when scroll position changes
- */
 export function TimelinePlayhead({
   duration,
   zoomLevel,
@@ -52,6 +33,7 @@ export function TimelinePlayhead({
   trackLabelsRef,
   timelineRef,
   playheadRef: externalPlayheadRef,
+  isSnappingToPlayhead = false,
   scrollLeft,
   onScrollChange,
 }: TimelinePlayheadProps) {

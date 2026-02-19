@@ -111,22 +111,6 @@ export function getTotalTracksHeight(
   return tracksHeight + gapsHeight;
 }
 
-// Clip color constants (hex equivalents of OKLCH design tokens from globals.css)
-// These match the clip type colors for consistent visual identity
-export const CLIP_COLORS = {
-  video: '#0f92f7', // Blue — oklch(0.65 0.18 250)
-  audio: '#00ad5b', // Green — oklch(0.65 0.18 155)
-  text: '#c18200', // Amber — oklch(0.65 0.18 85)
-  image: '#0f92f7', // Blue (same as video) — images are visual media
-  caption: '#df6900', // Orange — oklch(0.65 0.18 55)
-  effect: '#be64d2', // Magenta — oklch(0.65 0.18 320)
-  transition: '#00b09e', // Teal — oklch(0.65 0.18 185)
-} as const;
-
-// Selection highlight color (purple accent)
-export const SELECTION_COLOR = '#7a5aff'; // Indigo accent — oklch(0.60 0.24 285)
-export const SELECTION_BORDER_WIDTH = 2;
-
 // Other timeline constants
 // Moved up to avoid temporal dead zone if needed, or just cleaner organization
 

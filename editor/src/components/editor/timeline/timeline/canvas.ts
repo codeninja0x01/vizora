@@ -634,9 +634,13 @@ class Timeline extends EventEmitter<TimelineCanvasEvents> {
     this.#tracks = []; // Reset tracks
     this.#clipsMap = {}; // Reset clips
     // Also clear internal object caches
-    this.#trackObjects.forEach((obj) => this.canvas.remove(obj));
+    this.#trackObjects.forEach((obj) => {
+      this.canvas.remove(obj);
+    });
     this.#trackObjects.clear();
-    this.#clipObjects.forEach((obj) => this.canvas.remove(obj));
+    this.#clipObjects.forEach((obj) => {
+      this.canvas.remove(obj);
+    });
     this.#clipObjects.clear();
     this.#separatorLines.forEach((sep) => {
       this.canvas.remove(sep.container);
