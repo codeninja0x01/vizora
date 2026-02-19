@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FolderOpen, Plus, ChevronLeft, X } from 'lucide-react';
-import { useAssetStore } from '@/stores/asset-store';
 import { createFolder } from '@/actions/folder-actions';
 import { toast } from 'sonner';
 import type { AssetFolder } from '@prisma/client';
@@ -35,7 +34,7 @@ export function FolderBar({
       const currentFolder = folders.find((f) => f.id === currentFolderId);
       if (currentFolder) {
         // Parse materialized path: /folder1/folder2/current/
-        const segments = currentFolder.path
+        const _segments = currentFolder.path
           .split('/')
           .filter((s) => s.length > 0);
 

@@ -169,7 +169,7 @@ export default function PanelCaptions() {
 
   function normalizeWordTimings(words: any[]) {
     let currentTime = 0;
-    return words.map((word, i) => {
+    return words.map((word, _i) => {
       const duration = word.to - word.from;
       const newWord = {
         ...word,
@@ -196,7 +196,7 @@ export default function PanelCaptions() {
 
     const wordsInText: { text: string; start: number; end: number }[] = [];
     const regex = /\S+/g;
-    let match;
+    let match: RegExpExecArray | null;
     while ((match = regex.exec(fullText)) !== null) {
       wordsInText.push({
         text: match[0],
@@ -336,7 +336,7 @@ export default function PanelCaptions() {
     const paragraphIndex = oldWords[0]?.paragraphIndex ?? '';
 
     const isNewWordAdded = newWordsText.length > oldWords.length;
-    let updatedWords;
+    let updatedWords: Array<Record<string, any>>;
 
     if (isNewWordAdded) {
       const totalDurationMs =

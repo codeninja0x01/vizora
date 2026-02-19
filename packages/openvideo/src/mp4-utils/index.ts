@@ -1,4 +1,10 @@
-import { mp4box, MP4File, MP4Sample, SampleOpts, TrakBoxParser } from 'wrapbox';
+import {
+  mp4box,
+  type MP4File,
+  type MP4Sample,
+  type SampleOpts,
+  type TrakBoxParser,
+} from 'wrapbox';
 import { tmpfile, write } from 'opfs-tools';
 import { DEFAULT_AUDIO_CONF } from '../clips';
 import { autoReadStream, file2stream } from '../utils/stream-utils';
@@ -50,7 +56,7 @@ function fixMP4BoxFileDuration(
     sentBoxIdx = moovIdx + 1;
 
     if (tracks.length === 0) {
-      for (let i = 1; true; i += 1) {
+      for (let i = 1; ; i += 1) {
         const track = inMP4File.getTrackById(i);
         if (track == null) break;
         tracks.push({ track, id: i });
@@ -458,7 +464,7 @@ export function mixinMP4AndAudio(
         if (aTrackId === 0) {
           aTrackId = outfile.addTrack(safeAudioTrackConf as any);
           sampleRate = audioTrackConf?.samplerate ?? sampleRate;
-          mp4HasAudio = audioTrackConf == null ? false : true;
+          mp4HasAudio = audioTrackConf != null;
         }
         const audioCtx = new AudioContext({ sampleRate });
         inputAudioPCM = extractPCM4AudioBuffer(

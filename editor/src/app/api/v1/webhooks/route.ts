@@ -111,7 +111,7 @@ async function postHandler(
  * Returns webhooks WITHOUT secret field (for security)
  */
 async function getHandler(
-  request: Request,
+  _request: Request,
   context: ApiKeyContext
 ): Promise<Response> {
   try {

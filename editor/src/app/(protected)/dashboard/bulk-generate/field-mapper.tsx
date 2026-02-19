@@ -66,7 +66,7 @@ export function FieldMapper({
   };
 
   // Check if any required fields are unmapped
-  const requiredFields = templateFields.filter((f) => {
+  const requiredFields = templateFields.filter((_f) => {
     // In the schema, all fields are optional, but we can check if there's a default value
     // For now, we'll just warn if high-confidence auto-matches were unmapped
     return false; // No strict required fields per plan

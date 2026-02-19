@@ -1,6 +1,6 @@
 import { BaseClip } from './base-clip';
-import { type IClip } from './iclip';
-import { type EffectKey } from '../effect/glsl/gl-effect';
+import type { IClip } from './iclip';
+import type { EffectKey } from '../effect/glsl/gl-effect';
 
 // Since Effect is an adjustment layer, it doesn't render visual content directly.
 // We can use a minimal dummy implementation for BaseClip abstract methods.

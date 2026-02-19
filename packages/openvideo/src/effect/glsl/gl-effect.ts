@@ -1,4 +1,4 @@
-//@ts-ignore
+//@ts-expect-error
 import {
   BAD_SIGNAL_FRAGMENT,
   BAD_SIGNAL_UNIFORMS,

@@ -70,7 +70,7 @@ export function groupWordsIntoCues(
 
   for (let i = 0; i < words.length; i++) {
     const word = words[i];
-    const nextWord = words[i + 1];
+    const _nextWord = words[i + 1];
 
     // Apply timing offset adjustment
     const adjustedWord: WordTiming = {

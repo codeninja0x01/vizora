@@ -52,7 +52,7 @@ export function getScriptToVideoTools() {
         message: z.string(),
       }),
     },
-    async (args) => {
+    async (_args) => {
       // The actual logic is handled on the client side, here we just acknowledge.
       // We return the args so the model sees what it called, but mainly for the client to act on.
       return {

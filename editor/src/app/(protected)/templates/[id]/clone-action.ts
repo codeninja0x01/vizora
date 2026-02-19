@@ -3,7 +3,6 @@
 import { headers } from 'next/headers';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import type { MergeField } from '@/types/template';
 
 /**
  * Clone a public template to the current user's account

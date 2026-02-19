@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { TemplateGenerationService } from '@/lib/ai/services/template-generation-service';
-import type { MergeFieldSuggestion } from '@/lib/ai/utils/merge-field-detector';
 import type Anthropic from '@anthropic-ai/sdk';
 
 /**

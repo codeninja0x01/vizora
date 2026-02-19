@@ -4,8 +4,7 @@ import {
   getTemplateStyleById,
   getDefaultTemplateStyle,
 } from '@/lib/ai/presets/template-style-presets';
-import { randomUUID } from 'crypto';
-import type { MergeFieldSuggestion } from '@/lib/ai/utils/merge-field-detector';
+import { randomUUID } from 'node:crypto';
 import type Anthropic from '@anthropic-ai/sdk';
 
 /**

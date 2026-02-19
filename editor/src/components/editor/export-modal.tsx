@@ -123,7 +123,7 @@ export function ExportModal({ open, onOpenChange }: ExportModalProps) {
       }, 500);
     } catch (error) {
       Log.error('Export error:', error);
-      alert('Failed to export: ' + (error as Error).message);
+      alert(`Failed to export: ${(error as Error).message}`);
       setIsExporting(false);
     }
   };

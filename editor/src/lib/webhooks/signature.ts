@@ -72,7 +72,7 @@ export function verifyWebhookSignature(
 
     // Timing-safe comparison prevents timing attacks
     return timingSafeEqual(expectedBuffer, providedBuffer);
-  } catch (error) {
+  } catch (_error) {
     // Any error in verification means invalid signature
     return false;
   }

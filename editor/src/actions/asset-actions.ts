@@ -6,7 +6,7 @@ import { headers } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { config } from '@/lib/config';
 import { R2StorageService } from '@/lib/r2';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 // Initialize R2 service
 const r2 = new R2StorageService({
@@ -249,7 +249,7 @@ export async function deleteAsset(id: string) {
   const usageCount = await prisma.$queryRaw<[{ count: bigint }]>`
     SELECT COUNT(*) as count FROM "Template"
     WHERE "organizationId" = ${activeOrgId}
-    AND CAST("projectData" AS TEXT) LIKE ${'%' + asset.cdnUrl + '%'}
+    AND CAST("projectData" AS TEXT) LIKE ${`%${asset.cdnUrl}%`}
   `;
 
   const count = Number(usageCount[0].count);

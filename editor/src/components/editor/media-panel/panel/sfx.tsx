@@ -5,7 +5,6 @@ import { Audio, Log } from 'openvideo';
 import { IconWaveSine } from '@tabler/icons-react';
 import { useState, useEffect, useCallback } from 'react';
 import { AudioItem } from './audio-item';
-import { SfxChatPanel } from '../sfx-chat-panel';
 import { Search, Loader2 } from 'lucide-react';
 import {
   InputGroup,

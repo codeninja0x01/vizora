@@ -5,7 +5,7 @@ import { vertex } from './vertex';
 import { GL_EFFECTS } from './glsl/gl-effect';
 
 export function makeEffect({ name, renderer }: EffectOptions) {
-  let effect: undefined | any = undefined;
+  let effect: undefined | any;
   const localKey = Object.keys(GL_EFFECTS).find(
     (key) => key.toLowerCase() === name.toLowerCase()
   ) as keyof typeof GL_EFFECTS | undefined;

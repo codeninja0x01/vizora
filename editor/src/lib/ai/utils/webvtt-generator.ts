@@ -77,7 +77,6 @@ export function generateSubtitleClipData(
         return padding;
       case 'center':
         return (videoHeight - captionHeight) / 2;
-      case 'bottom':
       default:
         return videoHeight - captionHeight - padding;
     }

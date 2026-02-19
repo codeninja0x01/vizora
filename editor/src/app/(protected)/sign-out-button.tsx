@@ -17,7 +17,7 @@ export function SignOutButton() {
       await authClient.signOut();
       toast.success('Signed out successfully');
       router.push('/login');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Failed to sign out');
       setLoading(false);
     }

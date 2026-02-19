@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useStudioStore } from '@/stores/studio-store';
 import { usePanelStore } from '@/stores/panel-store';
+import { useProjectStore } from '@/stores/project-store';
 import { Log, type IClip } from 'openvideo';
 import { ExportModal } from './export-modal';
 import { LogoIcons } from '../shared/logos';
@@ -28,7 +29,10 @@ import {
 export default function Header() {
   const { studio } = useStudioStore();
   const { toggleCopilot, isCopilotVisible } = usePanelStore();
+  const { aspectRatio, setCanvasSize } = useProjectStore();
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [_isExporting, _setIsExporting] = useState(false);
+  const [_isBatchExporting, _setIsBatchExporting] = useState(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
   const [isSaveTemplateOpen, setIsSaveTemplateOpen] = useState(false);
   const [canUndo, setCanUndo] = useState(false);

@@ -127,7 +127,7 @@ async function deleteHandler(
     const usageCount = await prisma.$queryRaw<[{ count: bigint }]>`
       SELECT COUNT(*) as count FROM "Template"
       WHERE "organizationId" = ${context.organizationId}
-      AND CAST("projectData" AS TEXT) LIKE ${'%' + asset.cdnUrl + '%'}
+      AND CAST("projectData" AS TEXT) LIKE ${`%${asset.cdnUrl}%`}
     `;
 
     const count = Number(usageCount[0].count);

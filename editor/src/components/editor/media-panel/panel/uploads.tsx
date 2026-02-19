@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useStudioStore } from '@/stores/studio-store';
-import { DEFAULT_CANVAS_SIZE } from '@/stores/project-store';
+import { useProjectStore } from '@/stores/project-store';
 import { Image, Video, Audio, Log } from 'openvideo';
 import { Upload, Search, Trash2, Music } from 'lucide-react';
 import {
@@ -52,19 +52,6 @@ function detectFileType(file: File): MediaType {
   }
   return 'image';
 }
-
-// Replace old blob URLs with new ones in serialized clips
-// function replaceUrlsInClips<T>(
-//   clips: T[],
-//   urlMapping: Record<string, string>
-// ): T[] {
-//   const json = JSON.stringify(clips);
-//   let updated = json;
-//   for (const [oldUrl, newUrl] of Object.entries(urlMapping)) {
-//     updated = updated.split(oldUrl).join(newUrl);
-//   }
-//   return JSON.parse(updated);
-// }
 
 // Helper to format duration like 00:00
 function formatDuration(seconds?: number) {
@@ -152,7 +139,7 @@ function AssetCard({
 
 export default function PanelUploads() {
   const { studio } = useStudioStore();
-  const canvasSize = DEFAULT_CANVAS_SIZE;
+  const { canvasSize } = useProjectStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [uploads, setUploads] = useState<VisualAsset[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -230,32 +217,6 @@ export default function PanelUploads() {
           };
         });
         console.warn('USE THIS LOGIC WHEN NEW CLIPS ARE ADDEDE EVENT');
-        // // Update timeline clips with new blob URLs if needed
-        // if (Object.keys(urlMapping).length > 0 && studio) {
-        //   try {
-        //     // Serialize current clips
-        //     const serializedClips = studio.clips.map((clip) =>
-        //       clipToJSON(clip as unknown as StudioClip)
-        //     );
-        //     console.log('Serialized clips:', {
-        //       serializedClips,
-        //       urlMapping
-        //     });
-        //     // Replace old URLs with new blob URLs
-        //     const updatedClips = replaceUrlsInClips(
-        //       serializedClips,
-        //       urlMapping
-        //     );
-        //     if (updatedClips.length > 0) {
-        //       console.log('Updated clips:', updatedClips);
-
-        //       // Reload with updated URLs
-        //       await studio.loadFromJSON({ clips: updatedClips });
-        //     }
-        //   } catch (error) {
-        //     Log.warn('Failed to update timeline URLs:', error);
-        //   }
-        // }
 
         setUploads(recoveredAssets);
         // Update localStorage with new URLs

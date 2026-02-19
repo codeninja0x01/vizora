@@ -3,7 +3,7 @@ import { createTTSProvider } from '@/lib/ai/providers/tts/factory';
 import type { AIProvider } from '@/lib/ai/types';
 import { R2StorageService } from '@/lib/r2';
 import { type NextRequest, NextResponse } from 'next/server';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 const r2 = new R2StorageService({
   bucketName: process.env.R2_BUCKET_NAME || '',

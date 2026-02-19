@@ -3,7 +3,7 @@ import { config } from '@/lib/config';
 import { R2StorageService } from '@/lib/r2';
 import { validateFileSize, ALLOWED_FILE_TYPES } from '@/lib/storage/validation';
 import { z } from 'zod';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 // Initialize R2 service
 const r2 = new R2StorageService({
@@ -24,11 +24,9 @@ const allowedMimes = [
 // Request validation schema
 const presignedUrlSchema = z.object({
   filename: z.string().min(1),
-  contentType: z
-    .string()
-    .refine((mime) => allowedMimes.includes(mime as any), {
-      message: 'Invalid content type',
-    }),
+  contentType: z.string().refine((mime) => allowedMimes.includes(mime as any), {
+    message: 'Invalid content type',
+  }),
   size: z.number().int().positive(),
   folderId: z.string().optional(),
 });

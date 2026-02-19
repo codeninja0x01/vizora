@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { IconPlayerPause, IconPlayerPlay, IconPlus } from '@tabler/icons-react';
+import { IconPlayerPause, IconPlayerPlay } from '@tabler/icons-react';
 import { useRef, useState, useEffect } from 'react';
 
 export const AudioItem = ({

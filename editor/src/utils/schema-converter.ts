@@ -1,4 +1,5 @@
 import { fontManager } from 'openvideo';
+import * as PIXI from 'pixi.js';
 
 /**
  * Fetches caption data from a URL
@@ -46,7 +47,11 @@ export const groupWordsByWidth = (
 
     // Calculate width if we add this word
     const testText = currentText ? `${currentText} ${wordText}` : wordText;
-    const testWidth = ctx.measureText(testText).width;
+    const bitmapText = new PIXI.BitmapText(testText, {
+      fontFamily,
+      fontSize,
+    });
+    const testWidth = bitmapText.width + 160;
 
     if (testWidth > maxWidth && currentWords.length > 0) {
       // Width exceeded, create caption with current words
@@ -240,7 +245,7 @@ export const convertSchemaToExported = async (
       }
 
       // Add audio from textToSpeech (before incrementing cumulative time)
-      if (segment.textToSpeech && segment.textToSpeech.src) {
+      if (segment.textToSpeech?.src) {
         // Convert milliseconds to microseconds
         const durationMs = segment.textToSpeech.duration || segmentDurationMs;
         const durationUs = durationMs * 1000;
@@ -273,17 +278,12 @@ export const convertSchemaToExported = async (
       }
 
       // Add captions from speechToText
-      if (segment.speechToText && segment.speechToText.src) {
+      if (segment.speechToText?.src) {
         try {
           // Fetch caption data from URL
           const captionData = await fetchCaptionData(segment.speechToText.src);
 
-          if (
-            captionData &&
-            captionData.results &&
-            captionData.results.main &&
-            captionData.results.main.words
-          ) {
+          if (captionData?.results?.main?.words) {
             const words = captionData.results.main.words;
 
             // Group words by width

@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     const assetUrl = r2.getAssetUrl(fileName, origin);
 
     return NextResponse.json({ url: assetUrl });
-  } catch (error) {
+  } catch (_error) {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

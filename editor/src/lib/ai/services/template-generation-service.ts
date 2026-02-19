@@ -1,5 +1,4 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { IClip, ITimelineTrack } from '@/types/timeline';
 import {
   detectMergeFields,
   type MergeFieldSuggestion,

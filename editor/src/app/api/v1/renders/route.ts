@@ -1,4 +1,3 @@
-import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { withApiAuth, type ApiKeyContext } from '@/lib/api-middleware';
 import { prisma } from '@/lib/db';
@@ -291,14 +290,14 @@ async function getHandler(
 
     if (fromDate) {
       const date = new Date(fromDate);
-      if (!isNaN(date.getTime())) {
+      if (!Number.isNaN(date.getTime())) {
         where.queuedAt = { ...where.queuedAt, gte: date };
       }
     }
 
     if (toDate) {
       const date = new Date(toDate);
-      if (!isNaN(date.getTime())) {
+      if (!Number.isNaN(date.getTime())) {
         where.queuedAt = { ...where.queuedAt, lte: date };
       }
     }

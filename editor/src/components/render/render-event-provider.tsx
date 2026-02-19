@@ -145,7 +145,7 @@ export function RenderEventProvider({ children }: RenderEventProviderProps) {
         });
       });
 
-      eventSource.addEventListener('batch.progress', (event) => {
+      eventSource.addEventListener('batch.progress', (_event) => {
         if (!mounted) return;
 
         // Don't show toast for batch progress updates (too noisy)

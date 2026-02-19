@@ -131,9 +131,9 @@ export function makeTransition({ name, renderer }: TransitionOptions) {
     const localNames = Object.keys(GL_TRANSITIONS).slice(0, 3).join(', ');
     console.error(
       `Transition not found: "${name}". Available in gl-transitions (${availableCount} total):`,
-      availableNames + '...'
+      `${availableNames}...`
     );
-    console.error(`Available locally:`, localNames + '...');
+    console.error(`Available locally:`, `${localNames}...`);
     throw new Error(
       `Transition "${name}" not found in gl-transitions library or local definitions`
     );
@@ -311,7 +311,7 @@ export function makeTransition({ name, renderer }: TransitionOptions) {
 
   const transitionGlitchDisplace =
     transition.name === 'GlitchDisplace' ||
-    name.toLowerCase() === 'glitchDisplace' ||
+    name.toLowerCase() === 'glitchdisplace' ||
     transition.label === 'GlitchDisplace';
 
   const transitionCrossZoom =

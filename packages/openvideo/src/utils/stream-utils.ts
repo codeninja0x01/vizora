@@ -1,4 +1,4 @@
-import { MP4File, mp4box } from 'wrapbox';
+import { type MP4File, mp4box } from 'wrapbox';
 
 export function autoReadStream<ST extends ReadableStream>(
   stream: ST,

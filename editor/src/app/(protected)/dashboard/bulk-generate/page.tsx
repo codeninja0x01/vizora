@@ -53,7 +53,7 @@ export default function BulkGeneratePage() {
   const [mapping, setMapping] = useState<Record<string, string>>({});
 
   // Preview
-  const [validRows, setValidRows] = useState<Record<string, unknown>[]>([]);
+  const [_validRows, _setValidRows] = useState<Record<string, unknown>[]>([]);
 
   // Submission
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -15,8 +15,8 @@ export class AssetManager {
   }
 
   static async get(url: string) {
-    const key = await this.getCacheKey(url);
-    const path = this.getPath(key);
+    const key = await AssetManager.getCacheKey(url);
+    const path = AssetManager.getPath(key);
     const f = file(path);
     if (await f.exists()) {
       return f;
@@ -25,8 +25,8 @@ export class AssetManager {
   }
 
   static async put(url: string, stream: ReadableStream<Uint8Array>) {
-    const key = await this.getCacheKey(url);
-    const path = this.getPath(key);
+    const key = await AssetManager.getCacheKey(url);
+    const path = AssetManager.getPath(key);
     const f = file(path);
     await write(f, stream as any);
     return f;

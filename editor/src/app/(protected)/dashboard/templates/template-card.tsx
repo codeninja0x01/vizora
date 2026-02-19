@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { Layers, FileSpreadsheet } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import type { TemplateCategory } from '@/types/template';
 import { TEMPLATE_CATEGORIES } from '@/types/template';
 import type { getTemplates } from './actions';
 import { DeleteButton } from './delete-button';

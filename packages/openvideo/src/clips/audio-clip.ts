@@ -471,7 +471,7 @@ export class Audio extends BaseClip implements IPlaybackCapable {
     audio.removeAttribute('src');
     audio.load();
 
-    if (objectUrl && objectUrl.startsWith('blob:')) {
+    if (objectUrl?.startsWith('blob:')) {
       URL.revokeObjectURL(objectUrl);
     }
   }

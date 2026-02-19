@@ -388,9 +388,9 @@ export function subscribeUser(userId: string, callback: EventCallback): void {
     userListeners.set(userId, new Set());
   }
 
-  userListeners.get(userId)!.add(callback);
+  userListeners.get(userId)?.add(callback);
   console.log(
-    `[QueueEvents] User ${userId} subscribed (${userListeners.get(userId)!.size} connections)`
+    `[QueueEvents] User ${userId} subscribed (${userListeners.get(userId)?.size} connections)`
   );
 }
 

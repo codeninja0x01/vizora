@@ -2,7 +2,6 @@ import * as React from 'react';
 import { useEffect, useState, useMemo } from 'react';
 import {
   ColorPicker,
-  ColorPickerAlpha,
   ColorPickerEyeDropper,
   ColorPickerFormat,
   ColorPickerHue,
@@ -14,7 +13,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { type IClip, AnimationOptions, KeyframeData } from 'openvideo';
+import type { IClip } from 'openvideo';
 import {
   Select,
   SelectContent,

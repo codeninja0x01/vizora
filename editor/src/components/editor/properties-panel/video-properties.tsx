@@ -1,8 +1,6 @@
-import * as React from 'react';
 import { useEffect, useState } from 'react';
 import {
   ColorPicker,
-  ColorPickerAlpha,
   ColorPickerEyeDropper,
   ColorPickerFormat,
   ColorPickerHue,
@@ -14,20 +12,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { type IClip, AnimationOptions, KeyframeData } from 'openvideo';
+import type { IClip } from 'openvideo';
 import {
-  IconAlignLeft,
-  IconAlignCenter,
-  IconAlignRight,
-  IconTextSize,
   IconLineHeight,
   IconMinus,
   IconBlur,
   IconRotate,
   IconRuler2,
-  IconOverline,
-  IconUnderline,
-  IconStrikethrough,
   IconCircle,
   IconMovie,
   IconPlus,
@@ -36,7 +27,6 @@ import {
   IconVolume,
   IconEdit,
 } from '@tabler/icons-react';
-import { cn } from '@/lib/utils';
 import {
   InputGroup,
   InputGroupAddon,

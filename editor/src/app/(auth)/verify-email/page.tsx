@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { authClient } from '@/lib/auth-client';
 import { Mail, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -48,7 +47,7 @@ function VerifyEmailContent() {
         );
         toast.error('Verification failed');
       }
-    } catch (err) {
+    } catch (_err) {
       setStatus('error');
       setMessage('An error occurred during verification. Please try again.');
       toast.error('Verification error');
@@ -62,7 +61,7 @@ function VerifyEmailContent() {
       // For now, show a message
       toast.info('Please sign up again to receive a new verification email');
       router.push('/signup');
-    } catch (err) {
+    } catch (_err) {
       toast.error('Failed to resend verification email');
     } finally {
       setResending(false);

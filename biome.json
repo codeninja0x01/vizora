@@ -34,18 +34,34 @@
       },
       "correctness": {
         "useExhaustiveDependencies": "off",
-        "useUniqueElementIds": "warn"
+        "useUniqueElementIds": "warn",
+        "noUnusedFunctionParameters": "warn",
+        "noInnerDeclarations": "warn"
+      },
+      "style": {
+        "noNonNullAssertion": "warn"
       },
       "suspicious": {
         "noExplicitAny": "off",
         "noUnsafeDeclarationMerging": "off",
-        "noArrayIndexKey": "off"
+        "noArrayIndexKey": "off",
+        "noAssignInExpressions": "warn",
+        "useIterableCallbackReturn": "warn",
+        "noAsyncPromiseExecutor": "warn"
+      },
+      "performance": {
+        "noImgElement": "warn"
       },
       "a11y": {
         "noSvgWithoutTitle": "off",
         "useMediaCaption": "off",
         "noStaticElementInteractions": "off",
-        "useKeyWithClickEvents": "off"
+        "useKeyWithClickEvents": "off",
+        "useKeyWithMouseEvents": "warn",
+        "noLabelWithoutControl": "warn",
+        "useButtonType": "warn",
+        "useSemanticElements": "warn",
+        "useAltText": "warn"
       }
     }
   },

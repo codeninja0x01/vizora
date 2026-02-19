@@ -100,14 +100,14 @@ export function RenderList({ initialRenders }: RenderListProps) {
         if (lastEvent.data?.batchId && lastEvent.data?.batchProgress) {
           setBatches((prev) =>
             prev.map((b) =>
-              b.id === lastEvent.data!.batchId
+              b.id === lastEvent.data?.batchId
                 ? {
                     ...b,
                     progress: {
-                      queued: lastEvent.data!.batchProgress!.queued,
-                      processing: lastEvent.data!.batchProgress!.processing,
-                      completed: lastEvent.data!.batchProgress!.completed,
-                      failed: lastEvent.data!.batchProgress!.failed,
+                      queued: lastEvent.data?.batchProgress?.queued,
+                      processing: lastEvent.data?.batchProgress?.processing,
+                      completed: lastEvent.data?.batchProgress?.completed,
+                      failed: lastEvent.data?.batchProgress?.failed,
                     },
                   }
                 : b
@@ -121,20 +121,20 @@ export function RenderList({ initialRenders }: RenderListProps) {
         if (lastEvent.data?.batchId && lastEvent.data?.batchProgress) {
           setBatches((prev) =>
             prev.map((b) =>
-              b.id === lastEvent.data!.batchId
+              b.id === lastEvent.data?.batchId
                 ? {
                     ...b,
-                    status: (lastEvent.data!.batchProgress!.failed === 0
+                    status: (lastEvent.data?.batchProgress?.failed === 0
                       ? 'completed'
-                      : lastEvent.data!.batchProgress!.completed === 0
+                      : lastEvent.data?.batchProgress?.completed === 0
                         ? 'failed'
                         : 'partial_failure') as any,
                     completedAt: new Date().toISOString(),
                     progress: {
-                      queued: lastEvent.data!.batchProgress!.queued,
-                      processing: lastEvent.data!.batchProgress!.processing,
-                      completed: lastEvent.data!.batchProgress!.completed,
-                      failed: lastEvent.data!.batchProgress!.failed,
+                      queued: lastEvent.data?.batchProgress?.queued,
+                      processing: lastEvent.data?.batchProgress?.processing,
+                      completed: lastEvent.data?.batchProgress?.completed,
+                      failed: lastEvent.data?.batchProgress?.failed,
                     },
                   }
                 : b

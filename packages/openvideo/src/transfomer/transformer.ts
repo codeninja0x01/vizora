@@ -232,9 +232,9 @@ export class Transformer extends Container {
       // and Root.pivot is (0,0), and AnimationContainer.pivot is (0,0),
       // the "Stable" position of MainSprite relative to Root is just its local position
       // as if AnimationContainer had identity transform.
-      
+
       const t = mainSprite.localTransform.clone();
-      
+
       // If the parent is AnimationContainer, we ignore the parent's transform
       // to get the "Reference" position.
       // Actually, in our case, MainSprite's localTransform is already relative to AnimationContainer.
@@ -261,7 +261,8 @@ export class Transformer extends Container {
 
     const contentChildren = container.children.filter(
       (child) =>
-        child.label !== 'ShadowContainer' && child.label !== 'AnimationContainer'
+        child.label !== 'ShadowContainer' &&
+        child.label !== 'AnimationContainer'
     );
 
     if (contentChildren.length === 0 && container.children.length > 0) {
@@ -338,7 +339,7 @@ export class Transformer extends Container {
   };
 
   #calculateSnappedMove(e: FederatedPointerEvent) {
-    const parentScale = Math.abs(this.parent!.worldTransform.a);
+    const parentScale = Math.abs(this.parent?.worldTransform.a);
 
     // Update context
     this.#snappingManager.updateContext(
@@ -356,7 +357,7 @@ export class Transformer extends Container {
     this.#unsnappedPivotWorld.y += dyGlobalMouse;
 
     // Calculate Proposed Parent Position from Virtual Pivot
-    const proposedParentPos = this.parent!.toLocal(this.#unsnappedPivotWorld);
+    const proposedParentPos = this.parent?.toLocal(this.#unsnappedPivotWorld);
 
     // Construct Proposed Bounds (centered at proposed position)
     const proposedBounds = new Rectangle(
@@ -380,12 +381,12 @@ export class Transformer extends Container {
     const finalParentPosY = proposedParentPos.y + snapDy;
 
     // Calculate Delta to apply to Objects
-    const currentParentPos = this.parent!.toLocal(this.#pivotWorld);
+    const currentParentPos = this.parent?.toLocal(this.#pivotWorld);
     const moveDx = finalParentPosX - currentParentPos.x;
     const moveDy = finalParentPosY - currentParentPos.y;
 
     // Calculate New Global Pivot
-    const newPivotWorld = this.parent!.toGlobal(
+    const newPivotWorld = this.parent?.toGlobal(
       new Point(finalParentPosX, finalParentPosY)
     );
 

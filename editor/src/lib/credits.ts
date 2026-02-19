@@ -1,7 +1,7 @@
 // Credit deduction, refund, and warning utilities
 
 import { prisma } from '@/lib/db';
-import { isLowCredit, calculateCredits } from '@/lib/billing';
+import { isLowCredit } from '@/lib/billing';
 import { Resend } from 'resend';
 
 const resendApiKey = process.env.RESEND_API_KEY;
@@ -228,7 +228,7 @@ export async function checkAndWarnLowCredits(
           },
         });
 
-        if (owner && owner.user.email) {
+        if (owner?.user.email) {
           const percentRemaining =
             (org.creditBalance / org.monthlyAllotment) * 100;
 

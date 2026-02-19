@@ -32,7 +32,7 @@ export class Transport {
     if (
       this.maxDuration <= 0 ||
       this.maxDuration === Infinity ||
-      isNaN(this.maxDuration)
+      Number.isNaN(this.maxDuration)
     ) {
       console.warn('Cannot play: invalid duration', this.maxDuration);
       return;
@@ -186,7 +186,7 @@ export class Transport {
     if (
       this.maxDuration <= 0 ||
       this.maxDuration === Infinity ||
-      isNaN(this.maxDuration)
+      Number.isNaN(this.maxDuration)
     ) {
       this.pause();
       return;
