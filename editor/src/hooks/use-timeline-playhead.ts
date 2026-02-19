@@ -173,21 +173,27 @@ export function useTimelinePlayhead({
     const playheadPx =
       playheadPosition * TIMELINE_CONSTANTS.PIXELS_PER_SECOND * zoomLevel;
     const viewportWidth = rulerViewport.clientWidth;
-    const scrollMin = 0;
-    const scrollMax =
-      duration * TIMELINE_CONSTANTS.PIXELS_PER_SECOND * zoomLevel -
-      viewportWidth;
+    const contentWidth =
+      duration * TIMELINE_CONSTANTS.PIXELS_PER_SECOND * zoomLevel;
 
-    // Only auto-scroll if playhead is completely out of view (no buffer)
+    // No scrolling needed if content fits within viewport
+    if (contentWidth <= viewportWidth) return;
+
+    const scrollMax = contentWidth - viewportWidth;
+    const currentScroll = rulerViewport.scrollLeft;
+
+    // Scroll when playhead reaches 80% of viewport or goes off-screen
+    const rightThreshold = currentScroll + viewportWidth * 0.8;
+    const leftThreshold = currentScroll + viewportWidth * 0.1;
+
     const needsScroll =
-      playheadPx < rulerViewport.scrollLeft ||
-      playheadPx > rulerViewport.scrollLeft + viewportWidth;
+      playheadPx > rightThreshold || playheadPx < leftThreshold;
 
     if (needsScroll && onScrollChange) {
-      // Position the playhead at the left edge of the viewport
+      // Position playhead at ~20% from the left edge for smooth following
       const desiredScroll = Math.max(
-        scrollMin,
-        Math.min(scrollMax, playheadPx)
+        0,
+        Math.min(scrollMax, playheadPx - viewportWidth * 0.2)
       );
       onScrollChange(desiredScroll);
     }
