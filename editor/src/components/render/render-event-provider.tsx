@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import { toast } from 'sonner';
 
 interface RenderEventContextValue {
@@ -229,8 +230,10 @@ export function RenderEventProvider({ children }: RenderEventProviderProps) {
   }, []);
 
   return (
-    <RenderEventContext.Provider value={{ isConnected, activeCount }}>
-      {children}
-    </RenderEventContext.Provider>
+    <NuqsAdapter>
+      <RenderEventContext.Provider value={{ isConnected, activeCount }}>
+        {children}
+      </RenderEventContext.Provider>
+    </NuqsAdapter>
   );
 }

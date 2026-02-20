@@ -9,11 +9,14 @@ import { useQueryStates, parseAsString } from 'nuqs';
  * Filter/search changes reset cursor to empty string (go back to page 1).
  */
 export function useRenderFilters() {
-  const [filters, setFilters] = useQueryStates({
-    status: parseAsString.withDefault('all'),
-    search: parseAsString.withDefault(''),
-    cursor: parseAsString.withDefault(''),
-  });
+  const [filters, setFilters] = useQueryStates(
+    {
+      status: parseAsString.withDefault('all'),
+      search: parseAsString.withDefault(''),
+      cursor: parseAsString.withDefault(''),
+    },
+    { history: 'replace' }
+  );
 
   return {
     status: filters.status,

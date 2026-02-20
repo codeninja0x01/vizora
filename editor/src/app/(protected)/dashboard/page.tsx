@@ -156,7 +156,7 @@ export default async function DashboardPage() {
     <div className="space-y-10">
       {/* Hero greeting */}
       <div
-        className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
+        className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200"
         style={{ animationFillMode: 'both' }}
       >
         <h1 className="text-3xl font-bold tracking-tight font-heading text-foreground">
@@ -173,9 +173,9 @@ export default async function DashboardPage() {
           <Link
             key={stat.label}
             href={stat.href}
-            className="group relative overflow-hidden rounded-xl border border-border/50 bg-card/40 p-5 transition-all duration-200 hover:border-border/80 hover:bg-card/70 hover:shadow-lg hover:shadow-black/5 animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
+            className="group relative overflow-hidden rounded-xl border border-border/50 bg-card/40 p-5 transition-all duration-200 hover:border-border/80 hover:bg-card/70 hover:shadow-lg hover:shadow-black/5 animate-in fade-in-0 slide-in-from-bottom-2 duration-200"
             style={{
-              animationDelay: `${100 + i * 80}ms`,
+              animationDelay: `${40 + i * 30}ms`,
               animationFillMode: 'both',
             }}
           >
@@ -220,8 +220,8 @@ export default async function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Recent Renders */}
         <div
-          className="rounded-xl border border-border/50 bg-card/40 p-6 lg:col-span-3 animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
-          style={{ animationDelay: '450ms', animationFillMode: 'both' }}
+          className="rounded-xl border border-border/50 bg-card/40 p-6 lg:col-span-3 animate-in fade-in-0 slide-in-from-bottom-2 duration-200"
+          style={{ animationDelay: '160ms', animationFillMode: 'both' }}
         >
           <div className="mb-5 flex items-center justify-between">
             <h2 className="text-lg font-semibold tracking-tight font-heading text-foreground">
@@ -271,8 +271,8 @@ export default async function DashboardPage() {
 
         {/* Right column: Quick Actions + Getting Started */}
         <div
-          className="space-y-5 lg:col-span-2 animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
-          style={{ animationDelay: '530ms', animationFillMode: 'both' }}
+          className="space-y-5 lg:col-span-2 animate-in fade-in-0 slide-in-from-bottom-2 duration-200"
+          style={{ animationDelay: '200ms', animationFillMode: 'both' }}
         >
           {/* Quick Actions */}
           <div className="rounded-xl border border-border/50 bg-card/40 p-6">

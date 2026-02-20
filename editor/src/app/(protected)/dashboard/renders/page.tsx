@@ -7,7 +7,7 @@ export default async function RendersPage() {
   return (
     <div className="space-y-6">
       <div
-        className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
+        className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200"
         style={{ animationFillMode: 'both' }}
       >
         <h1 className="text-2xl font-bold tracking-tight font-heading">
@@ -19,8 +19,8 @@ export default async function RendersPage() {
       </div>
 
       <div
-        className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
-        style={{ animationDelay: '100ms', animationFillMode: 'both' }}
+        className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200"
+        style={{ animationDelay: '60ms', animationFillMode: 'both' }}
       >
         <RenderList initialRenders={initialRenders} />
       </div>
