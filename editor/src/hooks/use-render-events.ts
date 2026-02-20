@@ -52,6 +52,12 @@ export function useRenderEvents(
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
+  // Store callback in a ref so it never needs to be an effect dependency.
+  // This prevents reconnecting the SSE stream whenever the parent re-renders.
+  const onEventRef = useRef(options?.onEvent);
+
+  // Keep the ref current on every render without re-running the effect.
+  onEventRef.current = options?.onEvent;
 
   const [isConnected, setIsConnected] = useState(false);
   const [activeCount, setActiveCount] = useState(0);
@@ -101,8 +107,8 @@ export function useRenderEvents(
           setLastEvent(parsed);
 
           // Call external event handler if provided
-          if (options?.onEvent) {
-            options.onEvent(parsed);
+          if (onEventRef.current) {
+            onEventRef.current(parsed);
           }
         } catch (error) {
           console.error('[useRenderEvents] Failed to parse event:', error);
@@ -153,7 +159,7 @@ export function useRenderEvents(
         clearTimeout(reconnectTimeoutRef.current);
       }
     };
-  }, [options]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     isConnected,
