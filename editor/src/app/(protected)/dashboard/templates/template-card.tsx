@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Layers, FileSpreadsheet } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,12 +36,16 @@ function formatRelativeTime(date: Date): string {
 }
 
 export function TemplateCard({ template }: TemplateCardProps) {
+  const router = useRouter();
   const mergeFieldCount = Array.isArray(template.mergeFields)
     ? template.mergeFields.length
     : 0;
 
   return (
-    <Link href={`/?templateId=${template.id}`}>
+    <div
+      className="cursor-pointer"
+      onClick={() => router.push(`/editor?templateId=${template.id}`)}
+    >
       <Card className="group h-full overflow-hidden transition-all hover:scale-[1.02] hover:shadow-lg">
         {/* Thumbnail area - 16:9 aspect ratio */}
         <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5">
@@ -86,7 +91,7 @@ export function TemplateCard({ template }: TemplateCardProps) {
             </p>
             <div
               className="flex items-center gap-2"
-              onClick={(e) => e.preventDefault()}
+              onClick={(e) => e.stopPropagation()}
             >
               <Link href={`/dashboard/bulk-generate?templateId=${template.id}`}>
                 <Button
@@ -106,6 +111,6 @@ export function TemplateCard({ template }: TemplateCardProps) {
           </div>
         </CardContent>
       </Card>
-    </Link>
+    </div>
   );
 }
