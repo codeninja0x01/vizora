@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Layers, FileSpreadsheet } from 'lucide-react';
+import { Layers, FileSpreadsheet, Code2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { TEMPLATE_CATEGORIES } from '@/types/template';
@@ -37,6 +37,7 @@ function formatRelativeTime(date: Date): string {
 
 export function TemplateCard({ template }: TemplateCardProps) {
   const router = useRouter();
+
   const mergeFieldCount = Array.isArray(template.mergeFields)
     ? template.mergeFields.length
     : 0;
@@ -93,12 +94,25 @@ export function TemplateCard({ template }: TemplateCardProps) {
               className="flex items-center gap-2"
               onClick={(e) => e.stopPropagation()}
             >
+              <Button
+                variant="ghost"
+                size="sm"
+                className="size-8 p-0"
+                title="API Reference & Test Render"
+                aria-label="API Reference & Test Render"
+                onClick={() =>
+                  router.push(`/dashboard/templates/${template.id}`)
+                }
+              >
+                <Code2 className="size-4" />
+              </Button>
               <Link href={`/dashboard/bulk-generate?templateId=${template.id}`}>
                 <Button
                   variant="ghost"
                   size="sm"
                   className="size-8 p-0"
                   title="Bulk Generate"
+                  aria-label="Bulk Generate"
                 >
                   <FileSpreadsheet className="size-4" />
                 </Button>
