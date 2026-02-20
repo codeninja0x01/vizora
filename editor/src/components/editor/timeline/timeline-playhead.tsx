@@ -54,6 +54,10 @@ export function TimelinePlayhead({
     onScrollChange,
   });
 
+  // Use timeline container height minus a few pixels for breathing room
+  const timelineContainerHeight = timelineRef.current?.offsetHeight || 400;
+  const totalHeight = timelineContainerHeight - 4;
+
   // Get dynamic track labels width, fallback to 0 if no tracks or no ref
   const trackLabelsWidth =
     tracks.length > 0 && trackLabelsRef?.current
@@ -90,9 +94,8 @@ export function TimelinePlayhead({
       style={{
         left: `${leftPosition}px`,
         top: 0,
-        bottom: 0,
+        height: `${totalHeight}px`,
         width: '1px',
-        opacity: duration === 0 ? 0 : 1,
       }}
       onMouseDown={handlePlayheadMouseDown}
     >

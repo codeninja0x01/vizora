@@ -45,13 +45,16 @@ export default async function ProtectedLayout({
       where: { id: session.session.id },
       data: { activeOrganizationId: orgId },
     });
+    session.session.activeOrganizationId = orgId;
   }
 
   // Fetch billing data for low-credit banner
-  const orgBilling = await prisma.organization.findUnique({
-    where: { id: session.session.activeOrganizationId! },
-    select: { creditBalance: true, monthlyAllotment: true, tier: true },
-  });
+  const orgBilling = session.session.activeOrganizationId
+    ? await prisma.organization.findUnique({
+        where: { id: session.session.activeOrganizationId },
+        select: { creditBalance: true, monthlyAllotment: true, tier: true },
+      })
+    : null;
 
   return (
     <RenderEventProvider>
