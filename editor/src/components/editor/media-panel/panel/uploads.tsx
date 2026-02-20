@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useStudioStore } from '@/stores/studio-store';
 import { useProjectStore } from '@/stores/project-store';
 import { Image, Video, Audio, Log } from 'openvideo';
-import { Upload, Search, Trash2, Music } from 'lucide-react';
+import { Upload, Search, Trash2, Music, Loader2 } from 'lucide-react';
 import {
   storageService,
   type StorageStats,
@@ -28,6 +28,13 @@ interface VisualAsset {
   height?: number;
   duration?: number;
   size?: number;
+}
+
+interface UploadingFile {
+  id: string;
+  name: string;
+  previewUrl: string;
+  type: MediaType;
 }
 
 const STORAGE_KEY = 'designcombo_uploads';
@@ -59,6 +66,43 @@ function formatDuration(seconds?: number) {
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
+// Uploading card component
+function UploadingCard({ file }: { file: UploadingFile }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="relative aspect-square rounded-sm overflow-hidden bg-foreground/20 border border-primary animate-pulse flex items-center justify-center">
+        {file.type === 'image' ? (
+          // biome-ignore lint/performance/noImgElement: object URL preview during upload
+          <img
+            src={file.previewUrl}
+            alt={file.name}
+            className="max-w-full max-h-full object-contain opacity-60"
+          />
+        ) : file.type === 'audio' ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <Music className="text-[#2dc28c] opacity-60" size={32} />
+          </div>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-black/40">
+            <video
+              src={file.previewUrl}
+              className="max-w-full max-h-full object-contain opacity-60 pointer-events-none"
+              muted
+            />
+          </div>
+        )}
+        {/* Spinner overlay */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+          <Loader2 size={20} className="text-primary animate-spin" />
+        </div>
+      </div>
+      <p className="text-[10px] text-muted-foreground truncate px-0.5">
+        {file.name} — Uploading…
+      </p>
+    </div>
+  );
 }
 
 // Asset card component
@@ -143,6 +187,7 @@ export default function PanelUploads() {
   const [searchQuery, setSearchQuery] = useState('');
   const [uploads, setUploads] = useState<VisualAsset[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [_storageStats, setStorageStats] = useState<StorageStats | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -245,10 +290,21 @@ export default function PanelUploads() {
     setIsUploading(true);
     const newAssets: VisualAsset[] = [];
 
+    // Build per-file preview entries immediately
+    const fileList = Array.from(files);
+    const pendingEntries: UploadingFile[] = fileList.map((file) => ({
+      id: crypto.randomUUID(),
+      name: file.name,
+      previewUrl: URL.createObjectURL(file),
+      type: detectFileType(file),
+    }));
+    setUploadingFiles(pendingEntries);
+
     try {
-      for (const file of Array.from(files)) {
-        const id = crypto.randomUUID();
-        const type = detectFileType(file);
+      for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i];
+        const entry = pendingEntries[i];
+        const { id, type, previewUrl } = entry;
 
         // 1. Upload to R2
         let uploadResult: Awaited<ReturnType<typeof uploadFile>> | undefined;
@@ -258,7 +314,7 @@ export default function PanelUploads() {
           console.error('R2 upload failed, falling back to local only:', error);
         }
 
-        const src = uploadResult?.url || URL.createObjectURL(file);
+        const src = uploadResult?.url || previewUrl;
 
         // 2. Save to OPFS if supported (for local caching/backup)
         if (storageService.isOPFSSupported()) {
@@ -278,10 +334,18 @@ export default function PanelUploads() {
         newAssets.push({
           id,
           name: file.name,
-          src: src,
+          src,
           type,
           size: file.size,
         });
+
+        // Remove this file from uploading list as it completes
+        setUploadingFiles((prev) => prev.filter((f) => f.id !== id));
+
+        // Revoke object URL if we got an R2 URL
+        if (uploadResult?.url && previewUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(previewUrl);
+        }
       }
 
       const updated = [...newAssets, ...uploads];
@@ -290,6 +354,13 @@ export default function PanelUploads() {
       await loadStorageStats();
     } catch (error) {
       console.error('Upload failed:', error);
+      // Revoke any remaining object URLs on error
+      for (const entry of pendingEntries) {
+        if (entry.previewUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(entry.previewUrl);
+        }
+      }
+      setUploadingFiles([]);
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -411,7 +482,7 @@ export default function PanelUploads() {
 
       {/* Assets grid */}
       <ScrollArea className="flex-1 px-4">
-        {filteredAssets.length === 0 ? (
+        {uploadingFiles.length === 0 && filteredAssets.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-2">
             <Upload size={32} className="opacity-50" />
             <span className="text-sm">
@@ -420,6 +491,9 @@ export default function PanelUploads() {
           </div>
         ) : (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-x-3 gap-y-4">
+            {uploadingFiles.map((file) => (
+              <UploadingCard key={file.id} file={file} />
+            ))}
             {filteredAssets.map((asset) => (
               <AssetCard
                 key={asset.id}

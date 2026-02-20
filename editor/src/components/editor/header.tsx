@@ -31,6 +31,7 @@ export default function Header() {
   const [isSaveTemplateOpen, setIsSaveTemplateOpen] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
+  const [title, setTitle] = useState('Untitled video');
 
   useEffect(() => {
     if (!studio) return;
@@ -165,7 +166,7 @@ export default function Header() {
   };
 
   return (
-    <header className="relative flex h-[52px] w-full shrink-0 items-center justify-between px-4 bg-[var(--panel-background)] border-b border-white/5">
+    <header className="relative flex h-[52px] w-full shrink-0 items-center justify-between px-4 bg-[var(--panel-background)] border-b border-white/5 shadow-[0_1px_0_0_rgba(255,255,255,0.04)]">
       {/* Left Section */}
       <div className="flex items-center gap-1">
         <div className="pointer-events-auto flex size-8 bg-accent-purple-500/15 items-center justify-center rounded-lg">
@@ -195,7 +196,8 @@ export default function Header() {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <div className="pointer-events-auto flex h-10 items-center px-1.5">
+        <div className="border-r border-border/40 h-5 mx-1" />
+        <div className="pointer-events-auto flex items-center rounded-md bg-muted/30 px-0.5">
           <Button
             onClick={() => studio?.undo()}
             disabled={!canUndo}
@@ -218,8 +220,17 @@ export default function Header() {
       </div>
 
       {/* Center Section */}
-      <div className="absolute left-1/2 -translate-x-1/2 text-sm font-medium text-muted-foreground">
-        Untitled video
+      <div className="absolute left-1/2 -translate-x-1/2">
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          onBlur={(e) => {
+            const trimmed = e.target.value.trim();
+            setTitle(trimmed || 'Untitled video');
+          }}
+          className="text-sm font-medium text-center text-muted-foreground bg-transparent focus:outline-none focus:ring-1 focus:ring-border rounded px-2 w-40"
+        />
       </div>
 
       {/* Right Section */}
@@ -244,7 +255,7 @@ export default function Header() {
         </Button>
 
         {studio && (
-          <div className="flex items-center gap-1 border-x border-border/50 px-2 h-8 mx-1">
+          <div className="flex items-center border border-border/50 rounded-md px-1 h-8 mx-1">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -281,16 +292,15 @@ export default function Header() {
           </div>
         )}
 
-        <Link href="/dashboard">
-          <Button variant="outline" className="h-8 px-3 rounded-lg gap-1.5">
+        <Link href="/dashboard" title="Dashboard">
+          <Button variant="ghost" size="icon" className="h-8 w-8">
             <Layout className="size-4" />
-            <span className="hidden md:block">Dashboard</span>
           </Button>
         </Link>
 
         <Button
           variant="default"
-          className="h-8 px-4 rounded-lg font-medium gap-1.5"
+          className="h-8 px-4 rounded-lg font-medium gap-1.5 shadow-sm shadow-primary/20"
           onClick={() => setIsExportModalOpen(true)}
         >
           <Download className="size-4" />
