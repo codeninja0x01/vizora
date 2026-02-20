@@ -136,7 +136,7 @@ export default async function DashboardPage() {
       label: 'Create Template',
       description: 'Open the editor to build a new template',
       icon: Plus,
-      href: '/',
+      href: '/editor',
     },
     {
       label: 'Browse Gallery',

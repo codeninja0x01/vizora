@@ -22,7 +22,7 @@ export default async function TemplatesPage() {
             Create and manage reusable video templates with dynamic merge fields
           </p>
         </div>
-        <Link href="/">
+        <Link href="/editor">
           <Button>
             <Plus className="mr-2 size-4" />
             Create Template
@@ -45,7 +45,7 @@ export default async function TemplatesPage() {
               Create your first template from the editor by clicking File &gt;
               Save as Template.
             </p>
-            <Link href="/">
+            <Link href="/editor">
               <Button>
                 <Plus className="mr-2 size-4" />
                 Go to Editor

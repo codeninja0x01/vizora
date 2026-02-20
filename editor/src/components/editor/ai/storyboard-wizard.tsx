@@ -104,7 +104,7 @@ export function StoryboardWizard() {
     sessionStorage.setItem('pendingComposition', JSON.stringify(composition));
 
     // Navigate to editor
-    router.push('/');
+    router.push('/editor');
   };
 
   // Render step content
