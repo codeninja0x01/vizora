@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTimelineStore } from '@/stores/timeline-store';
 import { useStudioStore } from '@/stores/studio-store';
 import { usePlaybackStore } from '@/stores/playback-store';
@@ -17,6 +17,13 @@ export const TimelineStudioSync = ({
   const { studio } = useStudioStore();
   const { setTracks, tracks, updateClip, updateClips, removeClips } =
     useTimelineStore();
+
+  const timelineCanvasRef = useRef<TimelineCanvas | null | undefined>(null);
+
+  // Keep ref current whenever prop changes so studio effect closure can access it
+  useEffect(() => {
+    timelineCanvasRef.current = timelineCanvas;
+  }, [timelineCanvas]);
 
   // Sync Studio -> Store
   // When Studio emits events (e.g. from MediaPanel adding clips), update Store
@@ -310,6 +317,11 @@ export const TimelineStudioSync = ({
         _tracks: tracks,
         tracks: tracks,
       }));
+
+      // Force immediate canvas refresh so clips render without waiting for React effect
+      if (timelineCanvasRef.current) {
+        timelineCanvasRef.current.setTracks(tracks);
+      }
     };
 
     const handleClipReplaced = ({
