@@ -9,14 +9,7 @@ import { ExportModal } from './export-modal';
 import { LogoIcons } from '../shared/logos';
 import Link from 'next/link';
 import { Icons } from '../shared/icons';
-import {
-  Keyboard,
-  FilePlus,
-  Download,
-  Upload,
-  Share2,
-  Layout,
-} from 'lucide-react';
+import { Keyboard, FilePlus, Download, Upload, Layout } from 'lucide-react';
 import { ShortcutsModal } from './shortcuts-modal';
 import { SaveTemplateDialog } from './save-template-dialog';
 import { useEffect } from 'react';
@@ -250,12 +243,6 @@ export default function Header() {
           <span className="hidden md:block">AI Chat</span>
         </Button>
 
-        <Link href="https://discord.gg/SCfMrQx8kr" target="_blank">
-          <Button className="size-8" variant="ghost" size="icon">
-            <LogoIcons.discord className="size-4" />
-          </Button>
-        </Link>
-
         {studio && (
           <div className="flex items-center gap-1 border-x border-border/50 px-2 h-8 mx-1">
             <DropdownMenu>
@@ -294,10 +281,12 @@ export default function Header() {
           </div>
         )}
 
-        <Button variant="outline" className="h-8 px-3 rounded-lg gap-1.5">
-          <Share2 className="size-4" />
-          <span className="hidden md:block">Share</span>
-        </Button>
+        <Link href="/dashboard">
+          <Button variant="outline" className="h-8 px-3 rounded-lg gap-1.5">
+            <Layout className="size-4" />
+            <span className="hidden md:block">Dashboard</span>
+          </Button>
+        </Link>
 
         <Button
           variant="default"
