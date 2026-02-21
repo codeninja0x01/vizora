@@ -3,10 +3,10 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { authClient } from '@/lib/auth-client';
-import { KeyRound, CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, KeyRound, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { toast } from 'sonner';
 
 function ResetPasswordContent() {
@@ -21,14 +21,14 @@ function ResetPasswordContent() {
 
   if (!token) {
     return (
-      <div className="space-y-6 text-center">
+      <div className="space-y-8 text-center">
         <div className="flex justify-center">
-          <div className="rounded-full bg-destructive/10 p-4">
-            <XCircle className="size-8 text-destructive" />
+          <div className="flex size-16 items-center justify-center rounded-2xl border border-destructive/20 bg-destructive/10">
+            <XCircle className="size-7 text-destructive" />
           </div>
         </div>
         <div className="space-y-2">
-          <h2 className="text-xl font-semibold text-foreground">
+          <h2 className="font-heading text-2xl font-bold tracking-tight text-foreground">
             Invalid link
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -37,7 +37,7 @@ function ResetPasswordContent() {
         </div>
         <Link
           href="/forgot-password"
-          className="block text-sm text-primary hover:underline"
+          className="inline-block text-sm font-medium text-foreground transition-colors hover:text-primary"
         >
           Request new reset link
         </Link>
@@ -47,14 +47,14 @@ function ResetPasswordContent() {
 
   if (done) {
     return (
-      <div className="space-y-6 text-center">
+      <div className="space-y-8 text-center">
         <div className="flex justify-center">
-          <div className="rounded-full bg-primary/10 p-4">
-            <CheckCircle className="size-8 text-primary" />
+          <div className="flex size-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10">
+            <CheckCircle className="size-7 text-primary" />
           </div>
         </div>
         <div className="space-y-2">
-          <h2 className="text-xl font-semibold text-foreground">
+          <h2 className="font-heading text-2xl font-bold tracking-tight text-foreground">
             Password updated
           </h2>
           <p className="text-sm text-muted-foreground">
@@ -64,7 +64,7 @@ function ResetPasswordContent() {
         </div>
         <Link
           href="/login"
-          className="block text-sm text-primary hover:underline"
+          className="inline-block text-sm font-medium text-foreground transition-colors hover:text-primary"
         >
           Sign in
         </Link>
@@ -110,26 +110,24 @@ function ResetPasswordContent() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2 text-center">
-        <div className="flex justify-center mb-4">
-          <div className="rounded-full bg-primary/10 p-4">
-            <KeyRound className="size-8 text-primary" />
-          </div>
+    <div className="space-y-8">
+      <div className="space-y-1.5">
+        <div className="mb-4 flex size-12 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
+          <KeyRound className="size-5 text-primary" />
         </div>
-        <h2 className="text-xl font-semibold text-foreground">
+        <h2 className="font-heading text-2xl font-bold tracking-tight text-foreground">
           Set new password
         </h2>
         <p className="text-sm text-muted-foreground">
-          Must be at least 8 characters.
+          Choose a strong password of at least 8 characters.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-1.5">
           <label
             htmlFor="password"
-            className="text-sm font-medium text-foreground"
+            className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
           >
             New password
           </label>
@@ -141,14 +139,14 @@ function ResetPasswordContent() {
             onChange={(e) => setPassword(e.target.value)}
             required
             disabled={loading}
-            className="bg-white/5 border-white/10"
+            className="h-11 border-white/10 bg-white/5 transition-colors focus-visible:border-primary/50 focus-visible:ring-primary/20"
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <label
             htmlFor="confirm"
-            className="text-sm font-medium text-foreground"
+            className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
           >
             Confirm password
           </label>
@@ -160,18 +158,26 @@ function ResetPasswordContent() {
             onChange={(e) => setConfirm(e.target.value)}
             required
             disabled={loading}
-            className="bg-white/5 border-white/10"
+            className="h-11 border-white/10 bg-white/5 transition-colors focus-visible:border-primary/50 focus-visible:ring-primary/20"
           />
         </div>
 
-        <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? 'Updating...' : 'Update password'}
+        <Button
+          type="submit"
+          className="h-11 w-full font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          style={{
+            background:
+              'linear-gradient(105deg, #22D3EE 0%, #3B82F6 50%, oklch(0.60 0.24 285) 100%)',
+          }}
+          disabled={loading}
+        >
+          {loading ? 'Updating…' : 'Update password'}
         </Button>
       </form>
 
       <Link
         href="/login"
-        className="block text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="block text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         Back to sign in
       </Link>
