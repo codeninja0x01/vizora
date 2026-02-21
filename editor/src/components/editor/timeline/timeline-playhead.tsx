@@ -54,7 +54,8 @@ export function TimelinePlayhead({
     onScrollChange,
   });
 
-  // Use timeline container height minus a few pixels for breathing room
+  // Use timeline container height minus a few pixels for breathing room.
+  // 400 is a safe fallback before the ref is measured on first render.
   const timelineContainerHeight = timelineRef.current?.offsetHeight || 400;
   const totalHeight = timelineContainerHeight - 4;
 

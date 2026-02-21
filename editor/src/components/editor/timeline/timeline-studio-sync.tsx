@@ -262,7 +262,7 @@ export const TimelineStudioSync = ({
 
         // Update track
         const updatedTracks = state._tracks.map((t) => {
-          if (t.id === trackId || (t.id === trackId && trackId)) {
+          if (trackId && t.id === trackId) {
             // Check which clips are not already in track
             const uniqueNewIds = clipsToAdd.filter(
               (id) => !t.clipIds.includes(id)
@@ -300,7 +300,8 @@ export const TimelineStudioSync = ({
       }
 
       // 2. Map clips to store format
-      const newClipsMap: Record<string, any> = {};
+      const newClipsMap: Record<string, IClip & { sourceDuration?: number }> =
+        {};
       clips.forEach((c) => {
         const serialized = clipToJSON(c as unknown as StudioClip);
         newClipsMap[c.id] = {
@@ -685,42 +686,23 @@ export const TimelineStudioSync = ({
   }, [timelineCanvas, updateClip, updateClips, setTracks, studio]);
 
   // Sync Store -> Studio
-  // Render/Playback engine needs to know about track structure
+  // When the store's track list changes, push the update to the Studio engine.
+  // studio.setTracks does NOT emit track events, so this won't cause loops.
+  const lastSyncedTracksRef = useRef<ITimelineTrack[] | null>(null);
+
   useEffect(() => {
     if (!studio) return;
 
-    // We only want to set tracks if they differ, or rely on Studio to be smart.
-    // Studio.setTracks triggers a re-render.
-    // Ideally check deeply if changes? Or just pass it.
-    // For now, pass it. Optimizing later.
+    // Skip if the tracks reference hasn't changed (same array = same state).
+    // Also skip if we already synced this exact array to avoid redundant engine calls.
+    if (lastSyncedTracksRef.current === tracks) return;
 
-    // NOTE: This might cause a loop if Studio.setTracks emits events.
-    // Studio.setTracks DOES NOT emit events currently in my implementation.
-    // `addTrack` etc emit events. `setTracks` just sets. Good.
-
-    // However, if we change the Store, this effect runs.
-    // Then we call studio.setTracks.
-    // That's fine.
-
-    // But what if Studio event triggered the Store change?
-    // 1. Studio: emits `clip:added`
-    // 2. Sync: updates Store
-    // 3. Store: updates `tracks`
-    // 4. Sync Effect: calls `studio.setTracks(tracks)`
-    // 5. Studio: sets tracks.
-    // Result: Redundant setTracks call, but functionally correct (idempotent-ish).
-    // As long as `studio.setTracks` doesn't emit `track:added` we are good.
-
-    // Convert store tracks to studio tracks (Types are identical currently)
-    // Only set if they actually differ to avoid infinite loops if engine emits
     const studioTracks = studio.getTracks();
-    const storeTracksJson = JSON.stringify(tracks);
-    const studioTracksJson = JSON.stringify(studioTracks);
-
-    if (storeTracksJson !== studioTracksJson) {
+    if (tracks !== studioTracks) {
       studio.setTracks(tracks);
+      lastSyncedTracksRef.current = tracks;
     }
-  }, [studio, tracks]); // Depend on `tracks`.
+  }, [studio, tracks]);
 
   // Sync Selection (Bidirectional)
   useEffect(() => {

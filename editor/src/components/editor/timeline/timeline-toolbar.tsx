@@ -122,12 +122,12 @@ export function TimelineToolbar({
                 className="size-7"
                 variant="ghost"
                 size="icon"
-                onClick={() => seek(0)}
+                onClick={() => seek(duration)}
               >
                 <IconPlayerSkipForward className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Return to Start (Home / Enter)</TooltipContent>
+            <TooltipContent>Skip to End</TooltipContent>
           </Tooltip>
           {/* Time Display */}
           <div className="flex flex-row items-center justify-center px-2">

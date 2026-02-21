@@ -3,6 +3,8 @@
 import { useEffect, useRef } from 'react';
 import { TIMELINE_CONSTANTS } from '@/components/editor/timeline/timeline-constants';
 
+const RULER_HEIGHT = 24;
+
 interface TimelineRulerProps {
   zoomLevel: number;
   duration: number;
@@ -29,17 +31,17 @@ export function TimelineRuler({
     const dpr = window.devicePixelRatio || 1;
     // Set display size (css pixels)
     canvas.style.width = `${width}px`;
-    canvas.style.height = `24px`;
+    canvas.style.height = `${RULER_HEIGHT}px`;
 
     // Set actual size in memory (scaled to account for extra pixel density)
     canvas.width = Math.floor(width * dpr);
-    canvas.height = Math.floor(24 * dpr);
+    canvas.height = Math.floor(RULER_HEIGHT * dpr);
 
     // Normalize coordinate system to use css pixels
     ctx.scale(dpr, dpr);
 
     // Clear canvas
-    ctx.clearRect(0, 0, width, 24);
+    ctx.clearRect(0, 0, width, RULER_HEIGHT);
 
     const pixelsPerSecond = TIMELINE_CONSTANTS.PIXELS_PER_SECOND * zoomLevel;
 
@@ -55,7 +57,7 @@ export function TimelineRuler({
           visibleStart - scrollLeft,
           0,
           visibleEnd - visibleStart,
-          24
+          RULER_HEIGHT
         );
       }
     }
@@ -169,7 +171,7 @@ export function TimelineRuler({
     <canvas
       ref={canvasRef}
       className="absolute inset-0 pointer-events-none"
-      style={{ height: '24px' }}
+      style={{ height: `${RULER_HEIGHT}px` }}
     />
   );
 }

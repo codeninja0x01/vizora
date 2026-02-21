@@ -34,6 +34,7 @@ import { TimelineToolbar } from './timeline-toolbar';
 import { TimelineCanvas } from './timeline';
 import { TimelineStudioSync } from './timeline-studio-sync';
 import { useEditorHotkeys } from '@/hooks/use-editor-hotkeys';
+import { useProjectStore } from '@/stores/project-store';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,6 +47,7 @@ export function Timeline() {
   const { tracks, clips, getTotalDuration } = useTimelineStore();
   const { duration, seek, setDuration } = usePlaybackStore();
   const { studio } = useStudioStore();
+  const fps = useProjectStore((state) => state.fps);
 
   const timelineRef = useRef<HTMLDivElement>(null);
   const rulerRef = useRef<HTMLDivElement>(null);
@@ -67,8 +69,6 @@ export function Timeline() {
     containerRef: timelineRef,
     isInTimeline,
   });
-
-  // Old marquee selection removed - using new SelectionBox component instead
 
   // Dynamic timeline width calculation based on playhead position and duration
   const dynamicTimelineWidth = Math.max(
@@ -152,51 +152,39 @@ export function Timeline() {
       );
 
       let mouseX: number;
-      let scrollLeft = 0;
+      let clickScrollLeft = 0;
 
       if (isRulerClick) {
-        // Calculate based on ruler position
         const rulerContent = rulerScrollRef.current;
         if (!rulerContent) {
           return;
         }
         const rect = rulerContent.getBoundingClientRect();
         mouseX = e.clientX - rect.left;
-        scrollLeft = rulerContent.scrollLeft;
+        clickScrollLeft = rulerContent.scrollLeft;
       } else {
         const tracksContent = tracksScrollRef.current;
         if (!tracksContent) {
-          // If tracksScrollRef is gone (because we removed it), we can try to use canvas container if possible,
-          // or just rely on ruler if we assume vertical stack is aligned.
-          // But playhead seeking usually depends on ruler X.
-          // If the user clicked elsewhere?
-          // In the new layout, timeline-canvas is in a div. We didn't ref it for clicking yet.
-          // But handleTimelineContentClick is attached to...
-          // Wait, I removed the "tracksContainerRef" attachment in the previous step?
-          // "onMouseDown={handleTimelineMouseDown} ... ref={tracksContainerRef}" was on the removed div.
-          // So click seeking on the canvas tracks area MIGHT BE BROKEN unless I re-attach listeners.
           return;
         }
         const rect = tracksContent.getBoundingClientRect();
         mouseX = e.clientX - rect.left;
-        scrollLeft = tracksContent.scrollLeft;
+        clickScrollLeft = tracksContent.scrollLeft;
       }
 
       const rawTime = Math.max(
         0,
         Math.min(
           duration,
-          (mouseX + scrollLeft) /
+          (mouseX + clickScrollLeft) /
             (TIMELINE_CONSTANTS.PIXELS_PER_SECOND * zoomLevel)
         )
       );
 
-      // Use frame snapping for timeline clicking
-      const projectFps = 30;
-      const time = snapTimeToFrame(rawTime, projectFps);
+      const time = snapTimeToFrame(rawTime, fps);
       seek(time);
     },
-    [duration, zoomLevel, seek, rulerScrollRef, tracksScrollRef]
+    [duration, fps, zoomLevel, seek, rulerScrollRef, tracksScrollRef]
   );
 
   // Update timeline duration when tracks change
