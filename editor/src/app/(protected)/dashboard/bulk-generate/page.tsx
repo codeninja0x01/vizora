@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { ChevronLeft, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -155,20 +154,26 @@ export default function BulkGeneratePage() {
   const currentStepIndex = steps.findIndex((s) => s.key === step);
 
   return (
-    <div className="container max-w-5xl py-8">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight font-heading">
+      <div
+        className="animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+        style={{ animationFillMode: 'both' }}
+      >
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
           Bulk Generate
         </h1>
-        <p className="mt-1 text-muted-foreground">
+        <p className="mt-1.5 text-[15px] text-muted-foreground/70">
           Generate videos in bulk from CSV data.
         </p>
       </div>
 
       {/* Step indicator */}
       {step !== 'submitted' && (
-        <div className="mb-8 flex items-center justify-center gap-2">
+        <div
+          className="flex items-center justify-center gap-2 animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+          style={{ animationDelay: '60ms', animationFillMode: 'both' }}
+        >
           {steps.map((s, index) => {
             const isActive = s.key === step;
             const isComplete = index < currentStepIndex;
@@ -176,27 +181,35 @@ export default function BulkGeneratePage() {
             return (
               <div key={s.key} className="flex items-center gap-2">
                 <div
-                  className={`flex size-8 items-center justify-center rounded-full text-xs font-semibold ${
+                  className={`flex size-8 items-center justify-center rounded-full text-xs font-semibold transition-all ${
                     isComplete
-                      ? 'bg-primary text-primary-foreground'
+                      ? 'text-white'
                       : isActive
-                        ? 'bg-primary/20 text-primary ring-2 ring-primary'
-                        : 'bg-white/5 text-muted-foreground'
+                        ? 'border border-primary/40 bg-primary/10 text-primary'
+                        : 'border border-white/[0.07] bg-white/[0.02] text-muted-foreground/50'
                   }`}
+                  style={
+                    isComplete
+                      ? {
+                          background:
+                            'linear-gradient(135deg, #22D3EE 0%, #3B82F6 50%, oklch(0.60 0.24 285) 100%)',
+                        }
+                      : undefined
+                  }
                 >
-                  {isComplete ? <Check className="size-4" /> : index + 1}
+                  {isComplete ? <Check className="size-3.5" /> : index + 1}
                 </div>
                 <span
-                  className={`text-sm ${
+                  className={`text-[13px] ${
                     isActive
                       ? 'font-medium text-foreground'
-                      : 'text-muted-foreground'
+                      : 'text-muted-foreground/50'
                   }`}
                 >
                   {s.label}
                 </span>
                 {index < steps.length - 1 && (
-                  <div className="mx-2 h-px w-8 bg-border/40" />
+                  <div className="mx-2 h-px w-8 bg-white/[0.07]" />
                 )}
               </div>
             );
@@ -205,29 +218,30 @@ export default function BulkGeneratePage() {
       )}
 
       {/* Content card */}
-      <div className="rounded-lg border border-border/40 bg-card/30 p-6">
+      <div
+        className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+        style={{ animationDelay: '120ms', animationFillMode: 'both' }}
+      >
         {/* Back button */}
         {step !== 'select-template' && step !== 'submitted' && (
-          <Button
+          <button
             type="button"
-            variant="ghost"
-            size="sm"
             onClick={goBack}
-            className="mb-6"
+            className="mb-6 inline-flex items-center gap-1.5 text-[13px] text-muted-foreground/60 transition-colors hover:text-foreground"
           >
-            <ChevronLeft className="mr-1 size-4" />
+            <ChevronLeft className="size-4" />
             Back
-          </Button>
+          </button>
         )}
 
         {/* Step 1: Select Template */}
         {step === 'select-template' && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">
+              <h2 className="font-heading text-lg font-semibold text-foreground">
                 Select a Template
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-1 text-[13px] text-muted-foreground/60">
                 Choose a template to use for bulk generation
               </p>
             </div>
@@ -237,7 +251,7 @@ export default function BulkGeneratePage() {
                 value={selectedTemplateId}
                 onValueChange={handleTemplateSelect}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full border-white/[0.07] bg-white/[0.02]">
                   <SelectValue placeholder="Select a template" />
                 </SelectTrigger>
                 <SelectContent>
@@ -255,13 +269,18 @@ export default function BulkGeneratePage() {
               </Select>
 
               <div className="flex justify-end">
-                <Button
+                <button
+                  type="button"
                   onClick={handleTemplateConfirm}
                   disabled={!selectedTemplate}
-                  size="lg"
+                  className="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-40"
+                  style={{
+                    background:
+                      'linear-gradient(105deg, #22D3EE 0%, #3B82F6 50%, oklch(0.60 0.24 285) 100%)',
+                  }}
                 >
                   Continue
-                </Button>
+                </button>
               </div>
             </div>
           </div>
@@ -271,10 +290,10 @@ export default function BulkGeneratePage() {
         {step === 'upload-csv' && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">
+              <h2 className="font-heading text-lg font-semibold text-foreground">
                 Upload CSV File
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-1 text-[13px] text-muted-foreground/60">
                 Upload a CSV file with your data. The first row should contain
                 column headers.
               </p>
@@ -288,10 +307,10 @@ export default function BulkGeneratePage() {
         {step === 'map-fields' && selectedTemplate && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">
+              <h2 className="font-heading text-lg font-semibold text-foreground">
                 Map CSV Columns to Template Fields
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-1 text-[13px] text-muted-foreground/60">
                 Review auto-matched fields and adjust as needed
               </p>
             </div>
@@ -308,10 +327,10 @@ export default function BulkGeneratePage() {
         {step === 'preview' && selectedTemplate && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">
+              <h2 className="font-heading text-lg font-semibold text-foreground">
                 Preview and Validate
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-1 text-[13px] text-muted-foreground/60">
                 Review all rows and validation status before submitting
               </p>
             </div>
@@ -328,26 +347,34 @@ export default function BulkGeneratePage() {
 
         {/* Step 5: Submitted */}
         {step === 'submitted' && batchId && (
-          <div className="py-12 text-center">
-            <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-green-500/10">
-              <Check className="size-8 text-green-500" />
+          <div className="py-14 text-center">
+            <div className="mx-auto mb-5 flex size-16 items-center justify-center rounded-2xl border border-white/[0.06] bg-green-500/10">
+              <Check className="size-7 text-green-500" />
             </div>
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="font-heading text-xl font-semibold text-foreground">
               Batch Submitted Successfully
             </h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Batch ID: <span className="font-mono">{batchId}</span>
+            <p className="mt-2 text-sm text-muted-foreground/60">
+              Batch ID:{' '}
+              <code className="rounded-md bg-white/[0.06] px-2 py-0.5 font-mono text-[12px] text-muted-foreground">
+                {batchId}
+              </code>
             </p>
-            <div className="mt-6 flex justify-center gap-3">
-              <Button
+            <div className="mt-8 flex justify-center gap-3">
+              <button
+                type="button"
                 onClick={() => router.push('/dashboard/renders')}
-                size="lg"
+                className="inline-flex items-center rounded-lg px-5 py-2.5 text-sm font-medium text-white"
+                style={{
+                  background:
+                    'linear-gradient(105deg, #22D3EE 0%, #3B82F6 50%, oklch(0.60 0.24 285) 100%)',
+                }}
               >
                 View Renders
-              </Button>
-              <Button
+              </button>
+              <button
+                type="button"
                 onClick={() => {
-                  // Reset state and start over
                   setStep('select-template');
                   setSelectedTemplateId('');
                   setSelectedTemplate(null);
@@ -356,11 +383,10 @@ export default function BulkGeneratePage() {
                   setMapping({});
                   setBatchId(null);
                 }}
-                variant="outline"
-                size="lg"
+                className="inline-flex items-center rounded-lg border border-white/[0.08] bg-white/[0.02] px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-white/[0.05]"
               >
                 Create Another Batch
-              </Button>
+              </button>
             </div>
           </div>
         )}

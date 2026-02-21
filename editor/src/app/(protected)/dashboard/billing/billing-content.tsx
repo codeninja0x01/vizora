@@ -218,21 +218,21 @@ export function BillingContent({
     <div className="space-y-8">
       {/* Header */}
       <div
-        className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
+        className="animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
         style={{ animationFillMode: 'both' }}
       >
-        <h1 className="text-2xl font-bold tracking-tight font-heading">
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
           Billing & Usage
         </h1>
-        <p className="mt-1 text-muted-foreground">
+        <p className="mt-1.5 text-[15px] text-muted-foreground/70">
           Manage your subscription and view usage analytics
         </p>
       </div>
 
       {/* Plan Overview Card */}
       <div
-        className="rounded-xl border border-border/50 bg-card/40 p-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
-        style={{ animationDelay: '100ms', animationFillMode: 'both' }}
+        className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+        style={{ animationDelay: '80ms', animationFillMode: 'both' }}
       >
         <div className="flex items-start justify-between mb-6">
           <div>
@@ -241,12 +241,12 @@ export function BillingContent({
             </h2>
             <div className="flex items-center gap-2">
               <span
-                className={`px-3 py-1 rounded-full text-xs font-medium ${getTierBadgeColor()}`}
+                className={`rounded-full px-3 py-1 text-[11px] font-medium ${getTierBadgeColor()}`}
               >
                 {currentTierConfig.displayName}
               </span>
               {organization.cancelAtPeriodEnd && (
-                <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400">
+                <span className="rounded-full bg-amber-500/10 px-3 py-1 text-[11px] font-medium text-amber-400">
                   Cancels at period end
                 </span>
               )}
@@ -263,9 +263,9 @@ export function BillingContent({
 
         {/* Payment Failed Warning */}
         {organization.subscriptionStatus === 'past_due' && (
-          <div className="mb-6 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
+          <div className="mb-6 rounded-lg border border-red-500/20 bg-red-500/10 p-4">
             <p className="text-sm text-red-400">
-              Payment failed - rendering suspended. Please update your payment
+              Payment failed — rendering suspended. Please update your payment
               method.
             </p>
           </div>
@@ -273,23 +273,23 @@ export function BillingContent({
 
         {/* Credit Balance */}
         <div className="mb-4">
-          <div className="flex items-baseline justify-between mb-2">
-            <span className="text-sm text-muted-foreground">
+          <div className="mb-2 flex items-baseline justify-between">
+            <span className="text-[13px] text-muted-foreground/70">
               Credit Balance
             </span>
-            <span className="text-2xl font-bold tabular-nums font-heading">
+            <span className="font-heading text-2xl font-bold tabular-nums text-foreground">
               {organization.creditBalance.toLocaleString()} /{' '}
               {organization.monthlyAllotment.toLocaleString()}
             </span>
           </div>
-          <div className="h-2 rounded-full bg-muted overflow-hidden">
+          <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
             <div
               className={`h-full transition-all duration-500 ${getProgressColor()}`}
               style={{ width: `${Math.min(creditPercentage, 100)}%` }}
             />
           </div>
           {isLowCredit && (
-            <div className="mt-2 flex items-center gap-2 text-xs text-amber-400">
+            <div className="mt-2 flex items-center gap-1.5 text-[12px] text-amber-400">
               <AlertCircle className="size-3" />
               <span>Credit balance is low</span>
             </div>
@@ -297,7 +297,7 @@ export function BillingContent({
         </div>
 
         {/* Billing Cycle */}
-        <div className="text-sm text-muted-foreground">
+        <div className="text-[13px] text-muted-foreground/50">
           {organization.billingCycleEnd ? (
             <>
               Renews {formatDate(organization.billingCycleEnd)}
@@ -313,38 +313,38 @@ export function BillingContent({
 
       {/* Plan Comparison Section */}
       <div
-        className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
-        style={{ animationDelay: '200ms', animationFillMode: 'both' }}
+        className="animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+        style={{ animationDelay: '160ms', animationFillMode: 'both' }}
       >
-        <h2 className="text-lg font-semibold tracking-tight font-heading text-foreground mb-4">
+        <h2 className="mb-4 font-heading text-lg font-semibold tracking-tight text-foreground">
           Plans
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {/* Free Plan */}
           <div
-            className={`rounded-xl border ${currentTier === 'free' ? 'border-primary/50 bg-primary/5' : 'border-border/40 bg-card/50'} p-6`}
+            className={`rounded-xl border p-6 ${currentTier === 'free' ? 'border-primary/40 bg-primary/[0.04]' : 'border-white/[0.07] bg-white/[0.02]'}`}
           >
             <div className="mb-4">
               {currentTier === 'free' && (
-                <span className="px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">
+                <span className="rounded-md bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary">
                   Current Plan
                 </span>
               )}
             </div>
-            <h3 className="text-xl font-bold font-heading mb-2">Free</h3>
-            <p className="text-3xl font-bold font-heading mb-4">
+            <h3 className="mb-2 font-heading text-xl font-bold">Free</h3>
+            <p className="mb-4 font-heading text-3xl font-bold">
               $0
-              <span className="text-sm text-muted-foreground font-normal">
+              <span className="text-sm font-normal text-muted-foreground">
                 /mo
               </span>
             </p>
             <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-green-500" />
+              <li className="flex items-center gap-2 text-muted-foreground/70">
+                <CheckCircle2 className="size-3.5 text-green-500" />
                 <span>3,000 credits/month</span>
               </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-green-500" />
+              <li className="flex items-center gap-2 text-muted-foreground/70">
+                <CheckCircle2 className="size-3.5 text-green-500" />
                 <span>5 concurrent renders</span>
               </li>
             </ul>
@@ -352,36 +352,42 @@ export function BillingContent({
 
           {/* Pro Plan */}
           <div
-            className={`rounded-xl border ${currentTier === 'pro' ? 'border-primary/50 bg-primary/5' : 'border-border/40 bg-card/50'} p-6 relative`}
+            className={`relative rounded-xl border p-6 ${currentTier === 'pro' ? 'border-primary/40 bg-primary/[0.04]' : 'border-white/[0.07] bg-white/[0.02]'}`}
           >
             {currentTier !== 'pro' && (
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                <span className="px-3 py-1 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300">
+                <span
+                  className="rounded-full px-3 py-1 text-[11px] font-medium text-white"
+                  style={{
+                    background:
+                      'linear-gradient(105deg, #22D3EE 0%, #3B82F6 50%, oklch(0.60 0.24 285) 100%)',
+                  }}
+                >
                   Recommended
                 </span>
               </div>
             )}
             {currentTier === 'pro' && (
               <div className="mb-4">
-                <span className="px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">
+                <span className="rounded-md bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary">
                   Current Plan
                 </span>
               </div>
             )}
-            <h3 className="text-xl font-bold font-heading mb-2">Pro</h3>
-            <p className="text-3xl font-bold font-heading mb-4">
+            <h3 className="mb-2 font-heading text-xl font-bold">Pro</h3>
+            <p className="mb-4 font-heading text-3xl font-bold">
               $29
-              <span className="text-sm text-muted-foreground font-normal">
+              <span className="text-sm font-normal text-muted-foreground">
                 /mo
               </span>
             </p>
-            <ul className="space-y-2 text-sm mb-6">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-green-500" />
+            <ul className="mb-6 space-y-2 text-sm">
+              <li className="flex items-center gap-2 text-muted-foreground/70">
+                <CheckCircle2 className="size-3.5 text-green-500" />
                 <span>30,000 credits/month</span>
               </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-green-500" />
+              <li className="flex items-center gap-2 text-muted-foreground/70">
+                <CheckCircle2 className="size-3.5 text-green-500" />
                 <span>50 concurrent renders</span>
               </li>
             </ul>
@@ -390,7 +396,11 @@ export function BillingContent({
                 type="button"
                 onClick={handleUpgradeToPro}
                 disabled={isPending}
-                className="w-full px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-colors disabled:opacity-50"
+                className="inline-flex w-full items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-white transition-opacity disabled:opacity-50"
+                style={{
+                  background:
+                    'linear-gradient(105deg, #22D3EE 0%, #3B82F6 50%, oklch(0.60 0.24 285) 100%)',
+                }}
               >
                 Upgrade to Pro
               </button>
@@ -400,7 +410,7 @@ export function BillingContent({
                 type="button"
                 onClick={handleManageSubscription}
                 disabled={isPending}
-                className="w-full px-4 py-2 rounded-lg border border-border/40 hover:bg-white/[0.03] text-foreground font-medium transition-colors disabled:opacity-50"
+                className="inline-flex w-full items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.02] px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-white/[0.05] disabled:opacity-50"
               >
                 Manage Subscription
               </button>
@@ -409,24 +419,24 @@ export function BillingContent({
 
           {/* Enterprise Plan */}
           <div
-            className={`rounded-xl border ${currentTier === 'enterprise' ? 'border-primary/50 bg-primary/5' : 'border-border/40 bg-card/50'} p-6`}
+            className={`rounded-xl border p-6 ${currentTier === 'enterprise' ? 'border-primary/40 bg-primary/[0.04]' : 'border-white/[0.07] bg-white/[0.02]'}`}
           >
             {currentTier === 'enterprise' && (
               <div className="mb-4">
-                <span className="px-2 py-1 rounded text-xs font-medium bg-primary/10 text-primary">
+                <span className="rounded-md bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary">
                   Current Plan
                 </span>
               </div>
             )}
-            <h3 className="text-xl font-bold font-heading mb-2">Enterprise</h3>
-            <p className="text-3xl font-bold font-heading mb-4">Custom</p>
-            <ul className="space-y-2 text-sm mb-6">
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-green-500" />
+            <h3 className="mb-2 font-heading text-xl font-bold">Enterprise</h3>
+            <p className="mb-4 font-heading text-3xl font-bold">Custom</p>
+            <ul className="mb-6 space-y-2 text-sm">
+              <li className="flex items-center gap-2 text-muted-foreground/70">
+                <CheckCircle2 className="size-3.5 text-green-500" />
                 <span>1M+ credits/month</span>
               </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle2 className="size-4 text-green-500" />
+              <li className="flex items-center gap-2 text-muted-foreground/70">
+                <CheckCircle2 className="size-3.5 text-green-500" />
                 <span>Unlimited concurrent renders</span>
               </li>
             </ul>
@@ -437,18 +447,18 @@ export function BillingContent({
       {/* Enterprise Contact Form (shown when on free/pro or inside enterprise card) */}
       {currentTier !== 'enterprise' && (
         <div
-          className="rounded-xl border border-border/40 bg-card/50 p-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
-          style={{ animationDelay: '300ms', animationFillMode: 'both' }}
+          className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+          style={{ animationDelay: '240ms', animationFillMode: 'both' }}
         >
-          <h2 className="text-lg font-semibold tracking-tight font-heading text-foreground mb-4">
+          <h2 className="mb-4 font-heading text-lg font-semibold tracking-tight text-foreground">
             Contact Sales for Enterprise
           </h2>
           <form onSubmit={handleEnterpriseSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <label
                   htmlFor={nameId}
-                  className="block text-sm font-medium text-foreground mb-1.5"
+                  className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70"
                 >
                   Name *
                 </label>
@@ -462,7 +472,7 @@ export function BillingContent({
                       name: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="h-10 w-full rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20"
                   placeholder="Your name"
                   required
                 />
@@ -470,7 +480,7 @@ export function BillingContent({
               <div>
                 <label
                   htmlFor={emailId}
-                  className="block text-sm font-medium text-foreground mb-1.5"
+                  className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70"
                 >
                   Email *
                 </label>
@@ -484,7 +494,7 @@ export function BillingContent({
                       email: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="h-10 w-full rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20"
                   placeholder="your@email.com"
                   required
                 />
@@ -493,7 +503,7 @@ export function BillingContent({
             <div>
               <label
                 htmlFor={companyId}
-                className="block text-sm font-medium text-foreground mb-1.5"
+                className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70"
               >
                 Company
               </label>
@@ -507,14 +517,14 @@ export function BillingContent({
                     company: e.target.value,
                   })
                 }
-                className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                className="h-10 w-full rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20"
                 placeholder="Your company name"
               />
             </div>
             <div>
               <label
                 htmlFor={messageId}
-                className="block text-sm font-medium text-foreground mb-1.5"
+                className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70"
               >
                 Message *
               </label>
@@ -528,7 +538,7 @@ export function BillingContent({
                   })
                 }
                 rows={4}
-                className="w-full px-3 py-2 rounded-lg bg-white/[0.03] border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                className="w-full resize-none rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/40 focus:border-primary/40 focus:outline-none focus:ring-1 focus:ring-primary/20"
                 placeholder="Tell us about your needs..."
                 required
               />
@@ -536,9 +546,13 @@ export function BillingContent({
             <button
               type="submit"
               disabled={isPending}
-              className="px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+              className="inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-50"
+              style={{
+                background:
+                  'linear-gradient(105deg, #22D3EE 0%, #3B82F6 50%, oklch(0.60 0.24 285) 100%)',
+              }}
             >
-              <Send className="size-4" />
+              <Send className="size-3.5" />
               Send Message
             </button>
           </form>
@@ -548,40 +562,40 @@ export function BillingContent({
       {/* Manage Subscription (for Pro users) */}
       {currentTier !== 'free' && organization.stripeCustomerId && (
         <div
-          className="rounded-xl border border-border/40 bg-card/50 p-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
-          style={{ animationDelay: '300ms', animationFillMode: 'both' }}
+          className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-6 animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+          style={{ animationDelay: '240ms', animationFillMode: 'both' }}
         >
-          <h2 className="text-lg font-semibold tracking-tight font-heading text-foreground mb-2">
+          <h2 className="mb-1.5 font-heading text-lg font-semibold tracking-tight text-foreground">
             Manage Subscription
           </h2>
-          <p className="text-sm text-muted-foreground mb-4">
+          <p className="mb-4 text-[13px] text-muted-foreground/60">
             Update payment method, view invoices, or cancel your subscription
           </p>
           <button
             type="button"
             onClick={handleManageSubscription}
             disabled={isPending}
-            className="px-4 py-2 rounded-lg border border-border/40 hover:bg-white/[0.03] text-foreground font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+            className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.02] px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-white/[0.05] disabled:opacity-50"
           >
-            <CreditCard className="size-4" />
+            <CreditCard className="size-3.5" />
             Open Customer Portal
-            <ArrowUpRight className="size-4" />
+            <ArrowUpRight className="size-3.5" />
           </button>
         </div>
       )}
 
       {/* Credit Packs */}
       <div
-        className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
-        style={{ animationDelay: '400ms', animationFillMode: 'both' }}
+        className="animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+        style={{ animationDelay: '320ms', animationFillMode: 'both' }}
       >
-        <h2 className="text-lg font-semibold tracking-tight font-heading text-foreground mb-2">
+        <h2 className="mb-1 font-heading text-lg font-semibold tracking-tight text-foreground">
           Buy Additional Credits
         </h2>
-        <p className="text-sm text-muted-foreground mb-4">
+        <p className="mb-4 text-[13px] text-muted-foreground/60">
           One-time credit top-ups. Credits never expire.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           {creditPacks.map((pack) => {
             const pricePerCredit = (
               (pack.priceUsd / pack.credits) *
@@ -590,22 +604,22 @@ export function BillingContent({
             return (
               <div
                 key={pack.id}
-                className="rounded-xl border border-border/40 bg-card/50 p-6"
+                className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-6"
               >
-                <h3 className="text-xl font-bold font-heading mb-1">
+                <h3 className="mb-1 font-heading text-xl font-bold">
                   {pack.label}
                 </h3>
-                <p className="text-3xl font-bold font-heading text-primary mb-2">
+                <p className="mb-1 font-heading text-3xl font-bold text-foreground">
                   ${pack.priceUsd}
                 </p>
-                <p className="text-xs text-muted-foreground mb-4">
+                <p className="mb-4 text-[12px] text-muted-foreground/50">
                   ${pricePerCredit} per 100 credits
                 </p>
                 <button
                   type="button"
                   onClick={() => handleBuyCreditPack(pack.id)}
                   disabled={isPending}
-                  className="w-full px-4 py-2 rounded-lg border border-border/40 hover:bg-white/[0.03] text-foreground font-medium transition-colors disabled:opacity-50"
+                  className="inline-flex w-full items-center justify-center rounded-lg border border-white/[0.08] bg-white/[0.02] px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-white/[0.05] disabled:opacity-50"
                 >
                   Buy Now
                 </button>
@@ -617,76 +631,76 @@ export function BillingContent({
 
       {/* Usage Analytics */}
       <div
-        className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
-        style={{ animationDelay: '500ms', animationFillMode: 'both' }}
+        className="animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+        style={{ animationDelay: '400ms', animationFillMode: 'both' }}
       >
-        <h2 className="text-lg font-semibold tracking-tight font-heading text-foreground mb-4">
+        <h2 className="mb-4 font-heading text-lg font-semibold tracking-tight text-foreground">
           Usage This Cycle
         </h2>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="rounded-lg bg-white/[0.03] p-4">
+        <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-[13px] text-muted-foreground/60">
                 Credits Used
               </span>
-              <TrendingUp className="size-4 text-primary" />
+              <TrendingUp className="size-4 text-primary/60" />
             </div>
-            <p className="text-2xl font-bold font-heading mt-2 tabular-nums">
+            <p className="mt-2 font-heading text-2xl font-bold tabular-nums text-foreground">
               {usage.totalCreditsUsed.toLocaleString()}
             </p>
           </div>
-          <div className="rounded-lg bg-white/[0.03] p-4">
+          <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-[13px] text-muted-foreground/60">
                 Renders Completed
               </span>
-              <CheckCircle2 className="size-4 text-green-500" />
+              <CheckCircle2 className="size-4 text-green-500/60" />
             </div>
-            <p className="text-2xl font-bold font-heading mt-2 tabular-nums">
+            <p className="mt-2 font-heading text-2xl font-bold tabular-nums text-foreground">
               {completedRenders}
             </p>
           </div>
-          <div className="rounded-lg bg-white/[0.03] p-4">
+          <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-[13px] text-muted-foreground/60">
                 Renders Failed
               </span>
-              <AlertCircle className="size-4 text-red-500" />
+              <AlertCircle className="size-4 text-red-500/60" />
             </div>
-            <p className="text-2xl font-bold font-heading mt-2 tabular-nums">
+            <p className="mt-2 font-heading text-2xl font-bold tabular-nums text-foreground">
               {failedRenders}
             </p>
           </div>
         </div>
 
         {/* Transaction History */}
-        <div className="rounded-xl border border-border/40 bg-card/50 overflow-hidden">
-          <div className="p-4 border-b border-border/20">
-            <h3 className="font-semibold text-foreground">
+        <div className="overflow-hidden rounded-xl border border-white/[0.07]">
+          <div className="border-b border-white/[0.07] bg-white/[0.02] px-5 py-3.5">
+            <h3 className="text-[13px] font-semibold text-foreground">
               Credit Transaction History
             </h3>
           </div>
           <div className="overflow-x-auto">
             {usage.transactions.length === 0 ? (
-              <div className="p-8 text-center text-sm text-muted-foreground">
+              <div className="p-10 text-center text-sm text-muted-foreground/50">
                 No transactions yet
               </div>
             ) : (
-              <table className="w-full text-sm">
+              <table className="w-full">
                 <thead>
-                  <tr className="border-b border-border/20">
-                    <th className="text-left p-3 font-medium text-muted-foreground">
+                  <tr className="border-b border-white/[0.05] bg-white/[0.01]">
+                    <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50">
                       Date
                     </th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">
+                    <th className="px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50">
                       Description
                     </th>
-                    <th className="text-right p-3 font-medium text-muted-foreground">
+                    <th className="px-5 py-3.5 text-right text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50">
                       Amount
                     </th>
-                    <th className="text-right p-3 font-medium text-muted-foreground">
+                    <th className="px-5 py-3.5 text-right text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/50">
                       Balance After
                     </th>
                   </tr>
@@ -695,21 +709,21 @@ export function BillingContent({
                   {usage.transactions.map((tx) => (
                     <tr
                       key={tx.id}
-                      className="border-b border-border/20 hover:bg-white/[0.02]"
+                      className="border-b border-white/[0.05] transition-colors last:border-0 hover:bg-white/[0.02]"
                     >
-                      <td className="p-3 text-muted-foreground">
+                      <td className="px-5 py-3.5 text-sm tabular-nums text-muted-foreground/60">
                         {formatDate(tx.createdAt)}
                       </td>
-                      <td className="p-3 text-foreground">
+                      <td className="px-5 py-3.5 text-sm text-foreground">
                         {getTransactionDescription(tx.reason)}
                       </td>
                       <td
-                        className={`p-3 text-right font-medium tabular-nums ${tx.amount >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                        className={`px-5 py-3.5 text-right text-sm font-medium tabular-nums ${tx.amount >= 0 ? 'text-green-500' : 'text-red-400'}`}
                       >
                         {tx.amount >= 0 ? '+' : ''}
                         {tx.amount.toLocaleString()}
                       </td>
-                      <td className="p-3 text-right font-medium tabular-nums text-foreground">
+                      <td className="px-5 py-3.5 text-right text-sm font-medium tabular-nums text-muted-foreground/60">
                         {tx.balanceAfter.toLocaleString()}
                       </td>
                     </tr>

@@ -18,17 +18,17 @@ export default async function BillingPage({
     !usageResult.data
   ) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight font-heading">
+          <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
             Billing & Usage
           </h1>
-          <p className="mt-1 text-muted-foreground">
+          <p className="mt-1.5 text-[15px] text-muted-foreground/70">
             Manage your subscription and view usage analytics
           </p>
         </div>
-        <div className="rounded-xl border border-border/50 bg-card/40 p-12 text-center">
-          <p className="text-muted-foreground">
+        <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-14 text-center">
+          <p className="text-sm text-muted-foreground/60">
             {billingResult.error ||
               usageResult.error ||
               'Unable to load billing data'}

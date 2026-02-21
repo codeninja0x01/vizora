@@ -50,19 +50,21 @@ export default async function WebhooksPage() {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight font-heading">
+          <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
             Webhooks
           </h1>
-          <p className="mt-1 text-muted-foreground">
+          <p className="mt-1.5 text-[15px] text-muted-foreground/70">
             Receive notifications when renders complete or fail
           </p>
         </div>
-        <div className="rounded-xl border border-border/50 bg-card/40 p-12 text-center">
-          <Webhook className="mx-auto mb-4 size-12 text-muted-foreground/30" />
-          <h2 className="mb-2 text-xl font-semibold">
-            No Organization Selected
+        <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-14 text-center">
+          <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03]">
+            <Webhook className="size-6 text-muted-foreground/30" />
+          </div>
+          <h2 className="font-heading text-lg font-semibold text-foreground">
+            No organization selected
           </h2>
-          <p className="text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground/60">
             Please create or select an organization to manage webhooks.
           </p>
         </div>
@@ -93,17 +95,14 @@ export default async function WebhooksPage() {
     <div className="space-y-8">
       {/* Header */}
       <div
-        className="flex items-start justify-between animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
+        className="flex items-start justify-between animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
         style={{ animationFillMode: 'both' }}
       >
         <div>
-          <div className="flex items-center gap-2">
-            <Webhook className="size-6 text-primary" />
-            <h1 className="text-2xl font-bold tracking-tight font-heading">
-              Webhooks
-            </h1>
-          </div>
-          <p className="mt-1 text-muted-foreground">
+          <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
+            Webhooks
+          </h1>
+          <p className="mt-1.5 text-[15px] text-muted-foreground/70">
             Receive notifications when renders complete or fail
           </p>
         </div>
@@ -112,28 +111,32 @@ export default async function WebhooksPage() {
 
       {/* Webhooks List */}
       <div
-        className="animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
-        style={{ animationDelay: '100ms', animationFillMode: 'both' }}
+        className="animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+        style={{ animationDelay: '80ms', animationFillMode: 'both' }}
       >
         {webhooks.length === 0 ? (
-          <div className="rounded-xl border border-border/50 bg-card/40 p-12 text-center">
-            <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-muted/50">
-              <Webhook className="size-7 text-muted-foreground/40" />
+          <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-14 text-center">
+            <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03]">
+              <Webhook className="size-6 text-muted-foreground/30" />
             </div>
-            <h2 className="mb-2 text-xl font-semibold">No Webhooks Yet</h2>
-            <p className="mb-5 text-muted-foreground">
+            <h2 className="font-heading text-lg font-semibold text-foreground">
+              No webhooks yet
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground/60">
               Create your first webhook to receive notifications when renders
               complete or fail.
             </p>
-            <CreateWebhookDialog>
-              <span className="flex items-center gap-2">
-                <Plus className="size-4" />
-                Create Webhook
-              </span>
-            </CreateWebhookDialog>
+            <div className="mt-6">
+              <CreateWebhookDialog>
+                <span className="flex items-center gap-2">
+                  <Plus className="size-4" />
+                  Create Webhook
+                </span>
+              </CreateWebhookDialog>
+            </div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {webhooks.map((webhook) => {
               const hasFailures = webhook.consecutiveFailures > 0;
               const highFailures = webhook.consecutiveFailures > 3;
@@ -141,24 +144,24 @@ export default async function WebhooksPage() {
               return (
                 <div
                   key={webhook.id}
-                  className="rounded-xl border border-border/50 bg-white/[0.02] p-5 transition-colors hover:bg-white/[0.04]"
+                  className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-5 transition-colors hover:bg-white/[0.04]"
                 >
                   <div className="flex items-start justify-between gap-4">
                     {/* Left: URL and metadata */}
                     <div className="min-w-0 flex-1">
-                      <div className="mb-3 flex items-center gap-3">
-                        <code className="break-all rounded-md bg-white/[0.04] px-2 py-1 font-mono text-sm">
+                      <div className="mb-3 flex flex-wrap items-center gap-3">
+                        <code className="break-all rounded-md bg-white/[0.06] px-2 py-1 font-mono text-[12px] text-muted-foreground">
                           {webhook.url}
                         </code>
                         <div className="flex items-center gap-2">
                           {webhook.enabled ? (
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/10 px-2.5 py-0.5 text-xs font-medium text-green-500">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/10 px-2.5 py-0.5 text-[11px] font-medium text-green-500">
                               <span className="size-1.5 rounded-full bg-green-500" />
                               Enabled
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/50 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                              <span className="size-1.5 rounded-full bg-muted-foreground/50" />
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.04] px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground/60">
+                              <span className="size-1.5 rounded-full bg-muted-foreground/30" />
                               Disabled
                             </span>
                           )}
@@ -166,22 +169,30 @@ export default async function WebhooksPage() {
                       </div>
 
                       {/* Delivery metadata */}
-                      <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground">
+                      <div className="flex flex-wrap gap-x-6 gap-y-1.5 text-[12px] text-muted-foreground/50">
                         <div>
-                          <span className="font-medium">Created:</span>{' '}
+                          <span className="text-muted-foreground/70">
+                            Created:
+                          </span>{' '}
                           {formatDate(webhook.createdAt)}
                         </div>
                         <div>
-                          <span className="font-medium">Last delivery:</span>{' '}
+                          <span className="text-muted-foreground/70">
+                            Last delivery:
+                          </span>{' '}
                           {formatDate(webhook.lastDeliveryAt)}
                         </div>
                         <div>
-                          <span className="font-medium">Last success:</span>{' '}
+                          <span className="text-muted-foreground/70">
+                            Last success:
+                          </span>{' '}
                           {formatDate(webhook.lastSuccessAt)}
                         </div>
                         {webhook.lastFailureAt && (
                           <div>
-                            <span className="font-medium">Last failure:</span>{' '}
+                            <span className="text-muted-foreground/70">
+                              Last failure:
+                            </span>{' '}
                             {formatDate(webhook.lastFailureAt)}
                           </div>
                         )}
@@ -190,10 +201,10 @@ export default async function WebhooksPage() {
                       {/* Failure warning */}
                       {hasFailures && (
                         <div
-                          className={`mt-3 flex items-start gap-2 rounded-md p-2 text-xs ${
+                          className={`mt-3 flex items-start gap-2 rounded-lg p-2.5 text-[12px] ${
                             highFailures
-                              ? 'bg-red-500/10 text-red-500'
-                              : 'bg-amber-500/10 text-amber-500'
+                              ? 'bg-red-500/10 text-red-400'
+                              : 'bg-amber-500/10 text-amber-400'
                           }`}
                         >
                           <AlertTriangle className="mt-0.5 size-3 shrink-0" />
@@ -229,15 +240,17 @@ export default async function WebhooksPage() {
 
       {/* Security Notice */}
       <div
-        className="flex gap-3 rounded-xl border border-border/40 bg-card/20 p-5 animate-in fade-in-0 slide-in-from-bottom-4 duration-500"
-        style={{ animationDelay: '200ms', animationFillMode: 'both' }}
+        className="flex gap-4 rounded-xl border border-white/[0.06] bg-white/[0.015] p-5 animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+        style={{ animationDelay: '160ms', animationFillMode: 'both' }}
       >
-        <Shield className="mt-0.5 size-5 flex-shrink-0 text-muted-foreground/50" />
+        <Shield className="mt-0.5 size-4 shrink-0 text-muted-foreground/30" />
         <div>
-          <h3 className="mb-2 text-sm font-semibold">Webhook Security</h3>
-          <ul className="space-y-1 text-[13px] text-muted-foreground">
+          <h3 className="mb-2 text-[13px] font-semibold text-foreground">
+            Webhook security
+          </h3>
+          <ul className="space-y-1.5 text-[12.5px] text-muted-foreground/60">
             <li>
-              Webhook secrets are shown only once during creation - copy them
+              Webhook secrets are shown only once during creation — copy them
               immediately
             </li>
             <li>

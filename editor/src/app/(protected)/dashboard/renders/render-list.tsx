@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Video, AlertTriangle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Video, AlertTriangle, Loader2 } from 'lucide-react';
 import { RenderCard } from '@/components/render/render-card';
 import { BatchCard } from '@/components/render/batch-card';
 import { useRenderEvents } from '@/hooks/use-render-events';
@@ -44,7 +43,6 @@ export function RenderList({ initialRenders }: RenderListProps) {
 
     switch (lastEvent.type) {
       case 'progress':
-        // Update render progress in place
         if (lastEvent.renderId && lastEvent.data?.progress !== undefined) {
           setRenders((prev) =>
             prev.map((r) =>
@@ -57,7 +55,6 @@ export function RenderList({ initialRenders }: RenderListProps) {
         break;
 
       case 'completed':
-        // Update render status to completed
         if (lastEvent.renderId) {
           setRenders((prev) =>
             prev.map((r) =>
@@ -75,7 +72,6 @@ export function RenderList({ initialRenders }: RenderListProps) {
         break;
 
       case 'failed':
-        // Update render status to failed
         if (lastEvent.renderId) {
           setRenders((prev) =>
             prev.map((r) =>
@@ -96,7 +92,6 @@ export function RenderList({ initialRenders }: RenderListProps) {
         break;
 
       case 'batch.progress':
-        // Update batch progress in state
         if (lastEvent.data?.batchId && lastEvent.data?.batchProgress) {
           setBatches((prev) =>
             prev.map((b) =>
@@ -117,7 +112,6 @@ export function RenderList({ initialRenders }: RenderListProps) {
         break;
 
       case 'batch.completed':
-        // Update batch status in state
         if (lastEvent.data?.batchId && lastEvent.data?.batchProgress) {
           setBatches((prev) =>
             prev.map((b) =>
@@ -168,10 +162,8 @@ export function RenderList({ initialRenders }: RenderListProps) {
     refetch();
   }, [status, search]);
 
-  // Load more renders (pagination)
   const loadMore = async () => {
     if (!nextCursor || isLoadingMore) return;
-
     setIsLoadingMore(true);
     try {
       const result = await getRenders({ status, search, cursor: nextCursor });
@@ -185,12 +177,11 @@ export function RenderList({ initialRenders }: RenderListProps) {
     }
   };
 
-  // Filter standalone renders (exclude batch renders)
-  const standaloneRenders = useMemo(() => {
-    return renders.filter((r) => !r.batchId);
-  }, [renders]);
+  const standaloneRenders = useMemo(
+    () => renders.filter((r) => !r.batchId),
+    [renders]
+  );
 
-  // Merge batches and standalone renders, sorted by date
   const mergedItems = useMemo(() => {
     const items: Array<
       | { type: 'render'; data: (typeof renders)[0] }
@@ -199,8 +190,6 @@ export function RenderList({ initialRenders }: RenderListProps) {
       ...standaloneRenders.map((r) => ({ type: 'render' as const, data: r })),
       ...batches.map((b) => ({ type: 'batch' as const, data: b })),
     ];
-
-    // Sort by createdAt descending
     return items.sort(
       (a, b) =>
         new Date(b.data.createdAt).getTime() -
@@ -208,35 +197,30 @@ export function RenderList({ initialRenders }: RenderListProps) {
     );
   }, [standaloneRenders, batches]);
 
-  // Count expiring renders (deletionWarningShown = true)
-  const expiringCount = useMemo(() => {
-    return standaloneRenders.filter(
-      (r) =>
-        r.status === 'completed' &&
-        r.deletionWarningShown &&
-        r.expiresAt &&
-        new Date(r.expiresAt) > new Date()
-    ).length;
-  }, [standaloneRenders]);
+  const expiringCount = useMemo(
+    () =>
+      standaloneRenders.filter(
+        (r) =>
+          r.status === 'completed' &&
+          r.deletionWarningShown &&
+          r.expiresAt &&
+          new Date(r.expiresAt) > new Date()
+      ).length,
+    [standaloneRenders]
+  );
 
-  // Refetch handler for batch updates
   const handleBatchUpdate = () => {
-    // Trigger a refetch by updating status (will trigger the useEffect)
     setIsRefetching(true);
     getBatches({ status })
-      .then((result) => {
-        setBatches(result);
-      })
-      .catch((error) => {
-        console.error('[RenderList] Failed to refetch batches:', error);
-      })
-      .finally(() => {
-        setIsRefetching(false);
-      });
+      .then((result) => setBatches(result))
+      .catch((error) =>
+        console.error('[RenderList] Failed to refetch batches:', error)
+      )
+      .finally(() => setIsRefetching(false));
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Filters */}
       <RenderFilters
         status={status}
@@ -245,33 +229,37 @@ export function RenderList({ initialRenders }: RenderListProps) {
         onSearchChange={setSearch}
       />
 
-      {/* Expiry warning banner */}
+      {/* Expiry warning */}
       {expiringCount > 0 && (
-        <div className="flex items-center gap-3 rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
-          <AlertTriangle className="size-5 flex-shrink-0 text-amber-400" />
-          <p className="text-sm text-amber-400">
-            <strong>{expiringCount}</strong> rendered video
-            {expiringCount === 1 ? '' : 's'} expiring within 7 days — download
-            before deletion
+        <div className="flex items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3">
+          <AlertTriangle className="size-4 shrink-0 text-amber-400" />
+          <p className="text-sm text-amber-400/90">
+            <strong className="font-semibold">{expiringCount}</strong> rendered
+            video{expiringCount === 1 ? '' : 's'} expiring within 7 days —
+            download before deletion
           </p>
         </div>
       )}
 
       {/* Render list or empty state */}
       {mergedItems.length === 0 ? (
-        <div className="rounded-xl border border-border/50 bg-card/40 p-12 text-center">
-          <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-muted/50">
-            <Video className="size-7 text-muted-foreground/40" />
+        <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-14 text-center">
+          <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03]">
+            <Video className="size-6 text-muted-foreground/30" />
           </div>
-          <h2 className="mb-2 text-xl font-semibold">No renders found</h2>
-          <p className="text-muted-foreground">
+          <h2 className="font-heading text-lg font-semibold text-foreground">
+            No renders found
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground/60">
             {search || status !== 'all'
               ? 'Try adjusting your filters or search query.'
               : 'Queue a render from a template to see it here.'}
           </p>
         </div>
       ) : (
-        <div className={`grid gap-4 ${isRefetching ? 'opacity-50' : ''}`}>
+        <div
+          className={`grid gap-3 transition-opacity duration-150 ${isRefetching ? 'opacity-40' : 'opacity-100'}`}
+        >
           {mergedItems.map((item) =>
             item.type === 'batch' ? (
               <BatchCard
@@ -286,12 +274,18 @@ export function RenderList({ initialRenders }: RenderListProps) {
         </div>
       )}
 
-      {/* Load More button */}
+      {/* Load more */}
       {hasMore && (
-        <div className="flex justify-center pt-6">
-          <Button variant="outline" onClick={loadMore} disabled={isLoadingMore}>
-            {isLoadingMore ? 'Loading...' : 'Load More'}
-          </Button>
+        <div className="flex justify-center pt-4">
+          <button
+            type="button"
+            onClick={loadMore}
+            disabled={isLoadingMore}
+            className="inline-flex h-9 items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.02] px-5 text-sm text-muted-foreground transition-colors hover:bg-white/[0.05] hover:text-foreground disabled:opacity-50"
+          >
+            {isLoadingMore && <Loader2 className="size-3.5 animate-spin" />}
+            {isLoadingMore ? 'Loading…' : 'Load more'}
+          </button>
         </div>
       )}
     </div>
