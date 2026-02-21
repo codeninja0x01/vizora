@@ -17,7 +17,21 @@ async function sendEmail(to: string, subject: string, html: string) {
     );
     return;
   }
-  await resend.emails.send({ from: fromEmail, to, subject, html });
+  const { data, error } = await resend.emails.send({
+    from: fromEmail,
+    to,
+    subject,
+    html,
+  });
+  if (error) {
+    console.error(
+      `[Auth] Failed to send email: to=${to} subject="${subject}" error=${JSON.stringify(error)}`
+    );
+  } else {
+    console.log(
+      `[Auth] Email sent: id=${data?.id} to=${to} subject="${subject}"`
+    );
+  }
 }
 
 // Better Auth server configuration
