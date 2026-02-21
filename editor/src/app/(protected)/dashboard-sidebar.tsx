@@ -70,7 +70,6 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
   const [signingOut, setSigningOut] = useState(false);
   const { activeCount } = useRenderEventContext();
 
-  // Close mobile menu on Escape key
   useEffect(() => {
     if (!mobileOpen) return;
     const handleEscape = (e: KeyboardEvent) => {
@@ -112,25 +111,39 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
         key={item.href}
         href={item.href}
         onClick={() => setMobileOpen(false)}
-        className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+        className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 ${
           active
-            ? 'bg-primary/10 text-primary'
-            : 'text-muted-foreground hover:bg-white/[0.04] hover:text-foreground'
+            ? 'bg-white/[0.07] text-foreground'
+            : 'text-muted-foreground hover:bg-white/[0.05] hover:text-foreground/90'
         }`}
       >
+        {/* Active left accent — gradient pill */}
         {active && (
-          <div className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-primary shadow-[0_0_8px_oklch(0.60_0.24_285_/_0.5)]" />
+          <span
+            className="absolute left-0 top-1/2 h-[22px] w-[3px] -translate-y-1/2 rounded-r-full"
+            style={{
+              background:
+                'linear-gradient(180deg, #22D3EE 0%, #3B82F6 60%, oklch(0.60 0.24 285) 100%)',
+              boxShadow: '0 0 10px oklch(0.60 0.24 285 / 0.45)',
+            }}
+          />
         )}
         <Icon
-          className={`size-[18px] flex-shrink-0 transition-colors ${
+          className={`size-[17px] shrink-0 transition-colors ${
             active
-              ? 'text-primary'
-              : 'text-muted-foreground/70 group-hover:text-foreground'
+              ? 'text-foreground'
+              : 'text-muted-foreground/60 group-hover:text-muted-foreground'
           }`}
         />
-        <span className="flex-1">{item.label}</span>
+        <span className="flex-1 leading-none">{item.label}</span>
         {item.showBadge && activeCount > 0 && (
-          <span className="inline-flex items-center justify-center rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums text-primary">
+          <span
+            className="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold tabular-nums text-white"
+            style={{
+              background:
+                'linear-gradient(135deg, #22D3EE, oklch(0.60 0.24 285))',
+            }}
+          >
             {activeCount}
           </span>
         )}
@@ -138,26 +151,40 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
     );
   };
 
+  const initials = (user.name?.[0] || user.email?.[0] || 'U').toUpperCase();
+
   const sidebarContent = (
-    <>
+    <div className="relative flex h-full flex-col">
+      {/* Atmospheric bottom glow */}
+      <div
+        className="pointer-events-none absolute bottom-0 left-1/2 h-64 w-48 -translate-x-1/2 opacity-[0.12]"
+        style={{
+          background:
+            'radial-gradient(ellipse, oklch(0.60 0.24 285) 0%, transparent 70%)',
+          filter: 'blur(40px)',
+        }}
+      />
+
       {/* Logo */}
-      <div className="flex h-16 items-center px-5">
+      <div className="flex h-[58px] shrink-0 items-center px-5">
         <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
           <AutoClipLogo size="sm" />
         </Link>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-6 px-3 py-4">
-        <div>
-          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50">
-            Main
-          </p>
-          <div className="space-y-0.5">{mainNav.map(navLink)}</div>
-        </div>
+      {/* Divider */}
+      <div className="mx-4 h-px bg-white/[0.06]" />
 
-        <div>
-          <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/50">
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4">
+        <div className="space-y-0.5">{mainNav.map(navLink)}</div>
+
+        {/* Developer section */}
+        <div
+          className="mt-5 pt-4"
+          style={{ borderTop: '1px solid oklch(1 0 0 / 0.06)' }}
+        >
+          <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground/40">
             Developer
           </p>
           <div className="space-y-0.5">{devNav.map(navLink)}</div>
@@ -165,35 +192,46 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
       </nav>
 
       {/* User area */}
-      <div className="border-t border-border/40 p-3">
-        <div className="flex items-center gap-3 rounded-lg px-3 py-2.5">
-          <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/5 text-sm font-semibold text-primary ring-1 ring-primary/20">
-            {(user.name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+      <div className="shrink-0 p-3">
+        <div className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 transition-colors hover:bg-white/[0.04]">
+          {/* Avatar */}
+          <div
+            className="relative flex size-8 shrink-0 items-center justify-center rounded-lg text-[13px] font-bold text-white shadow-sm"
+            style={{
+              background:
+                'linear-gradient(135deg, #22D3EE 0%, #3B82F6 50%, oklch(0.60 0.24 285) 100%)',
+            }}
+          >
+            {initials}
           </div>
+
+          {/* Name + email */}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-foreground">
+            <p className="truncate text-[13px] font-medium leading-tight text-foreground">
               {user.name || 'User'}
             </p>
-            <p className="truncate text-[11px] text-muted-foreground">
+            <p className="truncate text-[11px] leading-tight text-muted-foreground/60">
               {user.email}
             </p>
           </div>
+
+          {/* Sign out */}
           <button
             type="button"
             onClick={handleSignOut}
             disabled={signingOut}
-            className="flex size-8 items-center justify-center rounded-lg text-muted-foreground/60 transition-colors hover:bg-white/[0.04] hover:text-foreground disabled:opacity-50"
+            className="flex size-7 shrink-0 items-center justify-center rounded-md text-muted-foreground/40 transition-colors hover:bg-white/[0.06] hover:text-muted-foreground disabled:opacity-40"
             aria-label="Sign out"
           >
             {signingOut ? (
-              <Loader2 className="size-4 animate-spin" />
+              <Loader2 className="size-3.5 animate-spin" />
             ) : (
-              <LogOut className="size-4" />
+              <LogOut className="size-3.5" />
             )}
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 
   return (
@@ -203,26 +241,26 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
         type="button"
         onClick={() => setMobileOpen(true)}
         aria-label="Open navigation menu"
-        className="fixed left-4 top-4 z-50 flex size-10 items-center justify-center rounded-xl border border-border/60 bg-card/80 backdrop-blur-md shadow-lg transition-colors hover:bg-card lg:hidden"
+        className="fixed left-4 top-4 z-50 flex size-9 items-center justify-center rounded-lg border border-white/10 bg-card/80 shadow-md backdrop-blur-md transition-colors hover:bg-card/90 lg:hidden"
       >
-        <Menu className="size-5 text-foreground" />
+        <Menu className="size-4 text-foreground" />
       </button>
 
       {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div
-            className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-background/70 backdrop-blur-sm"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="relative flex h-full w-[280px] flex-col bg-card shadow-2xl">
+          <aside className="relative flex h-full w-[260px] flex-col border-r border-white/[0.06] bg-[oklch(0.165_0.008_285)] shadow-2xl">
             <button
               type="button"
               onClick={() => setMobileOpen(false)}
               aria-label="Close navigation menu"
-              className="absolute right-3 top-4 flex size-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground"
+              className="absolute right-3 top-3.5 flex size-7 items-center justify-center rounded-md text-muted-foreground/50 hover:text-muted-foreground"
             >
-              <X className="size-5" />
+              <X className="size-4" />
             </button>
             {sidebarContent}
           </aside>
@@ -230,7 +268,7 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden w-[260px] flex-shrink-0 flex-col border-r border-border/40 bg-card/30 lg:flex">
+      <aside className="hidden w-[240px] shrink-0 flex-col border-r border-white/[0.06] bg-[oklch(0.155_0.008_285)] lg:flex">
         {sidebarContent}
       </aside>
     </>

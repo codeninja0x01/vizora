@@ -50,18 +50,25 @@ function formatRelativeTime(date: Date): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+// Status color map for render rows
+const statusBarColor: Record<string, string> = {
+  queued: 'oklch(0.75 0.16 85)',
+  active: '#3B82F6',
+  completed: 'oklch(0.65 0.18 155)',
+  failed: 'oklch(0.6368 0.2078 25.33)',
+};
+
 export default async function DashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return null;
 
   const { user } = session;
   const activeOrgId = session.session.activeOrganizationId;
+  const firstName = user.name?.trim().split(/\s+/)[0] || 'there';
 
   const [templateCount, renderCounts, apiKeyCount, recentRenders] =
     await Promise.all([
-      prisma.template.count({
-        where: { userId: user.id },
-      }),
+      prisma.template.count({ where: { userId: user.id } }),
       activeOrgId
         ? prisma.render.groupBy({
             by: ['status'],
@@ -77,9 +84,7 @@ export default async function DashboardPage() {
       activeOrgId
         ? prisma.render.findMany({
             where: { organizationId: activeOrgId },
-            include: {
-              template: { select: { name: true } },
-            },
+            include: { template: { select: { name: true } } },
             orderBy: { queuedAt: 'desc' },
             take: 5,
           })
@@ -97,27 +102,24 @@ export default async function DashboardPage() {
       value: templateCount,
       icon: Layers,
       href: '/dashboard/templates',
-      accent: 'from-blue-500 to-blue-600',
-      iconBg: 'bg-blue-500/10',
-      iconColor: 'text-blue-400',
+      iconColor: '#3B82F6',
+      glowColor: 'oklch(0.65 0.18 250 / 0.15)',
     },
     {
       label: 'Total Renders',
       value: totalRenders,
       icon: Film,
       href: '/dashboard/renders',
-      accent: 'from-emerald-500 to-emerald-600',
-      iconBg: 'bg-emerald-500/10',
-      iconColor: 'text-emerald-400',
+      iconColor: 'oklch(0.65 0.18 155)',
+      glowColor: 'oklch(0.65 0.18 155 / 0.15)',
     },
     {
       label: 'Active Now',
       value: activeRenders,
       icon: Zap,
       href: '/dashboard/renders?status=rendering',
-      accent: 'from-amber-500 to-amber-600',
-      iconBg: 'bg-amber-500/10',
-      iconColor: 'text-amber-400',
+      iconColor: 'oklch(0.75 0.16 85)',
+      glowColor: 'oklch(0.75 0.16 85 / 0.15)',
       pulse: activeRenders > 0,
     },
     {
@@ -125,142 +127,173 @@ export default async function DashboardPage() {
       value: apiKeyCount,
       icon: Key,
       href: '/dashboard/api-keys',
-      accent: 'from-violet-500 to-violet-600',
-      iconBg: 'bg-violet-500/10',
-      iconColor: 'text-violet-400',
+      iconColor: 'oklch(0.65 0.18 320)',
+      glowColor: 'oklch(0.65 0.18 320 / 0.15)',
     },
   ];
 
   const quickActions = [
     {
       label: 'Create Template',
-      description: 'Open the editor to build a new template',
+      description: 'Build a new video template in the editor',
       icon: Plus,
       href: '/editor',
+      iconBg: 'linear-gradient(135deg, #22D3EE, #3B82F6)',
     },
     {
       label: 'Browse Gallery',
       description: 'Discover and clone pre-built templates',
       icon: LayoutGrid,
       href: '/gallery',
+      iconBg: 'linear-gradient(135deg, #3B82F6, oklch(0.60 0.24 285))',
     },
     {
       label: 'Generate API Key',
       description: 'Create a key for programmatic access',
       icon: Key,
       href: '/dashboard/api-keys',
+      iconBg:
+        'linear-gradient(135deg, oklch(0.65 0.18 320), oklch(0.55 0.20 320))',
     },
   ];
 
   return (
     <div className="space-y-10">
-      {/* Hero greeting */}
+      {/* ── Hero greeting ──────────────────────────────────────────── */}
       <div
-        className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200"
+        className="animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
         style={{ animationFillMode: 'both' }}
       >
-        <h1 className="text-3xl font-bold tracking-tight font-heading text-foreground">
-          {getGreeting()}, {user.name?.trim().split(/\s+/)[0] || 'there'}
+        <h1 className="font-heading text-[2rem] font-bold leading-tight tracking-tight text-foreground lg:text-[2.4rem]">
+          {getGreeting()},{' '}
+          <span
+            className="bg-clip-text text-transparent"
+            style={{
+              backgroundImage:
+                'linear-gradient(105deg, #22D3EE 0%, #3B82F6 50%, oklch(0.60 0.24 285) 100%)',
+            }}
+          >
+            {firstName}
+          </span>
         </h1>
-        <p className="mt-1.5 text-muted-foreground">
+        <p className="mt-2 text-[15px] text-muted-foreground/70">
           Your video creation command center
         </p>
       </div>
 
-      {/* Stat Cards */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      {/* ── Stat cards ──────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {stats.map((stat, i) => (
           <Link
             key={stat.label}
             href={stat.href}
-            className="group relative overflow-hidden rounded-xl border border-border/50 bg-card/40 p-5 transition-all duration-200 hover:border-border/80 hover:bg-card/70 hover:shadow-lg hover:shadow-black/5 animate-in fade-in-0 slide-in-from-bottom-2 duration-200"
+            className="group relative overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.03] p-5 transition-all duration-200 hover:border-white/[0.12] hover:bg-white/[0.05] animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
             style={{
-              animationDelay: `${40 + i * 30}ms`,
+              animationDelay: `${50 + i * 35}ms`,
               animationFillMode: 'both',
             }}
           >
-            {/* Top accent gradient */}
+            {/* Icon — top right */}
             <div
-              className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${stat.accent} opacity-80`}
-            />
-
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-3xl font-bold tabular-nums tracking-tight text-foreground font-heading">
-                  {stat.value}
-                </p>
-                <p className="mt-1 text-[13px] text-muted-foreground">
-                  {stat.label}
-                </p>
-              </div>
-              <div
-                className={`flex size-10 items-center justify-center rounded-xl ${stat.iconBg}`}
-              >
-                <stat.icon className={`size-5 ${stat.iconColor}`} />
-              </div>
+              className="absolute right-4 top-4 flex size-9 items-center justify-center rounded-lg"
+              style={{ backgroundColor: stat.glowColor }}
+            >
+              <stat.icon
+                className="size-[18px]"
+                style={{ color: stat.iconColor }}
+              />
             </div>
 
-            {/* Pulse indicator for active renders */}
+            {/* Pulse dot for active renders */}
             {stat.pulse && (
-              <div className="absolute right-3 top-3">
-                <span className="relative flex size-2.5">
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-75" />
-                  <span className="relative inline-flex size-2.5 rounded-full bg-amber-500" />
+              <span className="absolute right-4 top-[52px]">
+                <span className="relative flex size-2">
+                  <span
+                    className="absolute inline-flex size-full animate-ping rounded-full opacity-75"
+                    style={{ backgroundColor: stat.iconColor }}
+                  />
+                  <span
+                    className="relative inline-flex size-2 rounded-full"
+                    style={{ backgroundColor: stat.iconColor }}
+                  />
                 </span>
-              </div>
+              </span>
             )}
 
+            {/* Number */}
+            <p className="mt-1 font-heading text-4xl font-bold tabular-nums tracking-tight text-foreground">
+              {stat.value}
+            </p>
+
+            {/* Label row */}
+            <div className="mt-2 flex items-center gap-1.5">
+              <span
+                className="size-1.5 rounded-full"
+                style={{ backgroundColor: stat.iconColor }}
+              />
+              <p className="text-[12px] font-medium text-muted-foreground/70">
+                {stat.label}
+              </p>
+            </div>
+
             {/* Hover arrow */}
-            <ArrowRight className="absolute bottom-4 right-4 size-4 translate-x-1 text-muted-foreground/0 transition-all duration-200 group-hover:translate-x-0 group-hover:text-muted-foreground/50" />
+            <ArrowRight className="absolute bottom-4 right-4 size-3.5 translate-x-1 text-muted-foreground/0 transition-all duration-200 group-hover:translate-x-0 group-hover:text-muted-foreground/40" />
           </Link>
         ))}
       </div>
 
-      {/* Bottom section: Recent Renders + Quick Actions */}
-      <div className="grid gap-6 lg:grid-cols-5">
-        {/* Recent Renders */}
+      {/* ── Bottom section ──────────────────────────────────────────── */}
+      <div className="grid gap-5 lg:grid-cols-5">
+        {/* Recent Renders — 3 cols */}
         <div
-          className="rounded-xl border border-border/50 bg-card/40 p-6 lg:col-span-3 animate-in fade-in-0 slide-in-from-bottom-2 duration-200"
-          style={{ animationDelay: '160ms', animationFillMode: 'both' }}
+          className="rounded-xl border border-white/[0.07] bg-white/[0.02] lg:col-span-3 animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+          style={{ animationDelay: '190ms', animationFillMode: 'both' }}
         >
-          <div className="mb-5 flex items-center justify-between">
-            <h2 className="text-lg font-semibold tracking-tight font-heading text-foreground">
+          <div className="flex items-center justify-between border-b border-white/[0.06] px-6 py-4">
+            <h2 className="font-heading text-[15px] font-semibold tracking-tight text-foreground">
               Recent Renders
             </h2>
             <Link
               href="/dashboard/renders"
-              className="flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="flex items-center gap-1 text-xs text-muted-foreground/60 transition-colors hover:text-muted-foreground"
             >
               View all
-              <ArrowRight className="size-3.5" />
+              <ArrowRight className="size-3" />
             </Link>
           </div>
 
           {recentRenders.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-10 text-center">
-              <div className="mb-4 flex size-12 items-center justify-center rounded-2xl bg-muted/50">
-                <Film className="size-6 text-muted-foreground/40" />
+            <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
+              <div className="mb-4 flex size-12 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.03]">
+                <Film className="size-5 text-muted-foreground/30" />
               </div>
-              <p className="text-sm font-medium text-muted-foreground">
+              <p className="text-sm font-medium text-muted-foreground/60">
                 No renders yet
               </p>
-              <p className="mt-1 text-xs text-muted-foreground/60">
+              <p className="mt-1 text-xs text-muted-foreground/40">
                 Queue a render from a template to see it here
               </p>
             </div>
           ) : (
-            <div className="space-y-0.5">
+            <div className="px-2 py-2">
               {(recentRenders as RecentRender[]).map((render) => (
                 <Link
                   key={render.id}
                   href="/dashboard/renders"
-                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[0.03]"
+                  className="group flex items-center gap-3 rounded-lg px-4 py-2.5 transition-colors hover:bg-white/[0.04]"
                 >
+                  {/* Status color bar */}
+                  <span
+                    className="h-5 w-[3px] shrink-0 rounded-full opacity-70"
+                    style={{
+                      backgroundColor: statusBarColor[render.status] ?? '#666',
+                    }}
+                  />
                   <RenderStatusBadge status={render.status as RenderStatus} />
-                  <span className="min-w-0 flex-1 truncate text-sm text-foreground">
+                  <span className="min-w-0 flex-1 truncate text-sm text-foreground/80">
                     {render.template.name}
                   </span>
-                  <span className="flex-shrink-0 text-xs tabular-nums text-muted-foreground/70">
+                  <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground/50">
                     {formatRelativeTime(render.queuedAt)}
                   </span>
                 </Link>
@@ -269,67 +302,75 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        {/* Right column: Quick Actions + Getting Started */}
+        {/* Right column — 2 cols */}
         <div
-          className="space-y-5 lg:col-span-2 animate-in fade-in-0 slide-in-from-bottom-2 duration-200"
-          style={{ animationDelay: '200ms', animationFillMode: 'both' }}
+          className="space-y-4 lg:col-span-2 animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+          style={{ animationDelay: '230ms', animationFillMode: 'both' }}
         >
           {/* Quick Actions */}
-          <div className="rounded-xl border border-border/50 bg-card/40 p-6">
-            <h2 className="mb-4 text-lg font-semibold tracking-tight font-heading text-foreground">
-              Quick Actions
-            </h2>
-            <div className="space-y-1.5">
+          <div className="rounded-xl border border-white/[0.07] bg-white/[0.02]">
+            <div className="border-b border-white/[0.06] px-5 py-4">
+              <h2 className="font-heading text-[15px] font-semibold tracking-tight text-foreground">
+                Quick Actions
+              </h2>
+            </div>
+            <div className="px-2 py-2">
               {quickActions.map((action) => (
                 <Link
                   key={action.label}
                   href={action.href}
-                  className="group flex items-center gap-3 rounded-lg p-3 transition-all duration-150 hover:bg-white/[0.04]"
+                  className="group flex items-center gap-3 rounded-lg px-3 py-3 transition-colors hover:bg-white/[0.04]"
                 >
-                  <div className="flex size-9 items-center justify-center rounded-lg bg-primary/10">
-                    <action.icon className="size-4 text-primary" />
+                  <div
+                    className="flex size-8 shrink-0 items-center justify-center rounded-lg shadow-sm"
+                    style={{ background: action.iconBg }}
+                  >
+                    <action.icon className="size-4 text-white" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground">
+                    <p className="text-[13px] font-medium leading-tight text-foreground">
                       {action.label}
                     </p>
-                    <p className="text-[11px] leading-snug text-muted-foreground">
+                    <p className="mt-0.5 text-[11px] leading-snug text-muted-foreground/60">
                       {action.description}
                     </p>
                   </div>
-                  <ArrowRight className="size-4 translate-x-1 text-muted-foreground/0 transition-all duration-150 group-hover:translate-x-0 group-hover:text-muted-foreground/50" />
+                  <ArrowRight className="size-3.5 translate-x-0.5 text-muted-foreground/0 transition-all duration-150 group-hover:translate-x-0 group-hover:text-muted-foreground/40" />
                 </Link>
               ))}
             </div>
           </div>
 
           {/* Getting Started */}
-          <div className="rounded-xl border border-dashed border-border/50 bg-card/20 p-6">
-            <div className="mb-3 flex items-center gap-2">
-              <Sparkles className="size-4 text-primary" />
-              <h3 className="text-sm font-semibold text-foreground">
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.015] p-5">
+            <div className="mb-4 flex items-center gap-2">
+              <Sparkles className="size-3.5 text-primary/70" />
+              <h3 className="text-[13px] font-semibold text-foreground">
                 Getting Started
               </h3>
             </div>
-            <ol className="space-y-2.5 text-[13px] text-muted-foreground">
-              <li className="flex items-start gap-2.5">
-                <span className="mt-0.5 flex size-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
-                  1
-                </span>
-                <span>Create an API key for programmatic access</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <span className="mt-0.5 flex size-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
-                  2
-                </span>
-                <span>Save a video template with merge fields</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <span className="mt-0.5 flex size-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
-                  3
-                </span>
-                <span>Queue renders via API and track progress</span>
-              </li>
+            <ol className="space-y-3">
+              {[
+                'Create an API key for programmatic access',
+                'Save a video template with merge fields',
+                'Queue renders via API and track progress',
+              ].map((step, i) => (
+                <li key={step} className="flex items-start gap-3">
+                  <span
+                    className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
+                    style={{
+                      background:
+                        'linear-gradient(135deg, #22D3EE, oklch(0.60 0.24 285))',
+                      opacity: 0.85,
+                    }}
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="text-[12.5px] leading-relaxed text-muted-foreground/70">
+                    {step}
+                  </span>
+                </li>
+              ))}
             </ol>
           </div>
         </div>
