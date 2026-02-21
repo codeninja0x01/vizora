@@ -68,17 +68,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check for Anthropic API key
-    const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
-    if (!anthropicApiKey) {
+    // Check for Google Gemini API key
+    if (!process.env.GOOGLE_GENAI_API_KEY) {
       return NextResponse.json(
-        { error: 'ANTHROPIC_API_KEY not configured' },
+        { error: 'GOOGLE_GENAI_API_KEY not configured' },
         { status: 500 }
       );
     }
 
     // Create service and generate composition
-    const service = new TextToVideoService({ anthropicApiKey });
+    const service = new TextToVideoService();
 
     const scenes: Scene[] = body.scenes.map((s) => ({
       description: s.description,

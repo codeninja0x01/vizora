@@ -5,7 +5,7 @@
  * and assembles scenes into editable project structure
  */
 
-import Anthropic from '@anthropic-ai/sdk';
+import { ai } from '@/genkit/chat-flow';
 import type { VideoStylePreset } from '../presets/video-style-presets';
 import { searchAllStockProviders } from '../providers/stock/factory';
 import type { StockClip } from '../providers/stock/types';
@@ -45,21 +45,7 @@ interface ProjectTransition {
   to: number;
 }
 
-interface GenerationOptions {
-  scenes: Scene[];
-  styleId: string;
-  style: VideoStylePreset;
-}
-
 export class TextToVideoService {
-  private anthropic: Anthropic;
-
-  constructor(config: { anthropicApiKey: string }) {
-    this.anthropic = new Anthropic({
-      apiKey: config.anthropicApiKey,
-    });
-  }
-
   /**
    * Generate video composition from storyboard scenes
    */
@@ -119,25 +105,13 @@ ${scenes.map((s, i) => `${i + 1}. ${s.description}${s.mood ? ` (mood: ${s.mood})
 
 Return ONLY a JSON array, no other text.`;
 
-      const message = await this.anthropic.messages.create({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 1024,
-        messages: [
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
+      const { text } = await ai.generate({
+        prompt,
+        config: { maxOutputTokens: 1024 },
       });
 
-      // Extract text content from response
-      const content = message.content.find((c) => c.type === 'text');
-      if (!content || content.type !== 'text') {
-        throw new Error('No text content in Claude response');
-      }
-
       // Parse JSON response
-      const jsonMatch = content.text.match(/\[[\s\S]*\]/);
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
       if (!jsonMatch) {
         throw new Error('No JSON array found in response');
       }
