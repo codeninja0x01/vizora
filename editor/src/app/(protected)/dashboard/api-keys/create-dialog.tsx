@@ -95,7 +95,7 @@ export function CreateApiKeyDialog({ children }: CreateApiKeyDialogProps) {
           <DialogDescription>
             {generatedKey
               ? "Copy your API key now - you won't be able to see it again!"
-              : 'Create a new API key for programmatic access to OpenVideo'}
+              : 'Create a new API key for programmatic access to AutoClip'}
           </DialogDescription>
         </DialogHeader>
 

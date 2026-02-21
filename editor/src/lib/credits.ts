@@ -236,11 +236,11 @@ export async function checkAndWarnLowCredits(
             await resend.emails.send({
               from: resendFromEmail,
               to: owner.user.email,
-              subject: 'Low Credit Warning - OpenVideo',
+              subject: 'Low Credit Warning - AutoClip',
               html: `
                 <h2>Low Credit Warning</h2>
                 <p>Hi ${owner.user.name || 'there'},</p>
-                <p>Your OpenVideo organization is running low on render credits.</p>
+                <p>Your AutoClip organization is running low on render credits.</p>
                 <ul>
                   <li><strong>Current Balance:</strong> ${org.creditBalance.toLocaleString()} credits</li>
                   <li><strong>Monthly Allotment:</strong> ${org.monthlyAllotment.toLocaleString()} credits</li>

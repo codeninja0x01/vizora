@@ -20,8 +20,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'OpenVideo',
-  description: 'Programmatic video generation platform',
+  title: 'AutoClip',
+  description: 'Automated video generation platform',
 };
 
 export default function RootLayout({

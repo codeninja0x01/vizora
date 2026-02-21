@@ -18,6 +18,7 @@ import {
   CreditCard,
   Sparkles,
 } from 'lucide-react';
+import { AutoClipLogo } from '@/components/shared/autoclip-logo';
 import { useRenderEventContext } from '@/components/render/render-event-provider';
 import { authClient } from '@/lib/auth-client';
 import { toast } from 'sonner';
@@ -140,18 +141,9 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
   const sidebarContent = (
     <>
       {/* Logo */}
-      <div className="flex h-16 items-center gap-3 px-6">
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-3"
-          onClick={() => setMobileOpen(false)}
-        >
-          <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/70 shadow-[0_0_12px_oklch(0.60_0.24_285_/_0.3)]">
-            <Film className="size-4 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-semibold tracking-tight font-heading">
-            OpenVideo
-          </span>
+      <div className="flex h-16 items-center px-5">
+        <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
+          <AutoClipLogo size="sm" />
         </Link>
       </div>
 

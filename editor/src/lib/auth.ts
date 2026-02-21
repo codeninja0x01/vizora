@@ -57,7 +57,7 @@ export const auth = betterAuth({
         user.email,
         'Verify your email address',
         `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2>Welcome to OpenVideo!</h2>
+          <h2>Welcome to AutoClip!</h2>
           <p>Please verify your email address by clicking the link below:</p>
           <p>
             <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #6366f1; color: white; text-decoration: none; border-radius: 6px;">
@@ -118,7 +118,7 @@ export const auth = betterAuth({
           `You've been invited to join ${org.name}`,
           `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
             <h2>Organization Invitation</h2>
-            <p>You've been invited to join <strong>${org.name}</strong> on OpenVideo!</p>
+            <p>You've been invited to join <strong>${org.name}</strong> on AutoClip!</p>
             <p>
               <a href="${invitationLink}" style="display: inline-block; padding: 12px 24px; background-color: #6366f1; color: white; text-decoration: none; border-radius: 6px;">
                 Accept Invitation

@@ -86,7 +86,7 @@ export default function SignupPage() {
           Create your account
         </h2>
         <p className="text-sm text-muted-foreground">
-          Get started with OpenVideo today
+          Get started with AutoClip today
         </p>
       </div>
 

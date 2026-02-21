@@ -1,4 +1,4 @@
-// Webhook type definitions for OpenVideo webhook system
+// Webhook type definitions for AutoClip webhook system
 
 // Supported webhook event types
 export type WebhookEventType = 'render.completed' | 'render.failed';

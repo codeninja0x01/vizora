@@ -50,7 +50,7 @@ export default async function ApiKeysPage() {
             API Keys
           </h1>
           <p className="mt-1 text-muted-foreground">
-            Manage API keys for programmatic access to OpenVideo
+            Manage API keys for programmatic access to AutoClip
           </p>
         </div>
         <div className="rounded-xl border border-border/50 bg-card/40 p-12 text-center">
@@ -95,7 +95,7 @@ export default async function ApiKeysPage() {
             API Keys
           </h1>
           <p className="mt-1 text-muted-foreground">
-            Manage API keys for programmatic access to OpenVideo
+            Manage API keys for programmatic access to AutoClip
           </p>
         </div>
         <CreateApiKeyDialog />

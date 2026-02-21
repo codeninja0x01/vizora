@@ -48,7 +48,7 @@ async function processWebhookDelivery(job: Job<WebhookJobData>) {
         'webhook-id': webhookId,
         'webhook-timestamp': timestamp.toString(),
         'webhook-signature': signature,
-        'user-agent': 'OpenVideo-Webhooks/1.0',
+        'user-agent': 'AutoClip-Webhooks/1.0',
       },
       body: payloadString,
       bodyTimeout: 30000,

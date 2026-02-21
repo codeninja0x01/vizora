@@ -322,7 +322,7 @@ export async function createCreditPackCheckout(packId: string) {
           currency: 'usd',
           product_data: {
             name: pack.label,
-            description: 'One-time credit top-up for OpenVideo',
+            description: 'One-time credit top-up for AutoClip',
           },
           unit_amount: pack.priceUsd * 100, // Convert to cents
         },

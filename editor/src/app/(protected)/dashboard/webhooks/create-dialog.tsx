@@ -116,7 +116,7 @@ export function CreateWebhookDialog({ children }: CreateWebhookDialogProps) {
               <Input
                 id="webhook-url"
                 type="url"
-                placeholder="https://example.com/webhooks/openvideo"
+                placeholder="https://example.com/webhooks/autoclip"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => {
@@ -180,7 +180,7 @@ export function CreateWebhookDialog({ children }: CreateWebhookDialogProps) {
               </p>
               <p>
                 Include it in your webhook handler to validate that requests are
-                from OpenVideo.
+                from AutoClip.
               </p>
             </div>
           </div>
