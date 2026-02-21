@@ -96,22 +96,32 @@ export function TimelinePlayhead({
         left: `${leftPosition}px`,
         top: 0,
         height: `${totalHeight}px`,
-        width: '1px',
+        width: '2px',
       }}
       onMouseDown={handlePlayheadMouseDown}
     >
       {/* The playhead line spanning full height */}
-      <div className="absolute left-1/2 -translate-x-1/2 w-[1px] cursor-col-resize h-full bg-white" />
+      <div
+        className="absolute left-1/2 -translate-x-1/2 w-px cursor-col-resize h-full"
+        style={{
+          background: '#f59e0b',
+          boxShadow:
+            '0 0 6px rgba(245, 158, 11, 0.45), 0 0 1px rgba(245, 158, 11, 0.8)',
+        }}
+      />
 
       {/* Playhead indicator at the top */}
       <div
-        className="absolute left-1/2 transform -translate-x-1/2 cursor-col-resize bg-white"
+        className="absolute left-1/2 transform -translate-x-1/2 cursor-col-resize"
         style={{
           top: '0',
-          width: '12px',
-          height: '14px',
+          width: '13px',
+          height: '17px',
+          background: '#f59e0b',
           borderRadius: '2px 2px 0 0',
-          clipPath: 'polygon(0% 0%, 100% 0%, 100% 70%, 50% 100%, 0% 70%)',
+          clipPath: 'polygon(0% 0%, 100% 0%, 100% 62%, 50% 100%, 0% 62%)',
+          boxShadow:
+            '0 0 10px rgba(245, 158, 11, 0.6), 0 2px 4px rgba(0,0,0,0.4)',
         }}
       />
     </div>

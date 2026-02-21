@@ -45,11 +45,11 @@ export function TimelineRuler({
 
     const pixelsPerSecond = TIMELINE_CONSTANTS.PIXELS_PER_SECOND * zoomLevel;
 
-    // Background for valid duration (darker)
+    // Background for valid duration (slightly elevated from page bg)
     const durationX = duration * pixelsPerSecond;
     if (durationX > 0) {
-      ctx.fillStyle = 'rgba(33, 33, 33, 1)';
-      // We only fill visible part
+      // Valid range: subtle dark fill
+      ctx.fillStyle = 'rgba(26, 26, 30, 1)';
       const visibleStart = Math.max(0, scrollLeft);
       const visibleEnd = Math.min(scrollLeft + width, durationX);
       if (visibleEnd > visibleStart) {
@@ -60,13 +60,19 @@ export function TimelineRuler({
           RULER_HEIGHT
         );
       }
+      // Beyond-duration: darker, receded
+      const beyondStart = Math.max(durationX - scrollLeft, 0);
+      if (beyondStart < width) {
+        ctx.fillStyle = 'rgba(14, 14, 16, 1)';
+        ctx.fillRect(beyondStart, 0, width - beyondStart, RULER_HEIGHT);
+      }
     }
 
     // Drawing settings
-    ctx.fillStyle = '#9ca3af'; // text-gray-400
-    ctx.strokeStyle = '#374151'; // border-gray-700
+    ctx.fillStyle = '#71717a'; // zinc-500 — refined, low-contrast labels
+    ctx.strokeStyle = '#3f3f46'; // zinc-700 — subtle tick marks
     ctx.lineWidth = 1;
-    ctx.font = '12px Inter, sans-serif';
+    ctx.font = '10px ui-monospace, "SF Mono", Menlo, Consolas, monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
 
@@ -137,7 +143,6 @@ export function TimelineRuler({
       if (x < -20) continue; // Skip if far left
 
       const isBeyondDuration = time > duration + 0.001;
-      ctx.globalAlpha = isBeyondDuration ? 0.4 : 1.0;
 
       ctx.beginPath();
       // Check if main interval
@@ -147,24 +152,27 @@ export function TimelineRuler({
         Math.abs((time % mainInterval) - mainInterval) < 0.001;
 
       if (isMain) {
-        // Main Tick (Botom)
-        ctx.moveTo(x, 18);
+        // Main Tick — taller, brighter
+        ctx.strokeStyle = isBeyondDuration ? '#27272a' : '#52525b';
+        ctx.moveTo(x, 16);
         ctx.lineTo(x, 24);
 
-        // Text (Top)
+        // Text label — top-aligned with padding
+        ctx.fillStyle = isBeyondDuration ? '#3f3f46' : '#71717a';
         const text = formatTime(time);
-        ctx.fillText(text, x, 4);
+        ctx.fillText(text, x, 3);
+        ctx.strokeStyle = '#3f3f46'; // reset for sub ticks
       } else {
-        // Sub Tick (Bottom, shorter)
-        // Only draw sub ticks if there's enough space
+        // Sub Tick — shorter, dimmer
         if (subInterval !== mainInterval) {
-          ctx.moveTo(x, 21);
+          ctx.strokeStyle = isBeyondDuration ? '#1f1f23' : '#27272a';
+          ctx.moveTo(x, 20);
           ctx.lineTo(x, 24);
+          ctx.strokeStyle = '#3f3f46';
         }
       }
       ctx.stroke();
     }
-    ctx.globalAlpha = 1.0;
   }, [zoomLevel, duration, width, scrollLeft]);
 
   return (

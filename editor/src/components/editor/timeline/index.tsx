@@ -43,6 +43,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 
+const TRACK_ACCENT_COLORS: Record<string, string> = {
+  Video: '#3b82f6',
+  Image: '#60a5fa',
+  Audio: '#22c55e',
+  Text: '#5DBAA0',
+  Caption: '#5DBAA0',
+  Effect: '#eab308',
+  Transition: '#ec4899',
+  Placeholder: '#52525b',
+};
+
 export function Timeline() {
   const { tracks, clips, getTotalDuration } = useTimelineStore();
   const { duration, seek, setDuration } = usePlaybackStore();
@@ -357,14 +368,11 @@ export function Timeline() {
         {/* Timeline Header with Ruler */}
         <div
           style={{ opacity: duration === 0 ? 0 : 1 }}
-          className="flex sticky top-0"
+          className="flex sticky top-0 z-20"
         >
           {/* Track Labels Header */}
-          <div className="w-16 shrink-0 bg-card border-r flex items-center justify-between h-6">
-            {/* Empty space */}
-            <span className="text-sm font-medium text-muted-foreground opacity-0">
-              .
-            </span>
+          <div className="w-16 shrink-0 bg-[#0c0c0e] border-r border-border/60 flex items-center justify-center h-6">
+            {/* empty header cell */}
           </div>
 
           {/* Timeline Ruler */}
@@ -422,7 +430,7 @@ export function Timeline() {
           {tracks.length > 0 && (
             <div
               ref={trackLabelsRef}
-              className="w-16 shrink-0 overflow-y-hidden z-10"
+              className="w-16 shrink-0 overflow-y-hidden z-10 bg-[#0c0c0e] border-r border-border/40"
               data-track-labels
             >
               <div className="flex flex-col">
@@ -441,8 +449,11 @@ export function Timeline() {
                     )}
 
                     <div
-                      className={cn('flex items-center px-3 group bg-input/40')}
-                      style={{ height: getTrackHeight(track.type as any) }}
+                      className={cn('flex items-center px-2 group bg-input/30')}
+                      style={{
+                        height: getTrackHeight(track.type as any),
+                        borderLeft: `2px solid ${TRACK_ACCENT_COLORS[track.type] ?? '#52525b'}`,
+                      }}
                     >
                       <div className="flex items-center justify-center flex-1 min-w-0 gap-1">
                         <TrackIcon track={track} />
@@ -511,25 +522,27 @@ export function Timeline() {
 }
 
 function TrackIcon({ track }: { track: TimelineTrack }) {
+  const color = TRACK_ACCENT_COLORS[track.type] ?? '#71717a';
+  const style = { color, opacity: 0.8 };
   return (
     <>
       {track.type === 'Image' && (
-        <Image className="w-4 h-4 shrink-0 text-muted-foreground" />
+        <Image className="w-3.5 h-3.5 shrink-0" style={style} />
       )}
       {(track.type === 'Video' || track.type === 'Placeholder') && (
-        <Video className="w-4 h-4 shrink-0 text-muted-foreground" />
+        <Video className="w-3.5 h-3.5 shrink-0" style={style} />
       )}
       {track.type === 'Text' && (
-        <TypeIcon className="w-4 h-4 shrink-0 text-muted-foreground" />
+        <TypeIcon className="w-3.5 h-3.5 shrink-0" style={style} />
       )}
       {track.type === 'Caption' && (
-        <TypeIcon className="w-4 h-4 shrink-0 text-muted-foreground" />
+        <TypeIcon className="w-3.5 h-3.5 shrink-0" style={style} />
       )}
       {track.type === 'Audio' && (
-        <Music className="w-4 h-4 shrink-0 text-muted-foreground" />
+        <Music className="w-3.5 h-3.5 shrink-0" style={style} />
       )}
       {track.type === 'Effect' && (
-        <SparklesIcon className="w-4 h-4 shrink-0 text-muted-foreground" />
+        <SparklesIcon className="w-3.5 h-3.5 shrink-0" style={style} />
       )}
     </>
   );
