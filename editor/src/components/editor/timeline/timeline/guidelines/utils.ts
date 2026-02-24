@@ -8,9 +8,8 @@ export const clearAuxiliaryObjects = (
   canvas: Canvas,
   allObjects: FabricObject[]
 ) => {
-  // @ts-expect-error - isAlignmentAuxiliary is a custom property
   allObjects.forEach((obj) => {
-    if (obj.isAlignmentAuxiliary) canvas.remove(obj);
+    if ((obj as any).isAlignmentAuxiliary) canvas.remove(obj);
   });
 };
 

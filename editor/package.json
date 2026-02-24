@@ -13,7 +13,10 @@
     "worker": "tsx --env-file=.env src/workers/render-worker.ts",
     "webhook-worker": "tsx --env-file=.env src/workers/webhook-worker.ts",
     "worker:deletion": "tsx --env-file=.env src/workers/deletion-warning-worker.ts",
-    "setup:r2-cors": "tsx scripts/setup-r2-cors.ts"
+    "setup:r2-cors": "tsx scripts/setup-r2-cors.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.74.0",
@@ -92,6 +95,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

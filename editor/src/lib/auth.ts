@@ -40,6 +40,10 @@ export const auth = betterAuth({
     provider: 'postgresql',
   }),
 
+  trustedOrigins: process.env.TRUSTED_ORIGINS
+    ? process.env.TRUSTED_ORIGINS.split(',')
+    : [process.env.BETTER_AUTH_URL || 'http://localhost:3000'],
+
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: !!process.env.RESEND_API_KEY,

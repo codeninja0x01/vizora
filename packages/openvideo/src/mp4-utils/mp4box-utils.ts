@@ -72,6 +72,7 @@ export function extractFileConfig(
       numberOfChannels:
         audioInfo.numberOfChannels ?? aTrack.audio.channel_count,
       sampleRate: audioInfo.sampleRate ?? aTrack.audio.sample_rate,
+      description: audioInfo.description,
     };
   }
 
@@ -107,7 +108,9 @@ function getESDSBoxFromMP4File(
 ): ESDSBoxParser | undefined {
   return file.moov?.traks
     .flatMap((t: any) => t.mdia.minf.stbl.stsd.entries)
-    .find((entry: any) => entry.type === codec) as ESDSBoxParser | undefined;
+    .find((entry: any) => entry.type === codec)?.esds as
+    | ESDSBoxParser
+    | undefined;
 }
 
 /**
@@ -118,6 +121,7 @@ function parseAudioInfoFromESDSBox(esds: ESDSBoxParser): {
   codec?: string;
   sampleRate?: number;
   numberOfChannels?: number;
+  description?: Uint8Array;
 } {
   const decConfDesc = esds.esd?.descs?.[0];
   if (!decConfDesc) return {};
@@ -148,6 +152,7 @@ function parseAudioInfoFromESDSBox(esds: ESDSBoxParser): {
     codec,
     sampleRate: SAMPLE_RATES[sampleRateIdx],
     numberOfChannels,
+    description: new Uint8Array(data),
   };
 }
 

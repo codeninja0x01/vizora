@@ -99,10 +99,11 @@ export function RenderList({ initialRenders }: RenderListProps) {
                 ? {
                     ...b,
                     progress: {
-                      queued: lastEvent.data?.batchProgress?.queued,
-                      processing: lastEvent.data?.batchProgress?.processing,
-                      completed: lastEvent.data?.batchProgress?.completed,
-                      failed: lastEvent.data?.batchProgress?.failed,
+                      queued: lastEvent.data?.batchProgress?.queued ?? 0,
+                      processing:
+                        lastEvent.data?.batchProgress?.processing ?? 0,
+                      completed: lastEvent.data?.batchProgress?.completed ?? 0,
+                      failed: lastEvent.data?.batchProgress?.failed ?? 0,
                     },
                   }
                 : b
@@ -125,10 +126,11 @@ export function RenderList({ initialRenders }: RenderListProps) {
                         : 'partial_failure') as any,
                     completedAt: new Date().toISOString(),
                     progress: {
-                      queued: lastEvent.data?.batchProgress?.queued,
-                      processing: lastEvent.data?.batchProgress?.processing,
-                      completed: lastEvent.data?.batchProgress?.completed,
-                      failed: lastEvent.data?.batchProgress?.failed,
+                      queued: lastEvent.data?.batchProgress?.queued ?? 0,
+                      processing:
+                        lastEvent.data?.batchProgress?.processing ?? 0,
+                      completed: lastEvent.data?.batchProgress?.completed ?? 0,
+                      failed: lastEvent.data?.batchProgress?.failed ?? 0,
                     },
                   }
                 : b

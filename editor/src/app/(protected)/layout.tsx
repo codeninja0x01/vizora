@@ -28,7 +28,8 @@ export default async function ProtectedLayout({
     if (existingMember) {
       orgId = existingMember.organizationId;
     } else {
-      const slug = `personal-${session.user.id.slice(0, 8)}`;
+      const randomSuffix = Math.random().toString(36).substring(2, 6);
+      const slug = `personal-${session.user.id.slice(0, 8)}-${randomSuffix}`;
       const org = await prisma.organization.create({
         data: {
           name: `${session.user.name || session.user.email}'s Org`,

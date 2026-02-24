@@ -143,7 +143,17 @@ export class Renderer extends EventEmitter {
       this.page.on('console', (msg) =>
         console.log(`[BROWSER] ${msg.type()}: ${msg.text()}`)
       );
-      this.page.on('pageerror', (err) => console.log(`[BROWSER ERROR] ${err}`));
+      this.page.on('pageerror', async (err) => {
+        console.log(`[BROWSER ERROR] ${err}`);
+        try {
+          await this.page?.evaluate((errMsg) => {
+            // @ts-expect-error
+            window.renderError = errMsg;
+          }, String(err));
+        } catch (e) {
+          // Ignore evaluate errors if page is closed
+        }
+      });
       this.page.on('requestfailed', (req) =>
         console.log(
           `[BROWSER NETWORK FAIL] ${req.url()} - ${req.failure()?.errorText}`
@@ -169,8 +179,11 @@ export class Renderer extends EventEmitter {
       await this.page.waitForFunction(
         () => {
           // @ts-expect-error - Running in browser context
+          if (window.renderError) throw new Error(window.renderError);
+          // @ts-expect-error - Running in browser context
           return window.renderComplete === true;
         },
+        undefined,
         {
           timeout: this.config.browserOptions?.timeout,
         }
