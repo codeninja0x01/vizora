@@ -169,7 +169,8 @@ export async function renameFolder(id: string, name: string) {
 
   // Update folder and all descendant paths
   // Use transaction to ensure consistency
-  await prisma.$transaction(async (tx) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await prisma.$transaction(async (tx: any) => {
     // Update this folder
     await tx.assetFolder.update({
       where: { id },
