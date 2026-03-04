@@ -53,6 +53,7 @@
     "@tabler/icons-react": "^3.36.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.2",
+    "@vercel/analytics": "^1.6.1",
     "ajv": "^8.17.1",
     "archiver": "^7.0.1",
     "better-auth": "^1.4.18",
