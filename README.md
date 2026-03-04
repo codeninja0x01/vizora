@@ -7,6 +7,10 @@
 AI-powered video creation platform — professional timeline editor meets intelligent automation.
 </p>
 
+<p align="center">
+  <a href="https://vizora-editor.vercel.app">Live Demo</a>
+</p>
+
 ---
 
 ![Vizora Editor](editor/public/screenshots/editor.png)
