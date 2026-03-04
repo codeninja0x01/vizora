@@ -1,88 +1,63 @@
 <p align="center">
-  <a href="https://github.com/openvideodev/openvideo">
-    <img width="150px" height="150px" src="https://cdn.scenify.io/openvideo-logo.png"/>
-  </a>
+  <img src="editor/public/logo-icon.svg" width="80" height="80" alt="Vizora logo" />
 </p>
-<h1 align="center">OpenVideo</h1>
-
-<div align="center">
-  
-  
-A high-performance video rendering and processing library for the web, built with WebCodecs and PixiJS.
+<h1 align="center">Vizora</h1>
 
 <p align="center">
-    <a href="https://openvideo.dev/">OpenVideo</a>
-    ·  
-    <a href="https://discord.gg/SCfMrQx8kr">Discord</a>
-    ·  
-    <a href="https://docs.openvideo.dev">Docs</a>
+AI-powered video creation platform — professional timeline editor meets intelligent automation.
 </p>
-</div>
 
-[![](https://cdn.scenify.io/openvideo-editor.png)](https://github.com/openvideodev/openvideo)
+---
 
+![Vizora Editor](editor/public/screenshots/editor.png)
 
+![Vizora Dashboard](editor/public/screenshots/dashboard.png)
 
 ## Features
 
-- **Browser-Based Rendering**: Leverages modern WebCodecs for efficient video encoding and decoding directly in the browser.
-- **Advanced Composition**: Powered by [PixiJS](https://pixijs.com/) for complex multi-track layering, transforms, and real-time previews.
-- **Universal Clip Support**: Built-in support for Video, Audio, Image, Text, and Captions.
-- **Dynamic Effects & Transitions**: Extensible GLSL-based effects (Chromakey, etc.) and transitions.
-- **JSON Serialization**: Full project state can be serialized to and from JSON for easy persistence and cloud rendering.
-- **Low Latency**: Optimized for interactive video editing experiences.
+- **Timeline Editor** — Multi-track video, audio, text, and effects on a precision timeline with drag-and-drop, trim, split, and resize.
+- **AI Copilot** — Chat-based editing assistant that understands your vision. Describe changes in natural language.
+- **Text to Video** — Generate complete videos from a text prompt. AI handles scripting, visuals, and narration.
+- **Auto Captions** — AI-powered transcription with perfectly timed, styleable captions.
+- **Template System** — Save and reuse templates with dynamic merge fields. Generate variations at scale from CSV.
+- **REST API & Webhooks** — Programmatic access to rendering, templates, and generation with async webhook notifications.
+- **Social Presets** — One-click export for TikTok, Reels, Shorts, and more at optimal formats and resolutions.
+- **Stock Library** — Built-in access to millions of stock videos and images.
 
-## Documentation
+## Tech Stack
 
-Comprehensive documentation is available at [docs.openvideo.dev](https://docs.openvideo.dev).
+- **Next.js** — App router, server components, server actions
+- **WebCodecs** — Hardware-accelerated video encoding/decoding in the browser
+- **PixiJS** — 2D rendering engine for real-time preview and composition
+- **Remotion** — Programmatic video generation with React
+- **Prisma** — Database ORM
+- **Better Auth** — Authentication with social providers
+- **Stripe** — Billing and subscriptions
 
-## Installation
+## Getting Started
 
 ```bash
-npm install openvideo
+# Install dependencies
+pnpm install
+
+# Start the development server
+pnpm dev
 ```
 
-## Quick Start
+## Project Structure
 
-### Basic Composition
-
-```typescript
-import { Studio, Video } from 'openvideo';
-
-// 1. Initialize the Studio (Project State & Preview)
-const studio = new Studio({
-  width: 1920,
-  height: 1080,
-  fps: 30,
-  canvas: document.getElementById('preview-canvas') as HTMLCanvasElement,
-  spacing: 20
-});
-
-// 2. Load and add a Video Clip
-const video = await Video.fromUrl('https://example.com/video.mp4');
-await studio.addClip(video);
-
-// 3. Start Preview
-studio.play();
 ```
-
-## Core Components
-
-- **`Studio`**: Manages the project state, including tracks, clips, and timeline configuration.
-- **`Compositor`**: The rendering engine that handles playback, seeking, and final export using WebCodecs.
-- **`Clips`**: Specialized objects for different media types (`Video`, `Audio`, `Text`, `Image`, `Caption`, etc.).
-- **`JsonSerialization`**: Utilities to convert your entire project into a portable JSON format.
-
-## Technology Stack
-
-- **WebCodecs**: For ultra-fast, hardware-accelerated video processing.
-- **PixiJS**: For a robust and performant 2D/3D rendering engine.
-- **wrapbox**: Internal utility for low-level MP4 box manipulation and muxing.
-
-
-## Contact
-
-For inquiries, support, or custom solutions, reach out to us at [cloud@designcombo.dev](mailto:cloud@designcombo.dev).
+editor/                  # Next.js application
+├── src/
+│   ├── app/            # App router pages
+│   │   ├── (marketing) # Landing page
+│   │   ├── (auth)      # Login / signup
+│   │   └── (protected) # Dashboard, editor
+│   ├── components/     # Shared UI components
+│   ├── lib/            # Utilities, auth, DB, Stripe
+│   ├── remotion/       # Remotion video compositions
+│   └── workers/        # Background workers
+```
 
 ## License
 
