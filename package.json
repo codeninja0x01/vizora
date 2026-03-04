@@ -22,7 +22,7 @@
   },
   "packageManager": "pnpm@9.15.4",
   "engines": {
-    "node": ">=18"
+    "node": ">=18 <25"
   },
   "lint-staged": {
     "*": "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
