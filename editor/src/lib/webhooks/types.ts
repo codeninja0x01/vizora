@@ -1,4 +1,4 @@
-// Webhook type definitions for AutoClip webhook system
+// Webhook type definitions for Vizora webhook system
 
 // Supported webhook event types
 export type WebhookEventType = 'render.completed' | 'render.failed';

@@ -1,9 +1,9 @@
-import { AutoClipLogo } from '@/components/shared/autoclip-logo';
+import { VizoraLogo } from '@/components/shared/vizora-logo';
 
 const features = [
-  'Auto-generate clips from long-form video',
-  'AI captions synced to every word',
-  'Batch export to any platform in minutes',
+  'AI-powered video generation from text',
+  'Professional timeline editor with effects',
+  'Batch render and export to any platform',
 ];
 
 export default function AuthLayout({
@@ -20,7 +20,7 @@ export default function AuthLayout({
           className="pointer-events-none absolute -bottom-32 -left-24 h-[480px] w-[480px] rounded-full opacity-30"
           style={{
             background:
-              'radial-gradient(circle, oklch(0.68 0.20 210) 0%, transparent 70%)',
+              'radial-gradient(circle, oklch(0.60 0.22 285) 0%, transparent 70%)',
             filter: 'blur(80px)',
           }}
         />
@@ -44,13 +44,13 @@ export default function AuthLayout({
         />
 
         {/* Logo */}
-        <AutoClipLogo size="lg" />
+        <VizoraLogo size="lg" />
 
         {/* Brand statement */}
         <div className="relative z-10 space-y-8">
           <div className="space-y-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              Professional Video Tools
+              AI Video Creation Platform
             </p>
             <h1 className="font-heading text-[2.6rem] font-bold leading-[1.08] tracking-tight text-foreground">
               Create at the
@@ -59,15 +59,15 @@ export default function AuthLayout({
                 className="bg-clip-text text-transparent"
                 style={{
                   backgroundImage:
-                    'linear-gradient(105deg, #22D3EE 0%, #3B82F6 45%, oklch(0.60 0.24 285) 100%)',
+                    'linear-gradient(105deg, #A855F7 0%, #7C3AED 45%, #4F46E5 100%)',
                 }}
               >
                 speed of thought
               </span>
             </h1>
             <p className="max-w-[280px] text-sm leading-relaxed text-muted-foreground">
-              AI-powered editing that turns raw footage into polished content —
-              automatically.
+              Turn ideas into stunning videos with AI — edit, generate, and
+              render at scale.
             </p>
           </div>
 
@@ -77,8 +77,7 @@ export default function AuthLayout({
                 <span
                   className="size-1.5 shrink-0 rounded-full"
                   style={{
-                    background:
-                      'linear-gradient(135deg, #22D3EE, oklch(0.60 0.24 285))',
+                    background: 'linear-gradient(135deg, #A855F7, #4F46E5)',
                   }}
                 />
                 <span className="text-sm text-muted-foreground">{f}</span>
@@ -88,7 +87,7 @@ export default function AuthLayout({
         </div>
 
         <p className="text-xs text-muted-foreground/50">
-          © {new Date().getFullYear()} AutoClip
+          © {new Date().getFullYear()} Vizora
         </p>
       </div>
 
@@ -96,7 +95,7 @@ export default function AuthLayout({
       <div className="flex flex-1 flex-col items-center justify-center px-6 py-12">
         {/* Mobile logo */}
         <div className="mb-10 lg:hidden">
-          <AutoClipLogo size="lg" />
+          <VizoraLogo size="lg" />
         </div>
 
         <div className="w-full max-w-[400px]">{children}</div>

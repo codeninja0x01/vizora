@@ -33,7 +33,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { AutoClipLogo } from '../shared/autoclip-logo';
+import { VizoraLogo } from '../shared/vizora-logo';
 import Link from 'next/link';
 
 const isSourcelessClipType = (type: string) =>
@@ -174,7 +174,7 @@ export default function Header() {
               className="group flex items-center gap-1.5 h-8 pl-1.5 pr-2.5 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/[0.06] transition-all duration-150"
             >
               <ArrowLeft className="size-3.5 transition-transform duration-150 group-hover:-translate-x-0.5" />
-              <AutoClipLogo size="sm" showWordmark={false} />
+              <VizoraLogo size="sm" showWordmark={false} />
               <span className="hidden sm:block font-heading text-[13px] font-semibold tracking-tight">
                 Dashboard
               </span>
@@ -422,7 +422,7 @@ export default function Header() {
             className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3.5 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
             style={{
               background:
-                'linear-gradient(105deg, #22D3EE 0%, #3B82F6 50%, oklch(0.60 0.24 285) 100%)',
+                'linear-gradient(105deg, #A855F7 0%, #7C3AED 50%, #4F46E5 100%)',
               boxShadow: '0 1px 8px 0 oklch(0.60 0.24 285 / 0.35)',
             }}
           >

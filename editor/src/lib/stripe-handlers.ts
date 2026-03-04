@@ -327,7 +327,7 @@ ${process.env.NEXT_PUBLIC_APP_URL || 'https://openvideo.dev'}/dashboard/billing
 If you have any questions, please contact support.
 
 Best regards,
-The AutoClip Team`,
+The Vizora Team`,
       });
 
       console.log(`[handlePaymentFailed] Email sent to ${owner.user.email}`);

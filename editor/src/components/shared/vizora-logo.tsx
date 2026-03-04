@@ -2,7 +2,7 @@
 
 import { useId } from 'react';
 
-interface AutoClipLogoProps {
+interface VizoraLogoProps {
   /** Icon + wordmark size variant */
   size?: 'sm' | 'md' | 'lg';
   /** Show the text wordmark beside the icon */
@@ -11,17 +11,17 @@ interface AutoClipLogoProps {
 }
 
 /**
- * AutoClip brand logo — inline SVG icon with optional wordmark.
+ * Vizora brand logo — inline SVG icon with optional wordmark.
  * Works in both light and dark contexts; icon uses its own gradient fill.
  */
-export function AutoClipLogo({
+export function VizoraLogo({
   size = 'md',
   showWordmark = true,
   className = '',
-}: AutoClipLogoProps) {
+}: VizoraLogoProps) {
   const id = useId();
   const bgId = `${id}-bg`;
-  const boltId = `${id}-bolt`;
+  const symbolId = `${id}-symbol`;
 
   const iconSize = size === 'sm' ? 24 : size === 'lg' ? 40 : 32;
   const fontSize = size === 'sm' ? 15 : size === 'lg' ? 22 : 18;
@@ -29,7 +29,7 @@ export function AutoClipLogo({
   return (
     <div
       role="img"
-      aria-label="AutoClip"
+      aria-label="Vizora"
       className={`flex items-center gap-2.5 select-none ${className}`}
     >
       {/* Icon mark */}
@@ -51,12 +51,12 @@ export function AutoClipLogo({
             y2="32"
             gradientUnits="userSpaceOnUse"
           >
-            <stop offset="0%" stopColor="#22D3EE" />
-            <stop offset="55%" stopColor="#3B82F6" />
-            <stop offset="100%" stopColor="#1D4ED8" />
+            <stop offset="0%" stopColor="#A855F7" />
+            <stop offset="55%" stopColor="#7C3AED" />
+            <stop offset="100%" stopColor="#4F46E5" />
           </linearGradient>
           <linearGradient
-            id={boltId}
+            id={symbolId}
             x1="10"
             y1="5"
             x2="22"
@@ -64,57 +64,29 @@ export function AutoClipLogo({
             gradientUnits="userSpaceOnUse"
           >
             <stop offset="0%" stopColor="#FFFFFF" />
-            <stop offset="100%" stopColor="#BAE6FD" />
+            <stop offset="100%" stopColor="#E9D5FF" />
           </linearGradient>
         </defs>
 
         {/* Background */}
-        <rect width="32" height="32" rx="7.5" fill={`url(#${bgId})`} />
+        <rect width="32" height="32" rx="8" fill={`url(#${bgId})`} />
 
-        {/* Film sprocket holes — left */}
-        <rect
-          x="2"
-          y="9.5"
-          width="4.5"
-          height="5.5"
-          rx="1.5"
-          fill="#0A2550"
-          opacity="0.35"
-        />
-        <rect
-          x="2"
-          y="18"
-          width="4.5"
-          height="5.5"
-          rx="1.5"
-          fill="#0A2550"
-          opacity="0.35"
-        />
-
-        {/* Film sprocket holes — right */}
-        <rect
-          x="25.5"
-          y="9.5"
-          width="4.5"
-          height="5.5"
-          rx="1.5"
-          fill="#0A2550"
-          opacity="0.35"
-        />
-        <rect
-          x="25.5"
-          y="18"
-          width="4.5"
-          height="5.5"
-          rx="1.5"
-          fill="#0A2550"
-          opacity="0.35"
-        />
-
-        {/* Lightning bolt */}
+        {/* Play/Vision triangle — the "V" of Vizora */}
         <path
-          d="M19 5L9.5 18H15.5L12 27L22.5 14H16.5L19 5Z"
-          fill={`url(#${boltId})`}
+          d="M11 7L25 16L11 25V7Z"
+          fill={`url(#${symbolId})`}
+          opacity="0.95"
+        />
+
+        {/* Lens ring — the "eye" / vision element */}
+        <circle
+          cx="16"
+          cy="16"
+          r="5.5"
+          stroke="white"
+          strokeWidth="1.5"
+          fill="none"
+          opacity="0.4"
         />
       </svg>
 
@@ -124,8 +96,8 @@ export function AutoClipLogo({
           style={{ fontSize, lineHeight: 1 }}
           className="font-heading tracking-tight text-foreground"
         >
-          <span className="font-medium">Auto</span>
-          <span className="font-bold">Clip</span>
+          <span className="font-medium">Viz</span>
+          <span className="font-bold">ora</span>
         </span>
       )}
     </div>

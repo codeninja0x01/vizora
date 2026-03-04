@@ -48,7 +48,7 @@ export default async function ApiKeysPage() {
             API Keys
           </h1>
           <p className="mt-1.5 text-[15px] text-muted-foreground/70">
-            Manage API keys for programmatic access to AutoClip
+            Manage API keys for programmatic access to Vizora
           </p>
         </div>
         <div className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-14 text-center">
@@ -90,7 +90,7 @@ export default async function ApiKeysPage() {
             API Keys
           </h1>
           <p className="mt-1.5 text-[15px] text-muted-foreground/70">
-            Manage API keys for programmatic access to AutoClip
+            Manage API keys for programmatic access to Vizora
           </p>
         </div>
         <CreateApiKeyDialog />
@@ -110,7 +110,7 @@ export default async function ApiKeysPage() {
               No API keys yet
             </h2>
             <p className="mt-2 text-sm text-muted-foreground/60">
-              Create your first API key to start using the AutoClip API.
+              Create your first API key to start using the Vizora API.
             </p>
             <div className="mt-6">
               <CreateApiKeyDialog />

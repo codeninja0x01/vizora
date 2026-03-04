@@ -41,7 +41,7 @@ const worker = new Worker(
         <p>Your rendered video "${render.template.name}" will be automatically deleted on <strong>${expiresAt}</strong>.</p>
         <p>If you need this video, please download it before it expires.</p>
         <p>${render.outputUrl ? `<a href="${render.outputUrl}">Download Video</a>` : ''}</p>
-        <p>— AutoClip</p>`,
+        <p>— Vizora</p>`,
       });
       console.log(
         `[DeletionWarning] Email sent to ${render.user.email} for render ${renderId}`

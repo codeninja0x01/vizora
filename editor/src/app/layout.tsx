@@ -20,8 +20,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'AutoClip',
-  description: 'Automated video generation platform',
+  title: 'Vizora',
+  description: 'AI-powered video creation platform',
 };
 
 export default function RootLayout({

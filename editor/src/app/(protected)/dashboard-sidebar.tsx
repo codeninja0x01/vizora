@@ -18,7 +18,7 @@ import {
   CreditCard,
   Sparkles,
 } from 'lucide-react';
-import { AutoClipLogo } from '@/components/shared/autoclip-logo';
+import { VizoraLogo } from '@/components/shared/vizora-logo';
 import { useRenderEventContext } from '@/components/render/render-event-provider';
 import { authClient } from '@/lib/auth-client';
 import { toast } from 'sonner';
@@ -123,7 +123,7 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
             className="absolute left-0 top-1/2 h-[22px] w-[3px] -translate-y-1/2 rounded-r-full"
             style={{
               background:
-                'linear-gradient(180deg, #22D3EE 0%, #3B82F6 60%, oklch(0.60 0.24 285) 100%)',
+                'linear-gradient(180deg, #A855F7 0%, #7C3AED 60%, #4F46E5 100%)',
               boxShadow: '0 0 10px oklch(0.60 0.24 285 / 0.45)',
             }}
           />
@@ -140,8 +140,7 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
           <span
             className="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold tabular-nums text-white"
             style={{
-              background:
-                'linear-gradient(135deg, #22D3EE, oklch(0.60 0.24 285))',
+              background: 'linear-gradient(135deg, #A855F7, #4F46E5)',
             }}
           >
             {activeCount}
@@ -168,7 +167,7 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
       {/* Logo */}
       <div className="flex h-[58px] shrink-0 items-center px-5">
         <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-          <AutoClipLogo size="sm" />
+          <VizoraLogo size="sm" />
         </Link>
       </div>
 
@@ -199,7 +198,7 @@ export function DashboardSidebar({ user }: DashboardSidebarProps) {
             className="relative flex size-8 shrink-0 items-center justify-center rounded-lg text-[13px] font-bold text-white shadow-sm"
             style={{
               background:
-                'linear-gradient(135deg, #22D3EE 0%, #3B82F6 50%, oklch(0.60 0.24 285) 100%)',
+                'linear-gradient(135deg, #A855F7 0%, #7C3AED 50%, #4F46E5 100%)',
             }}
           >
             {initials}

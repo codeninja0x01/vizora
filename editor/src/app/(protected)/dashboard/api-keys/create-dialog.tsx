@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 import { Plus, Copy, Check, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +20,7 @@ interface CreateApiKeyDialogProps {
 }
 
 export function CreateApiKeyDialog({ children }: CreateApiKeyDialogProps) {
+  const nameId = useId();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -95,7 +96,7 @@ export function CreateApiKeyDialog({ children }: CreateApiKeyDialogProps) {
           <DialogDescription>
             {generatedKey
               ? "Copy your API key now - you won't be able to see it again!"
-              : 'Create a new API key for programmatic access to AutoClip'}
+              : 'Create a new API key for programmatic access to Vizora'}
           </DialogDescription>
         </DialogHeader>
 
@@ -104,13 +105,13 @@ export function CreateApiKeyDialog({ children }: CreateApiKeyDialogProps) {
           <div className="space-y-4">
             <div>
               <label
-                htmlFor="api-key-name"
+                htmlFor={nameId}
                 className="mb-2 block text-sm font-medium"
               >
                 Name
               </label>
               <Input
-                id="api-key-name"
+                id={nameId}
                 placeholder="e.g., Production Server, Development"
                 value={name}
                 onChange={(e) => setName(e.target.value)}

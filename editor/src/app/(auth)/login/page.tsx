@@ -6,7 +6,7 @@ import { authClient } from '@/lib/auth-client';
 import { Github } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { toast } from 'sonner';
 
 function GoogleIcon() {
@@ -22,6 +22,8 @@ function GoogleIcon() {
 
 export default function LoginPage() {
   const router = useRouter();
+  const emailId = useId();
+  const passwordId = useId();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -91,7 +93,7 @@ export default function LoginPage() {
           Welcome back
         </h2>
         <p className="text-sm text-muted-foreground">
-          Sign in to continue to AutoClip
+          Sign in to continue to Vizora
         </p>
       </div>
 
@@ -135,13 +137,13 @@ export default function LoginPage() {
       <form onSubmit={handleEmailSignIn} className="space-y-5">
         <div className="space-y-1.5">
           <label
-            htmlFor="email"
+            htmlFor={emailId}
             className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
           >
             Email
           </label>
           <Input
-            id="email"
+            id={emailId}
             type="email"
             placeholder="you@example.com"
             value={email}
@@ -155,7 +157,7 @@ export default function LoginPage() {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label
-              htmlFor="password"
+              htmlFor={passwordId}
               className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground"
             >
               Password
@@ -168,7 +170,7 @@ export default function LoginPage() {
             </Link>
           </div>
           <Input
-            id="password"
+            id={passwordId}
             type="password"
             placeholder="••••••••"
             value={password}
@@ -190,7 +192,7 @@ export default function LoginPage() {
           className="h-11 w-full font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           style={{
             background:
-              'linear-gradient(105deg, #22D3EE 0%, #3B82F6 50%, oklch(0.60 0.24 285) 100%)',
+              'linear-gradient(105deg, #A855F7 0%, #7C3AED 50%, #4F46E5 100%)',
           }}
           disabled={loading}
         >

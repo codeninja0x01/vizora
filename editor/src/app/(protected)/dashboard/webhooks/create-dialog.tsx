@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useId, useState, type ReactNode } from 'react';
 import { Plus, Copy, Check, AlertTriangle, Webhook } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +20,7 @@ interface CreateWebhookDialogProps {
 }
 
 export function CreateWebhookDialog({ children }: CreateWebhookDialogProps) {
+  const urlId = useId();
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
@@ -107,16 +108,13 @@ export function CreateWebhookDialog({ children }: CreateWebhookDialogProps) {
           // Create form
           <div className="space-y-4">
             <div>
-              <label
-                htmlFor="webhook-url"
-                className="mb-2 block text-sm font-medium"
-              >
+              <label htmlFor={urlId} className="mb-2 block text-sm font-medium">
                 Webhook URL
               </label>
               <Input
-                id="webhook-url"
+                id={urlId}
                 type="url"
-                placeholder="https://example.com/webhooks/autoclip"
+                placeholder="https://example.com/webhooks/vizora"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 onKeyDown={(e) => {
@@ -180,7 +178,7 @@ export function CreateWebhookDialog({ children }: CreateWebhookDialogProps) {
               </p>
               <p>
                 Include it in your webhook handler to validate that requests are
-                from AutoClip.
+                from Vizora.
               </p>
             </div>
           </div>

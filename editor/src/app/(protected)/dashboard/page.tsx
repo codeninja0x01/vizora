@@ -138,22 +138,21 @@ export default async function DashboardPage() {
       description: 'Build a new video template in the editor',
       icon: Plus,
       href: '/editor',
-      iconBg: 'linear-gradient(135deg, #22D3EE, #3B82F6)',
+      iconBg: 'linear-gradient(135deg, #A855F7, #7C3AED)',
     },
     {
       label: 'Browse Gallery',
       description: 'Discover and clone pre-built templates',
       icon: LayoutGrid,
       href: '/gallery',
-      iconBg: 'linear-gradient(135deg, #3B82F6, oklch(0.60 0.24 285))',
+      iconBg: 'linear-gradient(135deg, #7C3AED, #4F46E5)',
     },
     {
       label: 'Generate API Key',
       description: 'Create a key for programmatic access',
       icon: Key,
       href: '/dashboard/api-keys',
-      iconBg:
-        'linear-gradient(135deg, oklch(0.65 0.18 320), oklch(0.55 0.20 320))',
+      iconBg: 'linear-gradient(135deg, #4F46E5, #3730A3)',
     },
   ];
 
@@ -170,7 +169,7 @@ export default async function DashboardPage() {
             className="bg-clip-text text-transparent"
             style={{
               backgroundImage:
-                'linear-gradient(105deg, #22D3EE 0%, #3B82F6 50%, oklch(0.60 0.24 285) 100%)',
+                'linear-gradient(105deg, #A855F7 0%, #7C3AED 50%, #4F46E5 100%)',
             }}
           >
             {firstName}
@@ -359,8 +358,7 @@ export default async function DashboardPage() {
                   <span
                     className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
                     style={{
-                      background:
-                        'linear-gradient(135deg, #22D3EE, oklch(0.60 0.24 285))',
+                      background: 'linear-gradient(135deg, #A855F7, #4F46E5)',
                       opacity: 0.85,
                     }}
                   >

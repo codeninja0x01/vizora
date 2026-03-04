@@ -160,6 +160,15 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.8
         version: 1.2.8(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      '@remotion/google-fonts':
+        specifier: ^4.0.432
+        version: 4.0.432(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      '@remotion/player':
+        specifier: ^4.0.432
+        version: 4.0.432(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      '@remotion/transitions':
+        specifier: ^4.0.432
+        version: 4.0.432(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@stripe/stripe-js':
         specifier: ^8.7.0
         version: 8.7.0
@@ -274,6 +283,9 @@ importers:
       remark-gfm:
         specifier: ^4.0.1
         version: 4.0.1
+      remotion:
+        specifier: ^4.0.432
+        version: 4.0.432(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       resend:
         specifier: ^6.9.1
         version: 6.9.1
@@ -3180,6 +3192,30 @@ packages:
 
   '@radix-ui/rect@1.1.1':
     resolution: {integrity: sha512-HPwpGIzkl28mWyZqG52jiqDJ12waP11Pa1lGoiyUkIEuMLBP0oeK/C89esbXrxsky5we7dfd8U58nm0SgAWpVw==}
+
+  '@remotion/google-fonts@4.0.432':
+    resolution: {integrity: sha512-9wn5gbINnkCrOeoLEW8BgpLYRrsEZeL5iDyk0Be6TeLPhEuT/mqgofaPv9h9YZXnAes1suobRF8jVhUqwcb1wg==}
+
+  '@remotion/paths@4.0.432':
+    resolution: {integrity: sha512-Zy8OrSgjvjpz5GUQsOnj1MALm+GQMm09dY0AuDkGtpLXx8l43VU9p9+fCoTwfVS9ptRrDKSm7qQW4fMM5D4Akw==}
+
+  '@remotion/player@4.0.432':
+    resolution: {integrity: sha512-D2B/yQ8B7yaSS2B99lw6sAtxixyBKXd1C+dOW5j1yWHUxiURD2aCsOLL2DuEPpsuIVWwO/DdHysefVRkS6QdpA==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+
+  '@remotion/shapes@4.0.432':
+    resolution: {integrity: sha512-M1cOCBUZLDuS9ilX4oWDQ4bTkpxeIVOVwOhApw4+suw0zk4EA12TnQMaNDspog7sGaFHKJpEWdJrGO+V4CEPpw==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+
+  '@remotion/transitions@4.0.432':
+    resolution: {integrity: sha512-ihSCw86dqFQ9hHeIm4w4i6qzFhX9rLpHtGP3U9MKGXx6LmFg6M1HWmCiMbNDBHTWMsLZdzhHwgAsjd5SuDo9zA==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   '@rolldown/pluginutils@1.0.0-rc.3':
     resolution: {integrity: sha512-eybk3TjzzzV97Dlj5c+XrBFW57eTNhzod66y9HrBlzJ6NsCrWCp/2kaPS3K9wJmurBC0Tdw4yPjXKZqlznim3Q==}
@@ -6998,6 +7034,12 @@ packages:
 
   remeda@2.33.4:
     resolution: {integrity: sha512-ygHswjlc/opg2VrtiYvUOPLjxjtdKvjGz1/plDhkG66hjNjFr1xmfrs2ClNFo/E6TyUFiwYNh53bKV26oBoMGQ==}
+
+  remotion@4.0.432:
+    resolution: {integrity: sha512-vM06zjMLoo5nANFJU1WSdelQisjpew2o006gnNCx93QTpfCrwC+3ZbDqOqidDML0VtOscr5MV5SUf9NZxv3sbw==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
@@ -11716,6 +11758,35 @@ snapshots:
       '@types/react-dom': 19.2.3(@types/react@19.2.8)
 
   '@radix-ui/rect@1.1.1': {}
+
+  '@remotion/google-fonts@4.0.432(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
+    dependencies:
+      remotion: 4.0.432(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+    transitivePeerDependencies:
+      - react
+      - react-dom
+
+  '@remotion/paths@4.0.432': {}
+
+  '@remotion/player@4.0.432(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
+    dependencies:
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+      remotion: 4.0.432(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+
+  '@remotion/shapes@4.0.432(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
+    dependencies:
+      '@remotion/paths': 4.0.432
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+
+  '@remotion/transitions@4.0.432(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
+    dependencies:
+      '@remotion/paths': 4.0.432
+      '@remotion/shapes': 4.0.432(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+      remotion: 4.0.432(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
 
   '@rolldown/pluginutils@1.0.0-rc.3': {}
 
@@ -16448,6 +16519,11 @@ snapshots:
       - supports-color
 
   remeda@2.33.4: {}
+
+  remotion@4.0.432(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+    dependencies:
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
 
   require-directory@2.1.1: {}
 
