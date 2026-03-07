@@ -18,6 +18,7 @@ import {
   IconBrandGithub,
   IconBrandX,
   IconBrandDiscord,
+  IconBrandLinkedin,
   IconCheck,
   IconSparkles,
 } from '@tabler/icons-react';
@@ -301,6 +302,12 @@ export default function LandingPage() {
               Pricing
             </a>
             <a
+              href="#team"
+              className="text-sm text-white/50 transition-colors hover:text-white"
+            >
+              Team
+            </a>
+            <a
               href="https://docs.vizora.dev"
               target="_blank"
               rel="noopener noreferrer"
@@ -336,10 +343,18 @@ export default function LandingPage() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-8 inline-flex items-center gap-2 rounded-full border border-purple-500/20 bg-purple-500/[0.08] px-4 py-1.5 text-sm"
+            className="mb-8 inline-flex items-center gap-3 rounded-full border border-white/[0.08] bg-white/[0.03] py-1.5 pr-5 pl-1.5 text-sm backdrop-blur-sm"
           >
-            <IconSparkles size={14} className="text-purple-400" />
-            <span className="text-purple-300">AI-Powered Video Creation</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 px-3 py-1 text-xs font-bold tracking-wide text-white uppercase">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white/60" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+              </span>
+              Beta
+            </span>
+            <span className="text-white/50">
+              AI-Powered Video Creation Platform
+            </span>
           </motion.div>
 
           {/* Headline */}
@@ -742,6 +757,148 @@ export default function LandingPage() {
               ]}
               delay={0.2}
             />
+          </div>
+        </div>
+      </section>
+
+      {/* ── Team ──────────────────────────────────────────────────── */}
+      <section id="team" className="relative overflow-hidden py-28 md:py-36">
+        {/* Section accent glow */}
+        <div
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{
+            background:
+              'radial-gradient(ellipse 50% 60% at 50% 40%, oklch(0.5 0.25 285 / 0.05), transparent)',
+          }}
+        />
+
+        <div className="mx-auto max-w-7xl px-6">
+          <Reveal>
+            <div className="mb-20 text-center">
+              <span className="mb-4 inline-block text-sm font-semibold tracking-widest text-purple-400 uppercase">
+                Our Team
+              </span>
+              <h2 className="font-heading text-3xl font-bold tracking-tight md:text-4xl">
+                The people behind{' '}
+                <span className="bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+                  Vizora
+                </span>
+              </h2>
+            </div>
+          </Reveal>
+
+          <div className="mx-auto max-w-lg">
+            <Reveal delay={0.1}>
+              <div className="group relative">
+                {/* Outer glow on hover */}
+                <div
+                  className="pointer-events-none absolute -inset-[1px] rounded-3xl opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+                  style={{
+                    background:
+                      'linear-gradient(135deg, oklch(0.55 0.27 285 / 0.2), oklch(0.5 0.2 250 / 0.1), oklch(0.55 0.27 285 / 0.2))',
+                  }}
+                />
+
+                <div className="relative rounded-3xl border border-white/[0.06] bg-white/[0.02] p-10 backdrop-blur-sm">
+                  {/* Decorative corner lines */}
+                  <div className="absolute top-0 left-0 h-16 w-16">
+                    <div className="absolute top-0 left-0 h-full w-[1px] bg-gradient-to-b from-purple-500/40 to-transparent" />
+                    <div className="absolute top-0 left-0 h-[1px] w-full bg-gradient-to-r from-purple-500/40 to-transparent" />
+                  </div>
+                  <div className="absolute right-0 bottom-0 h-16 w-16">
+                    <div className="absolute right-0 bottom-0 h-full w-[1px] bg-gradient-to-t from-purple-500/40 to-transparent" />
+                    <div className="absolute right-0 bottom-0 h-[1px] w-full bg-gradient-to-l from-purple-500/40 to-transparent" />
+                  </div>
+
+                  <div className="flex flex-col items-center gap-8 sm:flex-row sm:items-start sm:text-left">
+                    {/* Avatar */}
+                    <div className="relative shrink-0">
+                      <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl">
+                        {/* Gradient background */}
+                        <div
+                          className="absolute inset-0"
+                          style={{
+                            background:
+                              'linear-gradient(135deg, oklch(0.45 0.25 285) 0%, oklch(0.4 0.2 260) 50%, oklch(0.35 0.15 285) 100%)',
+                          }}
+                        />
+                        {/* Noise texture overlay */}
+                        <div
+                          className="absolute inset-0 opacity-20 mix-blend-overlay"
+                          style={{
+                            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
+                          }}
+                        />
+                        <span className="relative text-3xl font-bold text-white">
+                          R
+                        </span>
+                      </div>
+                      {/* Status indicator */}
+                      <div className="absolute -right-1 -bottom-1 flex h-6 w-6 items-center justify-center rounded-lg border-2 border-[oklch(0.1_0.01_285)] bg-gradient-to-br from-purple-500 to-indigo-500">
+                        <IconSparkles size={12} className="text-white" />
+                      </div>
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex flex-col items-center sm:items-start">
+                      <div className="mb-1 flex items-center gap-3">
+                        <h3 className="font-heading text-xl font-bold tracking-tight text-white">
+                          Robel
+                        </h3>
+                        <span className="rounded-md bg-purple-500/15 px-2.5 py-0.5 text-xs font-semibold text-purple-300">
+                          Founder
+                        </span>
+                      </div>
+
+                      <p className="mt-2 max-w-sm text-sm leading-relaxed text-white/45">
+                        Software engineer with over a decade of experience
+                        building scalable products. Passionate about making
+                        professional video creation accessible to everyone
+                        through AI.
+                      </p>
+
+                      {/* Stats row */}
+                      <div className="mt-5 flex items-center gap-5">
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.03]">
+                            <IconBolt
+                              size={14}
+                              className="text-purple-400"
+                              stroke={1.5}
+                            />
+                          </div>
+                          <div>
+                            <div className="text-xs font-semibold text-white/70">
+                              10+
+                            </div>
+                            <div className="text-[10px] text-white/30">
+                              Years Exp.
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="h-6 w-[1px] bg-white/[0.06]" />
+
+                        <a
+                          href="https://www.linkedin.com/in/robel-talele/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="group/link flex items-center gap-2 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3.5 py-2 text-sm transition-all duration-300 hover:border-[#0A66C2]/30 hover:bg-[#0A66C2]/10"
+                        >
+                          <IconBrandLinkedin
+                            size={16}
+                            className="text-white/40 transition-colors group-hover/link:text-[#0A66C2]"
+                          />
+                          <span className="text-xs font-medium text-white/50 transition-colors group-hover/link:text-white/70">
+                            Connect
+                          </span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
           </div>
         </div>
       </section>
