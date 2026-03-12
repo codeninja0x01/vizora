@@ -14,15 +14,21 @@ import {
   generateWebVTT,
   generateSubtitleClipData,
 } from '@/lib/ai/utils/webvtt-generator';
+import {
+  requireSession,
+  unauthorizedResponse,
+  zodErrorResponse,
+} from '@/lib/require-session';
+import { z } from 'zod';
 
-interface SubtitleRequest {
-  audioUrl: string;
-  presetId?: string;
-  mode?: 'karaoke' | 'phrase';
-  videoWidth?: number;
-  videoHeight?: number;
-  format?: 'clips' | 'webvtt';
-}
+const subtitlesSchema = z.object({
+  audioUrl: z.string().url(),
+  presetId: z.string().max(64).optional(),
+  mode: z.enum(['karaoke', 'phrase']).optional(),
+  videoWidth: z.number().int().min(1).max(7680).optional(),
+  videoHeight: z.number().int().min(1).max(4320).optional(),
+  format: z.enum(['clips', 'webvtt']).optional(),
+});
 
 /**
  * POST /api/ai/subtitles
@@ -42,19 +48,25 @@ interface SubtitleRequest {
  * - format='webvtt': { webvtt: string }
  */
 export async function POST(request: NextRequest) {
-  try {
-    const body = (await request.json()) as SubtitleRequest;
+  const session = await requireSession(request);
+  if (!session) return unauthorizedResponse();
 
-    // Validate required fields
-    if (!body.audioUrl) {
-      return NextResponse.json(
-        { error: 'audioUrl is required' },
-        { status: 400 }
-      );
-    }
+  try {
+    const body = await request.json();
+    const parsed = subtitlesSchema.safeParse(body);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
+
+    const {
+      audioUrl,
+      presetId: rawPresetId,
+      mode,
+      videoWidth: rawVideoWidth,
+      videoHeight: rawVideoHeight,
+      format: rawFormat,
+    } = parsed.data;
 
     // Resolve preset
-    const presetId = body.presetId || 'modern-karaoke';
+    const presetId = rawPresetId || 'modern-karaoke';
     let preset = getPresetById(presetId);
 
     if (!preset) {
@@ -63,21 +75,21 @@ export async function POST(request: NextRequest) {
     }
 
     // Override mode if provided
-    if (body.mode) {
+    if (mode) {
       preset = {
         ...preset,
-        mode: body.mode,
+        mode,
       };
     }
 
     // Set defaults for video dimensions
-    const videoWidth = body.videoWidth || 1920;
-    const videoHeight = body.videoHeight || 1080;
-    const format = body.format || 'clips';
+    const videoWidth = rawVideoWidth || 1920;
+    const videoHeight = rawVideoHeight || 1080;
+    const format = rawFormat || 'clips';
 
     // Generate subtitles
     const service = new SubtitleService();
-    const cues = await service.generateFromAudio(body.audioUrl, {
+    const cues = await service.generateFromAudio(audioUrl, {
       mode: preset.mode,
       preset,
     });

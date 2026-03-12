@@ -7,63 +7,41 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { TextToVideoService } from '@/lib/ai/services/text-to-video-service';
 import { getVideoStyleById } from '@/lib/ai/presets/video-style-presets';
 import type { Scene } from '@/lib/ai/services/text-to-video-service';
+import {
+  requireSession,
+  unauthorizedResponse,
+  zodErrorResponse,
+} from '@/lib/require-session';
+import { z } from 'zod';
 
-interface RequestBody {
-  scenes: Array<{
-    description: string;
-    duration: number;
-    mood?: string;
-    textOverlay?: string;
-  }>;
-  styleId: string;
-}
+const sceneSchema = z.object({
+  description: z.string().min(1).max(2000),
+  duration: z.number().positive().max(300),
+  mood: z.string().max(100).optional(),
+  textOverlay: z.string().max(500).optional(),
+});
+
+const textToVideoSchema = z.object({
+  scenes: z.array(sceneSchema).min(1).max(50),
+  styleId: z.string().min(1).max(64),
+});
 
 export async function POST(req: NextRequest) {
+  const session = await requireSession(req);
+  if (!session) return unauthorizedResponse();
+
   try {
-    // Parse request body
-    const body: RequestBody = await req.json();
+    const body = await req.json();
+    const parsed = textToVideoSchema.safeParse(body);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
 
-    // Validate request
-    if (
-      !body.scenes ||
-      !Array.isArray(body.scenes) ||
-      body.scenes.length === 0
-    ) {
-      return NextResponse.json(
-        { error: 'scenes array is required and must not be empty' },
-        { status: 400 }
-      );
-    }
-
-    if (!body.styleId) {
-      return NextResponse.json(
-        { error: 'styleId is required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate each scene
-    for (let i = 0; i < body.scenes.length; i++) {
-      const scene = body.scenes[i];
-      if (!scene.description || typeof scene.description !== 'string') {
-        return NextResponse.json(
-          { error: `Scene ${i + 1}: description is required` },
-          { status: 400 }
-        );
-      }
-      if (typeof scene.duration !== 'number' || scene.duration <= 0) {
-        return NextResponse.json(
-          { error: `Scene ${i + 1}: duration must be a positive number` },
-          { status: 400 }
-        );
-      }
-    }
+    const { scenes: rawScenes, styleId } = parsed.data;
 
     // Validate style
-    const style = getVideoStyleById(body.styleId);
+    const style = getVideoStyleById(styleId);
     if (!style) {
       return NextResponse.json(
-        { error: `Invalid styleId: ${body.styleId}` },
+        { error: `Invalid styleId: ${styleId}` },
         { status: 400 }
       );
     }
@@ -79,7 +57,7 @@ export async function POST(req: NextRequest) {
     // Create service and generate composition
     const service = new TextToVideoService();
 
-    const scenes: Scene[] = body.scenes.map((s) => ({
+    const scenes: Scene[] = rawScenes.map((s) => ({
       description: s.description,
       duration: s.duration,
       mood: s.mood,

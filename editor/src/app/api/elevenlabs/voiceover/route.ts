@@ -1,5 +1,11 @@
 import { R2StorageService } from '@/lib/r2';
+import {
+  requireSession,
+  unauthorizedResponse,
+  zodErrorResponse,
+} from '@/lib/require-session';
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
 const r2 = new R2StorageService({
   bucketName: process.env.R2_BUCKET_NAME || '',
@@ -9,16 +15,31 @@ const r2 = new R2StorageService({
   cdn: process.env.R2_PUBLIC_DOMAIN || '',
 });
 
-export async function POST(req: NextRequest) {
-  try {
-    const { text, voiceId = '21m00Tcm4TlvDq8ikWAM' } = await req.json();
+const voiceoverSchema = z.object({
+  text: z.string().min(1).max(5000),
+  voiceId: z
+    .string()
+    .regex(
+      /^[a-zA-Z0-9_-]{1,64}$/,
+      'Invalid voice ID format — must be 1–64 alphanumeric, underscore, or hyphen characters'
+    )
+    .default('21m00Tcm4TlvDq8ikWAM'),
+});
 
-    if (!text) {
-      return NextResponse.json({ error: 'Text is required' }, { status: 400 });
-    }
+export async function POST(req: NextRequest) {
+  const session = await requireSession(req);
+  if (!session) return unauthorizedResponse();
+
+  try {
+    const body = await req.json();
+    const parsed = voiceoverSchema.safeParse(body);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
+
+    const { text, voiceId } = parsed.data;
 
     const apiKey = process.env.ELEVENLABS_API_KEY;
     const model = process.env.ELEVENLABS_MODEL || 'eleven_multilingual_v2';
+    // voiceId is validated by Zod regex — safe to interpolate
     const url = `${process.env.ELEVENLABS_URL}/v1/text-to-speech/${voiceId}`;
 
     const headers = {
