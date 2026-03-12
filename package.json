@@ -11,10 +11,12 @@
     "check": "biome check .",
     "check:fix": "biome check --write .",
     "check-types": "turbo run check-types",
-    "prepare": "husky"
+    "prepare": "husky",
+    "vitest": "vitest"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.5",
+    "vitest": "^4.0.18",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "turbo": "^2.5.8",
