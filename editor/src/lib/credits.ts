@@ -5,8 +5,7 @@ import { isLowCredit } from '@/lib/billing';
 import { Resend } from 'resend';
 
 const resendApiKey = process.env.RESEND_API_KEY;
-const resendFromEmail =
-  process.env.RESEND_FROM_EMAIL || 'noreply@openvideo.dev';
+const resendFromEmail = process.env.RESEND_FROM_EMAIL || 'noreply@vizora.dev';
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 // Result types
@@ -247,7 +246,7 @@ export async function checkAndWarnLowCredits(
                   <li><strong>Remaining:</strong> ${percentRemaining.toFixed(1)}%</li>
                 </ul>
                 <p>To avoid render interruptions, consider upgrading your plan or purchasing additional credits.</p>
-                <p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://openvideo.dev'}/dashboard/billing">Manage Billing →</a></p>
+                <p><a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://vizora.dev'}/dashboard/billing">Manage Billing →</a></p>
               `,
             });
 

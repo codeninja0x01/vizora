@@ -314,7 +314,7 @@ export async function handlePaymentFailed(event: Stripe.Event) {
   if (owner && resend) {
     try {
       await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || 'noreply@openvideo.dev',
+        from: process.env.RESEND_FROM_EMAIL || 'noreply@vizora.dev',
         to: owner.user.email,
         subject: 'Payment Failed - Rendering Suspended',
         text: `Hi ${owner.user.name || 'there'},
@@ -322,7 +322,7 @@ export async function handlePaymentFailed(event: Stripe.Event) {
 Your payment for ${org.name} has failed and video rendering has been suspended.
 
 To restore access, please update your payment method at:
-${process.env.NEXT_PUBLIC_APP_URL || 'https://openvideo.dev'}/dashboard/billing
+${process.env.NEXT_PUBLIC_APP_URL || 'https://vizora.dev'}/dashboard/billing
 
 If you have any questions, please contact support.
 

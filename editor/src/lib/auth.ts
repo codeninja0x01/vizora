@@ -10,7 +10,7 @@ const resend = process.env.RESEND_API_KEY
   : null;
 
 async function sendEmail(to: string, subject: string, html: string) {
-  const fromEmail = process.env.RESEND_FROM_EMAIL || 'noreply@openvideo.dev';
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'noreply@vizora.dev';
   if (!resend) {
     console.log(
       `[Auth] Email skipped (no RESEND_API_KEY): to=${to} subject="${subject}"`

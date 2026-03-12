@@ -34,7 +34,7 @@ const worker = new Worker(
         : 'soon';
 
       await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || 'noreply@openvideo.dev',
+        from: process.env.RESEND_FROM_EMAIL || 'noreply@vizora.dev',
         to: render.user.email,
         subject: `Your rendered video expires ${expiresAt}`,
         html: `<p>Hi ${render.user.name || 'there'},</p>
