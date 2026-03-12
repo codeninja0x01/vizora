@@ -4,9 +4,14 @@ import { prisma } from '@/lib/db';
 import { isLowCredit } from '@/lib/billing';
 import { Resend } from 'resend';
 
-const resendApiKey = process.env.RESEND_API_KEY;
-const resendFromEmail = process.env.RESEND_FROM_EMAIL || 'noreply@vizora.dev';
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
+function getResendClient() {
+  const resendApiKey = process.env.RESEND_API_KEY;
+  return resendApiKey ? new Resend(resendApiKey) : null;
+}
+
+function getResendFromEmail() {
+  return process.env.RESEND_FROM_EMAIL || 'noreply@vizora.dev';
+}
 
 // Result types
 export type DeductResult =
@@ -202,6 +207,8 @@ export async function checkAndWarnLowCredits(
       data: { lowCreditWarningShown: true },
     });
 
+    const resend = getResendClient();
+
     // Send email if Resend configured and not sent recently
     if (resend) {
       const now = new Date();
@@ -233,7 +240,7 @@ export async function checkAndWarnLowCredits(
 
           try {
             await resend.emails.send({
-              from: resendFromEmail,
+              from: getResendFromEmail(),
               to: owner.user.email,
               subject: 'Low Credit Warning - Vizora',
               html: `

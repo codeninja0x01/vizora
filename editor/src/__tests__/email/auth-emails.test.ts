@@ -3,11 +3,13 @@ import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 const { mockEmailsSend, mockResend, mockConsoleInfo, mockConsoleError } =
   vi.hoisted(() => ({
     mockEmailsSend: vi.fn(),
-    mockResend: vi.fn().mockImplementation(() => ({
-      emails: {
-        send: mockEmailsSend,
-      },
-    })),
+    mockResend: vi.fn(function MockResend() {
+      return {
+        emails: {
+          send: mockEmailsSend,
+        },
+      };
+    }),
     mockConsoleInfo: vi.fn(),
     mockConsoleError: vi.fn(),
   }));

@@ -17,23 +17,27 @@ const {
 
   return {
     mockEmailsSend: vi.fn(),
-    mockResend: vi.fn().mockImplementation(() => ({
-      emails: {
-        send: mockEmailsSend,
-      },
-    })),
+    mockResend: vi.fn(function MockResend() {
+      return {
+        emails: {
+          send: mockEmailsSend,
+        },
+      };
+    }),
     mockPrisma: {
       render: {
         findUnique: vi.fn(),
         update: vi.fn(),
       },
+      $disconnect: vi.fn(),
     },
     mockWorkerOn: vi.fn(),
     mockRedisConnection: {},
-    mockBullWorker: vi.fn().mockImplementation((_name, processor) => {
+    mockBullWorker: vi.fn(function MockWorker(_name, processor) {
       capturedProcessor = processor;
       return {
         on: mockWorkerOn,
+        close: vi.fn(),
       };
     }),
     getCapturedProcessor: () => capturedProcessor,
@@ -81,8 +85,10 @@ describe('Deletion warning worker emails', () => {
       },
       user: {
         email: 'creator@vizora.dev',
+        name: 'Creator',
       },
-      downloadUrl: 'https://cdn.vizora.dev/renders/render-1.mp4',
+      outputUrl: 'https://cdn.vizora.dev/renders/render-1.mp4',
+      expiresAt: new Date('2026-03-20T00:00:00.000Z'),
     });
     mockPrisma.render.update.mockResolvedValue({ id: 'render-1' });
 
@@ -128,8 +134,10 @@ describe('Deletion warning worker emails', () => {
       },
       user: {
         email: 'creator@vizora.dev',
+        name: 'Creator',
       },
-      downloadUrl: 'https://cdn.vizora.dev/renders/render-1.mp4',
+      outputUrl: 'https://cdn.vizora.dev/renders/render-1.mp4',
+      expiresAt: new Date('2026-03-20T00:00:00.000Z'),
     });
     mockPrisma.render.update.mockResolvedValue({ id: 'render-1' });
 

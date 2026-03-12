@@ -2,17 +2,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mockEmailsSend, mockResend, mockPrisma } = vi.hoisted(() => ({
   mockEmailsSend: vi.fn(),
-  mockResend: vi.fn().mockImplementation(() => ({
-    emails: {
-      send: mockEmailsSend,
-    },
-  })),
+  mockResend: vi.fn(function MockResend() {
+    return {
+      emails: {
+        send: mockEmailsSend,
+      },
+    };
+  }),
   mockPrisma: {
     organization: {
-      findUnique: vi.fn(),
+      findUniqueOrThrow: vi.fn(),
       update: vi.fn(),
     },
-    user: {
+    member: {
       findFirst: vi.fn(),
     },
   },
@@ -41,16 +43,18 @@ describe('Low-credit warning emails', () => {
   });
 
   it('should send a low-credit warning email when the organization is below the threshold', async () => {
-    mockPrisma.organization.findUnique.mockResolvedValue({
-      id: 'org-1',
-      name: 'Vizora Studio',
-      creditsRemaining: 4,
+    mockPrisma.organization.findUniqueOrThrow.mockResolvedValue({
+      creditBalance: 4,
+      monthlyAllotment: 20,
       lowCreditWarningShown: false,
       lowCreditEmailSentAt: null,
+      tier: 'pro',
     });
-    mockPrisma.user.findFirst.mockResolvedValue({
-      id: 'owner-1',
-      email: 'owner@vizora.dev',
+    mockPrisma.member.findFirst.mockResolvedValue({
+      user: {
+        email: 'owner@vizora.dev',
+        name: 'Owner',
+      },
     });
     mockPrisma.organization.update.mockResolvedValue({ id: 'org-1' });
 
@@ -65,12 +69,12 @@ describe('Low-credit warning emails', () => {
   });
 
   it('should not send a low-credit warning email when a warning is already shown', async () => {
-    mockPrisma.organization.findUnique.mockResolvedValue({
-      id: 'org-1',
-      name: 'Vizora Studio',
-      creditsRemaining: 3,
+    mockPrisma.organization.findUniqueOrThrow.mockResolvedValue({
+      creditBalance: 3,
+      monthlyAllotment: 20,
       lowCreditWarningShown: true,
       lowCreditEmailSentAt: null,
+      tier: 'pro',
     });
 
     await checkAndWarnLowCredits('org-1');
@@ -79,13 +83,14 @@ describe('Low-credit warning emails', () => {
   });
 
   it('should not send a low-credit warning email twice within twenty-four hours', async () => {
-    mockPrisma.organization.findUnique.mockResolvedValue({
-      id: 'org-1',
-      name: 'Vizora Studio',
-      creditsRemaining: 2,
+    mockPrisma.organization.findUniqueOrThrow.mockResolvedValue({
+      creditBalance: 2,
+      monthlyAllotment: 20,
       lowCreditWarningShown: false,
       lowCreditEmailSentAt: new Date(),
+      tier: 'pro',
     });
+    mockPrisma.organization.update.mockResolvedValue({ id: 'org-1' });
 
     await checkAndWarnLowCredits('org-1');
 
@@ -93,12 +98,12 @@ describe('Low-credit warning emails', () => {
   });
 
   it('should not send a low-credit warning email when the organization is above the threshold', async () => {
-    mockPrisma.organization.findUnique.mockResolvedValue({
-      id: 'org-1',
-      name: 'Vizora Studio',
-      creditsRemaining: 100,
+    mockPrisma.organization.findUniqueOrThrow.mockResolvedValue({
+      creditBalance: 100,
+      monthlyAllotment: 200,
       lowCreditWarningShown: false,
       lowCreditEmailSentAt: null,
+      tier: 'pro',
     });
 
     await checkAndWarnLowCredits('org-1');

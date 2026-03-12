@@ -2,16 +2,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { mockEmailsSend, mockResend, mockPrisma } = vi.hoisted(() => ({
   mockEmailsSend: vi.fn(),
-  mockResend: vi.fn().mockImplementation(() => ({
-    emails: {
-      send: mockEmailsSend,
-    },
-  })),
+  mockResend: vi.fn(function MockResend() {
+    return {
+      emails: {
+        send: mockEmailsSend,
+      },
+    };
+  }),
   mockPrisma: {
     organization: {
       findUnique: vi.fn(),
+      update: vi.fn(),
     },
-    user: {
+    member: {
       findFirst: vi.fn(),
     },
   },
@@ -40,19 +43,22 @@ describe('Billing email flows', () => {
     mockPrisma.organization.findUnique.mockResolvedValue({
       id: 'org-1',
       name: 'Vizora Studio',
-      slug: 'vizora-studio',
     });
-    mockPrisma.user.findFirst.mockResolvedValue({
-      id: 'user-1',
-      email: 'owner@vizora.dev',
+    mockPrisma.organization.update.mockResolvedValue({ id: 'org-1' });
+    mockPrisma.member.findFirst.mockResolvedValue({
+      user: {
+        email: 'owner@vizora.dev',
+        name: 'Owner',
+      },
     });
 
-    // CODER NOTE: The architect plan expects this handler to keep using the public function signature
-    // while its internals look up the org owner and billing URL.
     await handlePaymentFailed({
-      organizationId: 'org-1',
-      customerId: 'cus_123',
-      invoiceId: 'in_123',
+      data: {
+        object: {
+          id: 'in_123',
+          customer: 'cus_123',
+        },
+      },
     } as never);
 
     expect(mockEmailsSend).toHaveBeenCalledTimes(1);
@@ -67,14 +73,17 @@ describe('Billing email flows', () => {
     mockPrisma.organization.findUnique.mockResolvedValue({
       id: 'org-1',
       name: 'Vizora Studio',
-      slug: 'vizora-studio',
     });
-    mockPrisma.user.findFirst.mockResolvedValue(null);
+    mockPrisma.organization.update.mockResolvedValue({ id: 'org-1' });
+    mockPrisma.member.findFirst.mockResolvedValue(null);
 
     await handlePaymentFailed({
-      organizationId: 'org-1',
-      customerId: 'cus_456',
-      invoiceId: 'in_456',
+      data: {
+        object: {
+          id: 'in_456',
+          customer: 'cus_456',
+        },
+      },
     } as never);
 
     expect(mockEmailsSend).not.toHaveBeenCalled();
@@ -85,17 +94,22 @@ describe('Billing email flows', () => {
     mockPrisma.organization.findUnique.mockResolvedValue({
       id: 'org-1',
       name: 'Vizora Studio',
-      slug: 'vizora-studio',
     });
-    mockPrisma.user.findFirst.mockResolvedValue({
-      id: 'user-1',
-      email: 'owner@vizora.dev',
+    mockPrisma.organization.update.mockResolvedValue({ id: 'org-1' });
+    mockPrisma.member.findFirst.mockResolvedValue({
+      user: {
+        email: 'owner@vizora.dev',
+        name: 'Owner',
+      },
     });
 
     await handlePaymentFailed({
-      organizationId: 'org-1',
-      customerId: 'cus_789',
-      invoiceId: 'in_789',
+      data: {
+        object: {
+          id: 'in_789',
+          customer: 'cus_789',
+        },
+      },
     } as never);
 
     expect(mockEmailsSend).not.toHaveBeenCalled();
