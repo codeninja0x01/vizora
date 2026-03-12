@@ -1,10 +1,10 @@
 const zapier = require('zapier-platform-core');
 const App = require('../index');
-const appTester = zapier.createAppTester(App);
+const _appTester = zapier.createAppTester(App);
 
 describe('authentication', () => {
   it('should authenticate with valid API key', async () => {
-    const bundle = {
+    const _bundle = {
       authData: { apiKey: process.env.OPENVIDEO_API_KEY || 'sk_live_test' },
     };
     // This test requires a running API, so mark as integration test

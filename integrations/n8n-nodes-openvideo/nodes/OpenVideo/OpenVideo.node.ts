@@ -210,7 +210,7 @@ export class OpenVideo implements INodeType {
             let mergeData: Record<string, any> = {};
             try {
               mergeData = JSON.parse(mergeDataStr);
-            } catch (parseError) {
+            } catch (_parseError) {
               throw new NodeOperationError(
                 this.getNode(),
                 'Invalid JSON in Merge Data field',
