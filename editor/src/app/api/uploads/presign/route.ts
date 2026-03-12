@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { type NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
 import { config } from '@/lib/config';
 import { R2StorageService } from '@/lib/r2';
 
 interface PresignRequest {
-  userId: string;
   fileNames: string[];
 }
 
@@ -18,8 +18,16 @@ const r2 = new R2StorageService({
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await auth.api.getSession({ headers: request.headers });
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+
     const body: PresignRequest = await request.json();
-    const { userId = 'mockuser', fileNames } = body;
+    const { fileNames } = body;
 
     if (!fileNames || !Array.isArray(fileNames) || fileNames.length === 0) {
       return NextResponse.json(
