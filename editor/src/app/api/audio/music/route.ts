@@ -6,10 +6,18 @@ import {
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-// Passthrough schema — body is forwarded to external worker.
-// Ensures the body is a valid JSON object; actual field validation
-// is the responsibility of the downstream worker.
-const audioMusicSchema = z.object({}).passthrough();
+const audioMusicSchema = z
+  .object({
+    limit: z.coerce.number().int().min(1).max(80).default(20),
+    page: z.coerce.number().int().min(1).max(100).default(1),
+    query: z
+      .object({
+        keys: z.array(z.string().trim().min(1).max(200)).max(10).optional(),
+      })
+      .strict()
+      .default({}),
+  })
+  .strict();
 
 export async function POST(req: NextRequest) {
   const session = await requireSession(req);
