@@ -1,6 +1,12 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { TemplateGenerationService } from '@/lib/ai/services/template-generation-service';
+import {
+  requireSession,
+  unauthorizedResponse,
+  zodErrorResponse,
+} from '@/lib/require-session';
 import type Anthropic from '@anthropic-ai/sdk';
+import { z } from 'zod';
 
 /**
  * In-memory conversation storage (shared with generation endpoint)
@@ -28,43 +34,26 @@ setInterval(
   5 * 60 * 1000
 );
 
+const refineSchema = z.object({
+  conversationId: z.string().uuid(),
+  prompt: z.string().min(1).max(500),
+  currentTemplate: z.record(z.string(), z.unknown()),
+});
+
 /**
  * POST /api/ai/template/refine
  * Refine an existing template based on user feedback
  */
 export async function POST(request: NextRequest) {
+  const session = await requireSession(request);
+  if (!session) return unauthorizedResponse();
+
   try {
     const body = await request.json();
-    const { conversationId, prompt, currentTemplate } = body;
+    const parsed = refineSchema.safeParse(body);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
 
-    // Validate inputs
-    if (!conversationId || typeof conversationId !== 'string') {
-      return NextResponse.json(
-        { error: 'conversationId is required and must be a string' },
-        { status: 400 }
-      );
-    }
-
-    if (!prompt || typeof prompt !== 'string') {
-      return NextResponse.json(
-        { error: 'Prompt is required and must be a string' },
-        { status: 400 }
-      );
-    }
-
-    if (prompt.length < 1 || prompt.length > 500) {
-      return NextResponse.json(
-        { error: 'Prompt must be between 1 and 500 characters' },
-        { status: 400 }
-      );
-    }
-
-    if (!currentTemplate || typeof currentTemplate !== 'object') {
-      return NextResponse.json(
-        { error: 'currentTemplate is required and must be an object' },
-        { status: 400 }
-      );
-    }
+    const { conversationId, prompt, currentTemplate } = parsed.data;
 
     // Check for API key
     const apiKey = process.env.ANTHROPIC_API_KEY;

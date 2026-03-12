@@ -4,8 +4,14 @@ import {
   getTemplateStyleById,
   getDefaultTemplateStyle,
 } from '@/lib/ai/presets/template-style-presets';
+import {
+  requireSession,
+  unauthorizedResponse,
+  zodErrorResponse,
+} from '@/lib/require-session';
 import { randomUUID } from 'node:crypto';
 import type Anthropic from '@anthropic-ai/sdk';
+import { z } from 'zod';
 
 /**
  * In-memory conversation storage with TTL
@@ -31,29 +37,25 @@ setInterval(
   5 * 60 * 1000
 );
 
+const templateSchema = z.object({
+  prompt: z.string().min(1).max(500),
+  styleId: z.string().max(64).optional(),
+});
+
 /**
  * POST /api/ai/template
  * Generate a new video template from text description and style preset
  */
 export async function POST(request: NextRequest) {
+  const session = await requireSession(request);
+  if (!session) return unauthorizedResponse();
+
   try {
     const body = await request.json();
-    const { prompt, styleId } = body;
+    const parsed = templateSchema.safeParse(body);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
 
-    // Validate inputs
-    if (!prompt || typeof prompt !== 'string') {
-      return NextResponse.json(
-        { error: 'Prompt is required and must be a string' },
-        { status: 400 }
-      );
-    }
-
-    if (prompt.length < 1 || prompt.length > 500) {
-      return NextResponse.json(
-        { error: 'Prompt must be between 1 and 500 characters' },
-        { status: 400 }
-      );
-    }
+    const { prompt, styleId } = parsed.data;
 
     // Get style preset
     const stylePreset = styleId
@@ -122,3 +124,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export { conversations };

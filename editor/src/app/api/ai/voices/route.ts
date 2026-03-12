@@ -3,7 +3,17 @@ import {
   createTTSProvider,
 } from '@/lib/ai/providers/tts/factory';
 import type { Voice } from '@/lib/ai/providers/tts/types';
+import {
+  requireSession,
+  unauthorizedResponse,
+  zodErrorResponse,
+} from '@/lib/require-session';
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+
+const voicesQuerySchema = z.object({
+  provider: z.enum(['elevenlabs', 'openai']).optional(),
+});
 
 interface VoiceCache {
   voices: Voice[];
@@ -14,9 +24,17 @@ let elevenLabsCache: VoiceCache | null = null;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 export async function GET(req: NextRequest) {
+  const session = await requireSession(req);
+  if (!session) return unauthorizedResponse();
+
   try {
     const { searchParams } = new URL(req.url);
-    const providerFilter = searchParams.get('provider');
+    const parsed = voicesQuerySchema.safeParse({
+      provider: searchParams.get('provider') ?? undefined,
+    });
+    if (!parsed.success) return zodErrorResponse(parsed.error);
+
+    const { provider: providerFilter } = parsed.data;
 
     const availableProviders = getAvailableTTSProviders();
 

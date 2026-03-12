@@ -1,5 +1,11 @@
 import { R2StorageService } from '@/lib/r2';
+import {
+  requireSession,
+  unauthorizedResponse,
+  zodErrorResponse,
+} from '@/lib/require-session';
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 
 // Note: Reusing SFX logic for Music as a placeholder or if using SFX "instrumental" capabilities.
 // If a specific Music API becomes available, this should be updated.
@@ -12,16 +18,21 @@ const r2 = new R2StorageService({
   cdn: process.env.R2_PUBLIC_DOMAIN || '',
 });
 
-export async function POST(req: NextRequest) {
-  try {
-    const { text, duration } = await req.json();
+const musicSchema = z.object({
+  text: z.string().min(1).max(1000),
+  duration: z.number().min(0.5).max(300).optional(),
+});
 
-    if (!text) {
-      return NextResponse.json(
-        { error: 'Text/Description is required' },
-        { status: 400 }
-      );
-    }
+export async function POST(req: NextRequest) {
+  const session = await requireSession(req);
+  if (!session) return unauthorizedResponse();
+
+  try {
+    const body = await req.json();
+    const parsed = musicSchema.safeParse(body);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
+
+    const { text, duration } = parsed.data;
 
     const apiKey = process.env.ELEVENLABS_API_KEY;
     // Using SFX endpoint for now as discussed

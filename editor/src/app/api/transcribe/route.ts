@@ -1,18 +1,30 @@
 // app/api/transcribe/route.ts
-import { NextResponse } from 'next/server';
+import {
+  requireSession,
+  unauthorizedResponse,
+  zodErrorResponse,
+} from '@/lib/require-session';
+import { type NextRequest, NextResponse } from 'next/server';
 import { transcribe } from '@/lib/transcribe';
+import { z } from 'zod';
 
-export async function POST(request: Request) {
+const transcribeSchema = z.object({
+  url: z.string().url(),
+  targetLanguage: z.string().max(10).optional(),
+  language: z.string().max(10).optional(),
+  model: z.string().max(50).optional(),
+});
+
+export async function POST(request: NextRequest) {
+  const session = await requireSession(request);
+  if (!session) return unauthorizedResponse();
+
   try {
     const body = await request.json();
-    const { url, targetLanguage, language, model } = body;
+    const parsed = transcribeSchema.safeParse(body);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
 
-    if (!url) {
-      return NextResponse.json(
-        { message: 'Audio URL is required' },
-        { status: 400 }
-      );
-    }
+    const { url, targetLanguage, language, model } = parsed.data;
 
     // Transcribe audio using the shared transcribe library
     const result = await transcribe({
