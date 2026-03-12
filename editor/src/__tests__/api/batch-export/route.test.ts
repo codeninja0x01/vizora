@@ -55,14 +55,32 @@ function makeGetRequest(): Request {
   });
 }
 
-function makePostRequest(fields: Record<string, string | Blob>): Request {
-  const fd = new FormData();
-  for (const [k, v] of Object.entries(fields)) fd.append(k, v);
-  return new Request('http://localhost/api/batch-export', {
+/**
+ * Creates a mock Request with a `formData()` method that returns the given
+ * fields. This avoids jsdom/undici FormData incompatibilities in Node 22.
+ */
+function makePostRequest(fields: { file?: Blob; filename?: string }): Request {
+  const req = new Request('http://localhost/api/batch-export', {
     method: 'POST',
     headers: { cookie: 'session=x' },
-    body: fd,
   });
+
+  // Override formData() to return a native FormData with controlled values
+  const fd = new FormData();
+  if (fields.file) {
+    fd.append(
+      'file',
+      new File([fields.file], 'upload.mp4', {
+        type: fields.file.type,
+      })
+    );
+  }
+  if (fields.filename !== undefined) {
+    fd.append('filename', fields.filename);
+  }
+  (req as any).formData = () => Promise.resolve(fd);
+
+  return req;
 }
 
 // ---------------------------------------------------------------------------
