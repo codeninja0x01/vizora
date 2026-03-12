@@ -98,7 +98,7 @@ function OrbBackground() {
 
 /* ─── Screenshot Placeholder ──────────────────────────────────────── */
 
-function ScreenshotPlaceholder({
+function _ScreenshotPlaceholder({
   label,
   aspect = '16/10',
   id,

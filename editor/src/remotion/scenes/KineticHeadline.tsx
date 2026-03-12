@@ -4,8 +4,6 @@ import {
   spring,
   useCurrentFrame,
   useVideoConfig,
-  Easing,
-  Sequence,
 } from 'remotion';
 import { COLORS } from '../constants';
 

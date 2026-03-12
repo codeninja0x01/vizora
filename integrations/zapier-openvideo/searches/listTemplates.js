@@ -1,7 +1,7 @@
 const baseUrl =
   process.env.OPENVIDEO_API_URL || 'https://app.openvideo.dev/api/v1';
 
-const perform = async (z, bundle) => {
+const perform = async (z, _bundle) => {
   const response = await z.request({
     url: `${baseUrl}/templates`,
   });

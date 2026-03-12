@@ -21,7 +21,7 @@ const performUnsubscribe = async (z, bundle) => {
   });
 };
 
-const perform = async (z, bundle) => {
+const perform = async (_z, bundle) => {
   const event = bundle.cleanedRequest;
   return [
     {
@@ -32,7 +32,7 @@ const perform = async (z, bundle) => {
   ];
 };
 
-const performList = async (z, bundle) => {
+const performList = async (z, _bundle) => {
   const response = await z.request({
     url: `${baseUrl}/renders`,
     params: { status: 'completed', limit: '3' },

@@ -67,7 +67,7 @@ export class OpenVideoTrigger implements INodeType {
 
           const webhooks = response.data || [];
           return webhooks.some((webhook: any) => webhook.url === webhookUrl);
-        } catch (error: any) {
+        } catch (_error: any) {
           // If we can't check, assume it doesn't exist
           return false;
         }
@@ -136,7 +136,7 @@ export class OpenVideoTrigger implements INodeType {
           delete webhookData.webhookId;
 
           return true;
-        } catch (error) {
+        } catch (_error) {
           // Best-effort cleanup - log but don't throw
           // This prevents errors when the webhook was already deleted manually
           return false;
