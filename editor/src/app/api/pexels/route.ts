@@ -19,13 +19,6 @@ export async function GET(req: NextRequest) {
   const session = await requireSession(req);
   if (!session) return unauthorizedResponse();
 
-  if (!PEXELS_API_KEY) {
-    return NextResponse.json(
-      { error: 'PEXELS_API_KEY is not configured' },
-      { status: 500 }
-    );
-  }
-
   const { searchParams } = new URL(req.url);
   const parsed = pexelsQuerySchema.safeParse({
     type: searchParams.get('type') ?? undefined,
@@ -34,6 +27,13 @@ export async function GET(req: NextRequest) {
     per_page: searchParams.get('per_page') ?? undefined,
   });
   if (!parsed.success) return zodErrorResponse(parsed.error);
+
+  if (!PEXELS_API_KEY) {
+    return NextResponse.json(
+      { error: 'PEXELS_API_KEY is not configured' },
+      { status: 500 }
+    );
+  }
 
   const { type, query, page, per_page } = parsed.data;
 
