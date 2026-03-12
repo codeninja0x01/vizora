@@ -77,7 +77,7 @@ async function getHandler(
           message: render.errorMessage,
         };
       }
-      return Response.json(response, { status: 200 });
+      return Response.json(response, { status: 422 });
     }
 
     // For queued or active status, add Retry-After header
