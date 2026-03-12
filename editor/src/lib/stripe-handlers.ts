@@ -4,16 +4,15 @@ import { stripe } from '@/lib/stripe';
 import { prisma } from '@/lib/db';
 import { TIER_CONFIG, type TierName } from '@/lib/billing';
 
-// Optional Resend for email notifications (follows same pattern as auth.ts)
-let resend: any = null;
-if (process.env.RESEND_API_KEY) {
-  import('resend').then(({ Resend }) => {
-    resend = new Resend(process.env.RESEND_API_KEY);
-  });
-} else {
-  console.warn(
-    '[Stripe Handlers] RESEND_API_KEY not configured - email notifications disabled'
-  );
+async function getResendClient() {
+  const resendApiKey = process.env.RESEND_API_KEY;
+
+  if (!resendApiKey) {
+    return null;
+  }
+
+  const { Resend } = await import('resend');
+  return new Resend(resendApiKey);
 }
 
 export async function handleCheckoutComplete(event: Stripe.Event) {
@@ -297,6 +296,8 @@ export async function handlePaymentFailed(event: Stripe.Event) {
       subscriptionStatus: 'past_due',
     },
   });
+
+  const resend = await getResendClient();
 
   // Send email notification to organization owner
   const owner = await prisma.member.findFirst({
