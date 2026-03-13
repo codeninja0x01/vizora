@@ -1,6 +1,6 @@
 export type AIProvider = 'elevenlabs' | 'openai';
 
-export interface AIConfig {
+interface AIConfig {
   elevenlabs?: {
     apiKey: string;
     baseUrl?: string;

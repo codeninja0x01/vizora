@@ -70,7 +70,7 @@ export function getPropertyValue(
  * @param property - The property path (e.g., 'text' or 'style.fontSize')
  * @param value - The value to set
  */
-export function setPropertyValue(
+function setPropertyValue(
   clip: Record<string, unknown>,
   property: string,
   value: unknown

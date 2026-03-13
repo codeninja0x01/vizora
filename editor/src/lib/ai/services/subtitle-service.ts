@@ -13,7 +13,7 @@ import {
   type SubtitlePreset,
 } from '../presets/subtitle-presets';
 
-export interface GenerateSubtitleOptions {
+interface GenerateSubtitleOptions {
   mode: 'karaoke' | 'phrase';
   preset: SubtitlePreset;
 }

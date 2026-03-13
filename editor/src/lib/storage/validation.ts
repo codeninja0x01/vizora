@@ -1,6 +1,6 @@
 import { fileTypeFromBuffer } from 'file-type';
 
-export const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB per user decision
+const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500 MB per user decision
 
 export const ALLOWED_FILE_TYPES = {
   video: {

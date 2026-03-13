@@ -9,8 +9,6 @@ import {
   unauthorizedResponse,
   zodErrorResponse,
 } from '@/lib/require-session';
-import { randomUUID } from 'node:crypto';
-import { setTemplateConversation } from '@/lib/ai/template-conversations';
 import { z } from 'zod';
 
 const templateSchema = z.object({
@@ -61,23 +59,10 @@ export async function POST(request: NextRequest) {
     const service = new TemplateGenerationService({ apiKey });
     const result = await service.generate(prompt, stylePreset);
 
-    // Store conversation history with 30-minute TTL
-    const conversationId = randomUUID();
-    const storeResult = setTemplateConversation(
-      conversationId,
-      result.conversationHistory,
-      session.user.id
-    );
-
-    if (!storeResult.ok) {
-      return NextResponse.json({ error: storeResult.error }, { status: 429 });
-    }
-
     return NextResponse.json(
       {
         template: result.template,
         mergeFields: result.mergeFields,
-        conversationId,
       },
       { status: 200 }
     );

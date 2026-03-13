@@ -14,7 +14,7 @@ function getResendFromEmail() {
 }
 
 // Result types
-export type DeductResult =
+type DeductResult =
   | { success: true; newBalance: number }
   | { success: false; available: number; required: number };
 
