@@ -119,14 +119,14 @@ export async function POST(request: NextRequest) {
 
       if (error.message.includes('transcribe')) {
         return NextResponse.json(
-          { error: 'Failed to transcribe audio', details: error.message },
+          { error: 'Failed to transcribe audio' },
           { status: 500 }
         );
       }
     }
 
     return NextResponse.json(
-      { error: 'Failed to generate subtitles', details: String(error) },
+      { error: 'Failed to generate subtitles' },
       { status: 500 }
     );
   }

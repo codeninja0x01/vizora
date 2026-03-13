@@ -3,8 +3,10 @@ import {
   unauthorizedResponse,
   zodErrorResponse,
 } from '@/lib/require-session';
+import crypto from 'node:crypto';
 import { type NextRequest, NextResponse } from 'next/server';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { z } from 'zod';
 
@@ -39,10 +41,11 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ success: true, keys: animationKeys, template });
   } catch (error: unknown) {
+    console.error('Batch export GET error:', error);
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: 'Failed to load animation presets',
       },
       { status: 500 }
     );
@@ -68,25 +71,34 @@ export async function POST(req: NextRequest) {
     const parsed = batchExportSchema.safeParse({ filename });
     if (!parsed.success) return zodErrorResponse(parsed.error);
 
-    const exportDir = 'D:\\animations';
+    const exportDir = process.env.RENDER_OUTPUT_DIR || os.tmpdir();
     if (!fs.existsSync(exportDir)) {
       fs.mkdirSync(exportDir, { recursive: true });
     }
 
+    const serverFilename = `${crypto.randomUUID()}.mp4`;
+    const filePath = path.resolve(exportDir, serverFilename);
+
+    // Guard against path traversal — resolved path must stay within exportDir
+    if (!filePath.startsWith(path.resolve(exportDir))) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid export path' },
+        { status: 400 }
+      );
+    }
+
     const buffer = Buffer.from(await file.arrayBuffer());
-    const filePath = path.join(exportDir, `${parsed.data.filename}.mp4`);
     fs.writeFileSync(filePath, buffer);
 
     return NextResponse.json({
       success: true,
-      path: filePath,
     });
   } catch (error: unknown) {
     console.error('Batch export error:', error);
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: 'Failed to export file',
       },
       { status: 500 }
     );

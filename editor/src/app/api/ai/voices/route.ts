@@ -80,9 +80,8 @@ export async function GET(req: NextRequest) {
 
         allVoices.push(...voices);
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error';
-        errors.push(`${provider}: ${errorMessage}`);
+        console.error(`Voice provider ${provider} error:`, error);
+        errors.push(provider);
       }
     }
 
@@ -97,7 +96,7 @@ export async function GET(req: NextRequest) {
 
     // All providers failed
     return NextResponse.json(
-      { error: 'Failed to fetch voices from all providers', details: errors },
+      { error: 'Failed to fetch voices from all providers' },
       { status: 500 }
     );
   } catch (error) {

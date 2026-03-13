@@ -67,20 +67,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Template generation error:', error);
 
-    if (error instanceof Error) {
-      // Check for specific error types
-      if (error.message.includes('AI template generation failed')) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-      }
-
-      return NextResponse.json(
-        {
-          error: `Template generation failed: ${error.message}`,
-        },
-        { status: 500 }
-      );
-    }
-
     return NextResponse.json(
       { error: 'An unexpected error occurred during template generation' },
       { status: 500 }
