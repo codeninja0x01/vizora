@@ -1,7 +1,9 @@
+import { resolve4 } from 'node:dns/promises';
 import { Worker, type Job, UnrecoverableError } from 'bullmq';
 import { request } from 'undici';
 import { prisma } from '@/lib/db';
 import { redisConnection } from '@/lib/redis';
+import { isPrivateOrReservedIP } from '@/lib/webhooks/validator';
 import { generateWebhookSignature } from '@/lib/webhooks/signature';
 import type { WebhookJobData } from '@/lib/webhooks/types';
 
@@ -25,6 +27,27 @@ async function processWebhookDelivery(job: Job<WebhookJobData>) {
   if (!config || !config.enabled) {
     console.log(
       `[Webhook Worker] Webhook ${webhookConfigId} not found or disabled, skipping delivery`
+    );
+    return;
+  }
+
+  // SSRF protection: resolve hostname and validate IP at delivery time
+  // This prevents DNS rebinding attacks where the IP changes after registration
+  const hostname = new URL(config.url).hostname;
+  try {
+    const addresses = await resolve4(hostname);
+    const blockedAddress = addresses.find((ip) => isPrivateOrReservedIP(ip));
+    if (blockedAddress) {
+      console.warn(
+        `[Webhook Worker] SSRF blocked: ${hostname} resolved to private/reserved IP ${blockedAddress}, skipping delivery for webhook ${webhookConfigId}`
+      );
+      return;
+    }
+  } catch (dnsError) {
+    // DNS resolution failed — skip delivery to avoid sending to an unknown target
+    console.warn(
+      `[Webhook Worker] DNS resolution failed for ${hostname}, skipping delivery for webhook ${webhookConfigId}:`,
+      dnsError instanceof Error ? dnsError.message : dnsError
     );
     return;
   }

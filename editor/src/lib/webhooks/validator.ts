@@ -7,7 +7,7 @@ import { isIP } from 'node:net';
  * Check if an IP address is private or reserved
  * Blocks RFC 1918 private ranges and other reserved ranges
  */
-function isPrivateOrReservedIP(ip: string): boolean {
+export function isPrivateOrReservedIP(ip: string): boolean {
   // Only IPv4 for now (IPv6 would need :: handling)
   const parts = ip.split('.').map(Number);
 
