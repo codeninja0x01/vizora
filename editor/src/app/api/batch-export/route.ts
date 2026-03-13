@@ -38,9 +38,12 @@ export async function GET(req: NextRequest) {
     const template = JSON.parse(fs.readFileSync(projectTemplatePath, 'utf-8'));
 
     return NextResponse.json({ success: true, keys: animationKeys, template });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
@@ -78,10 +81,13 @@ export async function POST(req: NextRequest) {
       success: true,
       path: filePath,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Batch export error:', error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }

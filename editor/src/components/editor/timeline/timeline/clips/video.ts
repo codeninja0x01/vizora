@@ -207,14 +207,15 @@ export class Video extends BaseTimelineClip {
       if (!signal.aborted && this.canvas) {
         this.canvas.requestRenderAll();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       this._isFetchingThumbnails = false;
 
       // Ignore expected abort errors
       if (
-        error?.name === 'AbortError' ||
-        error?.message === 'generate thumbnails aborted' ||
-        error?.message?.includes('aborted')
+        error instanceof Error &&
+        (error.name === 'AbortError' ||
+          error.message === 'generate thumbnails aborted' ||
+          error.message.includes('aborted'))
       ) {
         return;
       }
