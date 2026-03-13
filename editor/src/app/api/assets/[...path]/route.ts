@@ -1,6 +1,9 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { type NextRequest, NextResponse } from 'next/server';
 
+/** Only these R2 key prefixes are publicly accessible. */
+const ALLOWED_PREFIXES = ['assets/', 'renders/'];
+
 const s3Client = new S3Client({
   region: 'auto',
   endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
@@ -16,12 +19,21 @@ export async function GET(
 ) {
   try {
     const { path: pathArray } = await params;
-    const path = pathArray.join('/');
+    const key = pathArray.join('/');
+
+    // Block path traversal and restrict to known public prefixes
+    if (
+      key.includes('..') ||
+      key.includes('\0') ||
+      !ALLOWED_PREFIXES.some((prefix) => key.startsWith(prefix))
+    ) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     // Fetch from R2
     const command = new GetObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME || '',
-      Key: path,
+      Key: key,
     });
 
     const response = await s3Client.send(command);
@@ -59,11 +71,9 @@ export async function GET(
       },
     });
   } catch (error) {
+    console.error('[assets/proxy] Error:', error);
     return NextResponse.json(
-      {
-        error: 'Failed to fetch asset',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      { error: 'Failed to fetch asset' },
       { status: 500 }
     );
   }

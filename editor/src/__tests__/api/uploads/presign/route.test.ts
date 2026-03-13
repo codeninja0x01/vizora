@@ -73,9 +73,19 @@ describe('POST /api/uploads/presign', () => {
     vi.clearAllMocks();
   });
 
-  // Auth guards not yet implemented — see issue #17
-  it.todo('returns 401 when no session exists');
-  it.todo('returns 401 when session has no user id');
+  it('returns 401 when no session exists', async () => {
+    mockGetSession.mockResolvedValue(null);
+
+    const res = await POST(makeRequest({ fileNames: ['video.mp4'] }) as never);
+    expect(res.status).toBe(401);
+  });
+
+  it('returns 401 when session has no user id', async () => {
+    mockGetSession.mockResolvedValue({ user: {} });
+
+    const res = await POST(makeRequest({ fileNames: ['video.mp4'] }) as never);
+    expect(res.status).toBe(401);
+  });
 
   it('returns 400 when fileNames is missing', async () => {
     mockGetSession.mockResolvedValue({ user: { id: 'user-1' } });
@@ -111,10 +121,18 @@ describe('POST /api/uploads/presign', () => {
     expect(body.uploads[0].presignedUrl).toContain('presign');
   });
 
-  // Auth guard not yet implemented — userId comes from body, not session (see issue #17)
-  it.todo(
-    'uses session.user.id in the R2 key path, not a body-supplied userId'
-  );
+  it('uses session.user.id in the R2 key path, not a body-supplied userId', async () => {
+    mockGetSession.mockResolvedValue({ user: { id: 'session-user-99' } });
+    mockCreatePresignedUpload.mockResolvedValue(mockPresignResult('test.mp4'));
+
+    await POST(
+      makeRequest({ fileNames: ['test.mp4'], userId: 'attacker-id' }) as never
+    );
+
+    const callArg = mockCreatePresignedUpload.mock.calls[0][0] as string;
+    expect(callArg).toContain('session-user-99');
+    expect(callArg).not.toContain('attacker-id');
+  });
 
   it('returns 200 for multiple fileNames', async () => {
     mockCreatePresignedUpload
