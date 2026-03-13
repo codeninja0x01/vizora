@@ -2,6 +2,15 @@ import { Worker } from 'bullmq';
 import { prisma } from '@/lib/db';
 import { redisConnection } from '@/lib/redis';
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 const worker = new Worker(
   'deletion-warnings',
   async (job) => {
@@ -37,10 +46,10 @@ const worker = new Worker(
         from: process.env.RESEND_FROM_EMAIL || 'noreply@vizora.dev',
         to: render.user.email,
         subject: `Your rendered video expires ${expiresAt}`,
-        html: `<p>Hi ${render.user.name || 'there'},</p>
-        <p>Your rendered video "${render.template.name}" will be automatically deleted on <strong>${expiresAt}</strong>.</p>
+        html: `<p>Hi ${escapeHtml(render.user.name || 'there')},</p>
+        <p>Your rendered video "${escapeHtml(render.template.name)}" will be automatically deleted on <strong>${expiresAt}</strong>.</p>
         <p>If you need this video, please download it before it expires.</p>
-        <p>${render.outputUrl ? `<a href="${render.outputUrl}">Download Video</a>` : ''}</p>
+        <p>${render.outputUrl && /^https?:\/\//.test(render.outputUrl) ? `<a href="${escapeHtml(render.outputUrl)}">Download Video</a>` : ''}</p>
         <p>— Vizora</p>`,
       });
       console.log(
