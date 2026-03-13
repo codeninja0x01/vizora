@@ -1,7 +1,7 @@
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 
-export type RateLimitTier = 'free' | 'pro' | 'enterprise';
+type RateLimitTier = 'free' | 'pro' | 'enterprise';
 
 const hasRedis = !!(
   process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
@@ -37,7 +37,7 @@ const rateLimiters = redis
     }
   : null;
 
-export type RateLimitResult = {
+type RateLimitResult = {
   success: boolean;
   limit: number;
   remaining: number;

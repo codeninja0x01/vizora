@@ -21,7 +21,7 @@ export interface SubtitleCue {
   mode: 'karaoke' | 'phrase';
 }
 
-export interface GroupWordsOptions {
+interface GroupWordsOptions {
   maxDuration?: number; // Maximum duration per cue in seconds (default: 5)
   maxWords?: number; // Maximum words per cue (default: 10)
   mode: 'karaoke' | 'phrase';

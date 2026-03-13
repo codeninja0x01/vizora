@@ -13,7 +13,7 @@ export type ApiKeyContext = {
 /**
  * Type returned by generateApiKey() containing the full key, hash, and display prefix
  */
-export type GeneratedApiKey = {
+type GeneratedApiKey = {
   key: string;
   hash: string;
   prefix: string;
@@ -54,7 +54,7 @@ export function generateApiKey(): GeneratedApiKey {
  * const hash = hashApiKey("sk_live_Ab3xCd9f...");
  * // Returns: "a7f3e2..." (64-character hex string)
  */
-export function hashApiKey(key: string): string {
+function hashApiKey(key: string): string {
   return createHash('sha256').update(key).digest('hex');
 }
 

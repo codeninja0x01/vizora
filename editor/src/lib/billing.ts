@@ -1,14 +1,14 @@
 // Billing configuration and credit utilities
 
 // Credit calculation
-export const CREDIT_RATE_PER_SECOND = 10; // 10 credits per second of video output
+const CREDIT_RATE_PER_SECOND = 10; // 10 credits per second of video output
 
 export function calculateCredits(durationSeconds: number): number {
   return Math.ceil(durationSeconds * CREDIT_RATE_PER_SECOND);
 }
 
 // Low credit threshold
-export const LOW_CREDIT_THRESHOLD = 0.2; // 20% of monthly allotment
+const LOW_CREDIT_THRESHOLD = 0.2; // 20% of monthly allotment
 
 export function isLowCredit(
   balance: number,
@@ -17,23 +17,10 @@ export function isLowCredit(
   return balance <= monthlyAllotment * LOW_CREDIT_THRESHOLD;
 }
 
-// Subscription status check
-export function canRender(
-  subscriptionStatus: string | null,
-  tier: string
-): boolean {
-  // Free tier has no subscription
-  if (tier === 'free') {
-    return true;
-  }
-  // Paid tiers must have active subscription
-  return subscriptionStatus !== 'past_due' && subscriptionStatus !== 'canceled';
-}
-
 // Types
 export type TierName = 'free' | 'pro' | 'enterprise';
 
-export interface TierConfig {
+interface TierConfig {
   monthlyAllotment: number;
   concurrentLimit: number;
   displayName: string;
@@ -41,7 +28,7 @@ export interface TierConfig {
   maxRollover: number;
 }
 
-export interface CreditPack {
+interface CreditPack {
   id: string;
   credits: number;
   priceUsd: number;

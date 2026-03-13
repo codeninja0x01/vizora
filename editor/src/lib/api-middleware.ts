@@ -4,7 +4,7 @@ import { rateLimit, formatRateLimitHeaders } from './ratelimit';
 // Re-export ApiKeyContext for convenience
 export type { ApiKeyContext } from './api-keys';
 
-export type AuthenticatedHandler = (
+type AuthenticatedHandler = (
   request: Request,
   context: ApiKeyContext
 ) => Promise<Response>;

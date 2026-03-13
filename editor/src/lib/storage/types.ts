@@ -29,7 +29,7 @@ export interface TimelineData {
   lastModified: string;
 }
 
-export interface SceneTimelineData {
+interface SceneTimelineData {
   sceneId: string;
   tracks: TimelineTrack[];
   lastModified: string;
