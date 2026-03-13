@@ -15,7 +15,7 @@ async function getResendClient() {
   return new Resend(resendApiKey);
 }
 
-async function findOrganizationOwner(organizationId: string) {
+async function getOrganizationOwnerEmail(organizationId: string) {
   return prisma.member.findFirst({
     where: {
       organizationId,
@@ -26,6 +26,30 @@ async function findOrganizationOwner(organizationId: string) {
         select: { email: true, name: true },
       },
     },
+  });
+}
+
+async function sendBillingLifecycleEmail({
+  organizationId,
+  subject,
+  text,
+}: {
+  organizationId: string;
+  subject: string;
+  text: string;
+}) {
+  const owner = await getOrganizationOwnerEmail(organizationId);
+  const resend = await getResendClient();
+
+  if (!owner || !resend) {
+    return;
+  }
+
+  await resend.emails.send({
+    from: process.env.RESEND_FROM_EMAIL || 'noreply@vizora.dev',
+    to: owner.user.email,
+    subject,
+    text,
   });
 }
 
@@ -69,6 +93,7 @@ export async function handleCheckoutComplete(event: Stripe.Event) {
     const tierConfig = TIER_CONFIG[tier];
     const now = new Date();
     const cycleEnd = addMonths(now, 1);
+    let newBalance = 0;
 
     // Update organization with subscription details and initial credit grant
     await prisma.$transaction(
@@ -82,7 +107,7 @@ export async function handleCheckoutComplete(event: Stripe.Event) {
           throw new Error(`Organization ${organizationId} not found`);
         }
 
-        const newBalance = org.creditBalance + tierConfig.monthlyAllotment;
+        newBalance = org.creditBalance + tierConfig.monthlyAllotment;
 
         await tx.organization.update({
           where: { id: organizationId },
@@ -127,43 +152,18 @@ export async function handleCheckoutComplete(event: Stripe.Event) {
       }
     );
 
-    const resend = await getResendClient();
-    const owner = await findOrganizationOwner(organizationId);
-
-    if (owner && resend) {
-      try {
-        await resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL || 'noreply@vizora.dev',
-          to: owner.user.email,
-          subject: 'Subscription Activated',
-          text: `Hi ${owner.user.name || 'there'},
-
-Welcome to the ${tierConfig.displayName} plan for Vizora.
+    await sendBillingLifecycleEmail({
+      organizationId,
+      subject: `Welcome to Vizora ${tier} subscription`,
+      text: `Your ${tier} tier subscription is now active.
 
 Monthly allotment: ${tierConfig.monthlyAllotment} credits
-Next billing date: ${cycleEnd.toLocaleDateString()}
+Current balance: ${newBalance} credits
+Next billing date: ${cycleEnd.toDateString()}
 
-You can manage your subscription at:
-${process.env.NEXT_PUBLIC_APP_URL || 'https://vizora.dev'}/dashboard/billing
-
-Best regards,
-The Vizora Team`,
-        });
-
-        console.log(
-          `[handleCheckoutComplete] Subscription email sent to ${owner.user.email}`
-        );
-      } catch (error) {
-        console.error(
-          '[handleCheckoutComplete] Failed to send subscription email:',
-          error
-        );
-      }
-    } else if (owner && !resend) {
-      console.log(
-        `[handleCheckoutComplete] Would send subscription email to ${owner.user.email} (Resend not configured)`
-      );
-    }
+Manage billing:
+${process.env.NEXT_PUBLIC_APP_URL || 'https://vizora.dev'}/dashboard/billing`,
+    });
   }
 
   // Handle credit pack purchase
@@ -221,44 +221,18 @@ The Vizora Team`,
       }
     );
 
-    const resend = await getResendClient();
-    const owner = await findOrganizationOwner(organizationId);
+    await sendBillingLifecycleEmail({
+      organizationId,
+      subject: 'Credits purchase confirmation',
+      text: `Your credit purchase is complete.
 
-    if (owner && resend) {
-      try {
-        await resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL || 'noreply@vizora.dev',
-          to: owner.user.email,
-          subject: 'Credit Pack Purchased',
-          text: `Hi ${owner.user.name || 'there'},
-
-Your credit pack purchase was successful.
-
-Pack size: ${packSize} credits
+Credits added: ${packSize}
 Amount paid: ${((session.amount_total || 0) / 100).toFixed(2)}
-New balance: ${newBalance} credits
+New balance: ${newBalance}
 
-View your billing dashboard:
-${process.env.NEXT_PUBLIC_APP_URL || 'https://vizora.dev'}/dashboard/billing
-
-Best regards,
-The Vizora Team`,
-        });
-
-        console.log(
-          `[handleCheckoutComplete] Credit pack email sent to ${owner.user.email}`
-        );
-      } catch (error) {
-        console.error(
-          '[handleCheckoutComplete] Failed to send credit pack email:',
-          error
-        );
-      }
-    } else if (owner && !resend) {
-      console.log(
-        `[handleCheckoutComplete] Would send credit pack email to ${owner.user.email} (Resend not configured)`
-      );
-    }
+Manage billing:
+${process.env.NEXT_PUBLIC_APP_URL || 'https://vizora.dev'}/dashboard/billing`,
+    });
   }
 }
 
@@ -285,7 +259,6 @@ export async function handleInvoicePaid(event: Stripe.Event) {
     where: { stripeCustomerId: customerId },
     select: {
       id: true,
-      name: true,
       creditBalance: true,
       monthlyAllotment: true,
       tier: true,
@@ -303,9 +276,9 @@ export async function handleInvoicePaid(event: Stripe.Event) {
     `[handleInvoicePaid] Processing invoice ${invoice.id} for org ${org.id}`
   );
 
+  let newBalance = org.creditBalance;
   let addedCredits = 0;
-  let newBalance = 0;
-  let cycleEnd = addMonths(new Date(), 1);
+  const cycleEnd = addMonths(new Date(), 1);
 
   // Perform credit rollover with 2x cap
   await prisma.$transaction(
@@ -318,7 +291,6 @@ export async function handleInvoicePaid(event: Stripe.Event) {
       addedCredits = newBalance - org.creditBalance;
 
       const now = new Date();
-      cycleEnd = addMonths(now, 1);
 
       await tx.organization.update({
         where: { id: org.id },
@@ -357,39 +329,18 @@ export async function handleInvoicePaid(event: Stripe.Event) {
     }
   );
 
-  const resend = await getResendClient();
-  const owner = await findOrganizationOwner(org.id);
-
-  if (owner && resend) {
-    try {
-      await resend.emails.send({
-        from: process.env.RESEND_FROM_EMAIL || 'noreply@vizora.dev',
-        to: owner.user.email,
-        subject: 'Invoice Renewal Receipt',
-        text: `Hi ${owner.user.name || 'there'},
-
-Your ${org.name} subscription has been renewed successfully.
+  await sendBillingLifecycleEmail({
+    organizationId: org.id,
+    subject: 'Subscription renewal receipt',
+    text: `Your subscription has renewed successfully.
 
 Credits added: ${addedCredits}
-New balance: ${newBalance} credits
-Next renewal date: ${cycleEnd.toLocaleDateString()}
+New balance: ${newBalance}
+Next renewal date: ${cycleEnd.toDateString()}
 
-Manage billing here:
-${process.env.NEXT_PUBLIC_APP_URL || 'https://vizora.dev'}/dashboard/billing
-
-Best regards,
-The Vizora Team`,
-      });
-
-      console.log(`[handleInvoicePaid] Email sent to ${owner.user.email}`);
-    } catch (error) {
-      console.error('[handleInvoicePaid] Failed to send email:', error);
-    }
-  } else if (owner && !resend) {
-    console.log(
-      `[handleInvoicePaid] Would send email to ${owner.user.email} (Resend not configured)`
-    );
-  }
+Manage billing:
+${process.env.NEXT_PUBLIC_APP_URL || 'https://vizora.dev'}/dashboard/billing`,
+  });
 }
 
 export async function handlePaymentFailed(event: Stripe.Event) {
@@ -432,7 +383,17 @@ export async function handlePaymentFailed(event: Stripe.Event) {
   const resend = await getResendClient();
 
   // Send email notification to organization owner
-  const owner = await findOrganizationOwner(org.id);
+  const owner = await prisma.member.findFirst({
+    where: {
+      organizationId: org.id,
+      role: 'owner',
+    },
+    include: {
+      user: {
+        select: { email: true, name: true },
+      },
+    },
+  });
 
   if (owner && resend) {
     try {
@@ -479,7 +440,7 @@ export async function handleSubscriptionUpdated(event: Stripe.Event) {
 
   const org = await prisma.organization.findUnique({
     where: { stripeCustomerId: customerId },
-    select: { id: true, name: true, tier: true, monthlyAllotment: true },
+    select: { id: true, tier: true, monthlyAllotment: true },
   });
 
   if (!org) {
@@ -530,45 +491,21 @@ export async function handleSubscriptionUpdated(event: Stripe.Event) {
   );
 
   if (isCancelling) {
-    const resend = await getResendClient();
-    const owner = await findOrganizationOwner(org.id);
     const cancellationDate = new Date(
-      (subscription.cancel_at || subscription.current_period_end) * 1000
+      ((subscription.cancel_at || subscription.current_period_end) ?? 0) * 1000
     );
 
-    if (owner && resend) {
-      try {
-        await resend.emails.send({
-          from: process.env.RESEND_FROM_EMAIL || 'noreply@vizora.dev',
-          to: owner.user.email,
-          subject: 'Subscription Cancellation Scheduled',
-          text: `Hi ${owner.user.name || 'there'},
+    await sendBillingLifecycleEmail({
+      organizationId: org.id,
+      subject: 'Subscription cancellation scheduled',
+      text: `Your subscription is scheduled for cancellation.
 
-Your ${org.name} subscription is scheduled to cancel on ${cancellationDate.toLocaleDateString()}.
+Cancellation date: ${cancellationDate.toDateString()}
+After this date your organization will move to the free tier.
 
-After cancellation, your organization will revert to the free tier.
-
-You can review your billing details at:
-${process.env.NEXT_PUBLIC_APP_URL || 'https://vizora.dev'}/dashboard/billing
-
-Best regards,
-The Vizora Team`,
-        });
-
-        console.log(
-          `[handleSubscriptionUpdated] Cancellation email sent to ${owner.user.email}`
-        );
-      } catch (error) {
-        console.error(
-          '[handleSubscriptionUpdated] Failed to send cancellation email:',
-          error
-        );
-      }
-    } else if (owner && !resend) {
-      console.log(
-        `[handleSubscriptionUpdated] Would send cancellation email to ${owner.user.email} (Resend not configured)`
-      );
-    }
+Manage billing:
+${process.env.NEXT_PUBLIC_APP_URL || 'https://vizora.dev'}/dashboard/billing`,
+    });
   }
 }
 
