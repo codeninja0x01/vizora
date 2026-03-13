@@ -7,11 +7,29 @@ import {
 } from 'openvideo';
 import { generateUUID } from '@/utils/id';
 import { usePlaybackStore } from '@/stores/playback-store';
+import type { ITimelineTrack } from '@/types/timeline';
+import type { IClip as ITimelineClip } from '@/types/timeline';
+
+/** Minimal shape of the timeline store needed by action handlers */
+interface TimelineStoreApi {
+  getState: () => {
+    clips: Record<string, ITimelineClip>;
+    tracks: ITimelineTrack[];
+    updateClip: (
+      clipId: string,
+      updates: {
+        displayFrom?: number;
+        duration?: number;
+        trim?: { from: number; to: number };
+      },
+    ) => void;
+  };
+}
 
 export const duplicateClip = async (
   clipId: string,
   studio: Studio | null,
-  timelineStore: any
+  timelineStore: TimelineStoreApi,
 ) => {
   if (!studio) return;
 
@@ -19,7 +37,7 @@ export const duplicateClip = async (
   const originalClip = state.clips[clipId];
   if (!originalClip) return;
 
-  const track = state.tracks.find((t: any) => t.clipIds.includes(clipId));
+  const track = state.tracks.find((t) => t.clipIds.includes(clipId));
   if (!track) return;
 
   const studioClip = studio.getClip(clipId);
@@ -27,7 +45,7 @@ export const duplicateClip = async (
     return;
   }
 
-  const json = clipToJSON(studioClip as any);
+  const json = clipToJSON(studioClip);
   const newClip = await jsonToClip(json);
   const newClipId = generateUUID();
   newClip.id = newClipId;
@@ -49,8 +67,8 @@ export const duplicateClip = async (
 
 export const deleteClip = async (
   clipId: string,
-  studio: any,
-  removeClips: (ids: string[]) => void
+  studio: Studio | null,
+  removeClips: (ids: string[]) => void,
 ) => {
   removeClips([clipId]);
   if (studio) {
@@ -62,8 +80,15 @@ export const splitClip = async (
   clipId: string,
   splitTime: number,
   studio: Studio | null,
-  timelineStore: any,
-  updateClip: (id: string, updates: any) => void
+  timelineStore: TimelineStoreApi,
+  updateClip: (
+    id: string,
+    updates: {
+      displayFrom?: number;
+      duration?: number;
+      trim?: { from: number; to: number };
+    },
+  ) => void,
 ) => {
   const splitTimeUs = splitTime * 1000;
 
@@ -74,12 +99,12 @@ export const splitClip = async (
     return;
   }
 
-  const originalJson = clipToJSON(studioClip as any);
+  const originalJson = clipToJSON(studioClip);
   const splitOffset = splitTimeUs - studioClip.display.from;
   const playbackRate = studioClip.playbackRate || 1;
   const splitOffsetInSource = splitOffset * playbackRate;
 
-  const updates: any = {
+  const updates: Partial<IClip> = {
     duration: splitOffset,
     display: {
       from: studioClip.display.from,
@@ -95,7 +120,10 @@ export const splitClip = async (
   }
 
   await studio.updateClip(clipId, updates);
-  updateClip(clipId, updates);
+  updateClip(clipId, {
+    duration: splitOffset,
+    trim: updates.trim,
+  });
 
   const newJson = { ...originalJson };
   newJson.display = {
@@ -117,7 +145,7 @@ export const splitClip = async (
 
   const track = timelineStore
     .getState()
-    .tracks.find((t: any) => t.clipIds.includes(clipId));
+    .tracks.find((t) => t.clipIds.includes(clipId));
   if (track) {
     await studio.addClip(newClip, { trackId: track.id });
     studio.selectClipsByIds([newClipId]);
@@ -128,7 +156,7 @@ export const splitClip = async (
 
 export const trimClip = async (
   clipId: string,
-  timeline: { from: number; to: number }, // milliseconds (source trim range)
+  timeline: { from: number | undefined; to: number }, // milliseconds (source trim range)
   display: { from: number; to: number }, // milliseconds (timeline position)
   studio: Studio | null,
   updateClip: (
@@ -137,8 +165,8 @@ export const trimClip = async (
       displayFrom?: number;
       duration?: number;
       trim?: { from: number; to: number };
-    }
-  ) => void
+    },
+  ) => void,
 ) => {
   if (!studio) return;
 
@@ -154,7 +182,8 @@ export const trimClip = async (
   const currentTrimFromUs = currentClip.trim?.from ?? 0;
   const currentTrimToUs =
     currentClip.trim?.to ??
-    ((currentClip as any).sourceDuration || currentClip.duration);
+    ((currentClip as unknown as { sourceDuration?: number }).sourceDuration ||
+      currentClip.duration);
 
   const newTrimFromUs =
     timeline.from !== undefined ? timeline.from * 1000 : currentTrimFromUs;
@@ -172,7 +201,7 @@ export const trimClip = async (
     display.from !== undefined ? display.from * 1000 : currentClip.display.from;
   const newDisplayToUs = newDisplayFromUs + newDurationUs;
 
-  const updates: any = {
+  const updates: Partial<IClip> = {
     duration: newDurationUs,
     display: {
       from: newDisplayFromUs,
@@ -200,7 +229,7 @@ export const trimClip = async (
 export const applyEffectClip = async (
   name: string,
   timeline: { from: number; to: number },
-  addClip: (clip: IClip, options?: any) => Promise<void>
+  addClip: (clip: IClip, options?: { trackId?: string }) => Promise<void>,
 ) => {
   const from = timeline.from * 1000;
   const to = timeline.to * 1000;
