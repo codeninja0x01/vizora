@@ -3,14 +3,67 @@ import { generateCaptionClips } from './caption-generator';
 
 export type WordsPerLineMode = 'single' | 'multiple';
 
+/** Word entry as used by caption clips */
+interface CaptionWord {
+  text: string;
+  from: number;
+  to: number;
+  isKeyWord: boolean;
+  paragraphIndex?: number;
+}
+
+/**
+ * Minimal track shape matching Studio.getTracks() return.
+ * StudioTrack is not exported from the openvideo package.
+ */
+interface TrackLike {
+  id: string;
+  clipIds: string[];
+}
+
+/**
+ * Shape of caption clip properties accessed in this module.
+ * The Caption class keeps `opts` and `originalOpts` private,
+ * so we describe only the public surface we actually touch.
+ */
+interface CaptionClipLike extends IClip {
+  mediaId?: string;
+  words?: CaptionWord[];
+  wordsPerLine?: WordsPerLineMode;
+  originalOpts?: Record<string, unknown>;
+}
+
+/** Style update payload accepted by regenerateCaptionClips */
+interface CaptionStyleUpdate {
+  fill?: string;
+  align?: string;
+  fontFamily?: string;
+  fontUrl?: string;
+  strokeWidth?: number;
+  stroke?: string;
+  dropShadow?: {
+    color: number | string;
+    alpha: number;
+    blur: number;
+    angle: number;
+    distance: number;
+  };
+  textCase?: string;
+  caption?: {
+    colors?: Record<string, string>;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
 interface RegenerateCaptionClipsOptions {
   studio: Studio;
-  captionClip: any;
+  captionClip: CaptionClipLike;
   mode: WordsPerLineMode;
   fontSize?: number;
   fontFamily?: string;
   fontUrl?: string;
-  styleUpdate?: any;
+  styleUpdate?: CaptionStyleUpdate;
 }
 
 export async function regenerateCaptionClips({
@@ -25,14 +78,18 @@ export async function regenerateCaptionClips({
   if (!studio || !captionClip?.mediaId) return;
 
   const mediaId = captionClip.mediaId;
-  const tracks = studio.getTracks();
-  const siblingClips: any[] = [];
+  const tracks = studio.getTracks() as TrackLike[];
+  const siblingClips: CaptionClipLike[] = [];
 
-  tracks.forEach((track: any) => {
+  tracks.forEach((track) => {
     track.clipIds.forEach((id: string) => {
       const c = studio.getClipById(id);
-      if (c && c.type === 'Caption' && (c as any).opts.mediaId === mediaId) {
-        siblingClips.push(c);
+      if (
+        c &&
+        c.type === 'Caption' &&
+        (c as CaptionClipLike).mediaId === mediaId
+      ) {
+        siblingClips.push(c as CaptionClipLike);
       }
     });
   });
@@ -47,12 +104,12 @@ export async function regenerateCaptionClips({
   if (!mediaClip) return;
 
   const mediaStartUs = mediaClip.display.from;
-  const allWords: any[] = [];
+  const allWords: Array<CaptionWord & { start: number; end: number }> = [];
 
   siblingClips.forEach((c) => {
     const clipStartUs = c.display.from;
     const words = c.words || [];
-    words.forEach((w: any) => {
+    words.forEach((w) => {
       allWords.push({
         ...w,
         start: (clipStartUs + w.from * 1000 - mediaStartUs) / 1000000,
@@ -71,13 +128,19 @@ export async function regenerateCaptionClips({
 
   const currentOpts = captionClip.originalOpts || {};
   const newClipsJSON = await generateCaptionClips({
-    videoWidth: (studio as any).opts.width,
-    videoHeight: (studio as any).opts.height,
+    videoWidth: studio.opts.width,
+    videoHeight: studio.opts.height,
     words: allWords,
     mode: mode,
-    fontSize: fontSize || currentOpts.fontSize || 80,
-    fontFamily: fontFamily || currentOpts.fontFamily || 'Bangers-Regular',
-    fontUrl: fontUrl || currentOpts.fontUrl,
+    fontSize:
+      fontSize ||
+      (currentOpts.fontSize as number | undefined) ||
+      80,
+    fontFamily:
+      fontFamily ||
+      (currentOpts.fontFamily as string | undefined) ||
+      'Bangers-Regular',
+    fontUrl: fontUrl || (currentOpts.fontUrl as string | undefined),
     style: combinedStyle,
   });
 
@@ -87,10 +150,9 @@ export async function regenerateCaptionClips({
   // Optimistically update siblings (though they will be replaced)
   siblingClips.forEach((c) => {
     try {
-      (c as any).wordsPerLine = mode;
-      if ((c as any).opts) (c as any).opts.wordsPerLine = mode;
-      if ((c as any).originalOpts) (c as any).originalOpts.wordsPerLine = mode;
-      (c as any).emit?.('propsChange', {});
+      c.wordsPerLine = mode;
+      if (c.originalOpts) c.originalOpts.wordsPerLine = mode;
+      c.emit?.('propsChange', {});
     } catch (_e) {
       // ignore
     }
