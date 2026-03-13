@@ -99,8 +99,9 @@ export async function GET(req: NextRequest) {
     }
 
     // All providers failed
+    console.error('[Voices] All providers failed:', errors);
     return NextResponse.json(
-      { error: 'Failed to fetch voices from all providers', details: errors },
+      { error: 'Failed to fetch voices from all providers' },
       { status: 500 }
     );
   } catch (error) {

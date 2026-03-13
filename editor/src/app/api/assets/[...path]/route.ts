@@ -59,11 +59,9 @@ export async function GET(
       },
     });
   } catch (error) {
+    console.error('[Assets] Error:', error);
     return NextResponse.json(
-      {
-        error: 'Failed to fetch asset',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      { error: 'Failed to fetch asset' },
       { status: 500 }
     );
   }

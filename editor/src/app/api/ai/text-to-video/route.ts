@@ -89,10 +89,7 @@ export async function POST(req: NextRequest) {
     console.error('Text-to-video generation error:', error);
 
     return NextResponse.json(
-      {
-        error: 'Failed to generate video composition',
-        details: error instanceof Error ? error.message : 'Unknown error',
-      },
+      { error: 'Failed to generate video composition' },
       { status: 500 }
     );
   }

@@ -104,18 +104,12 @@ export async function POST(req: NextRequest) {
       provider,
     });
   } catch (error) {
-    if (error instanceof Error) {
-      // Check for specific provider errors
-      if (error.message.includes('not configured')) {
-        return NextResponse.json(
-          { error: 'Provider not configured', details: error.message },
-          { status: 503 }
-        );
-      }
+    console.error('[TTS] Error:', error);
 
+    if (error instanceof Error && error.message.includes('not configured')) {
       return NextResponse.json(
-        { error: 'Failed to generate speech', details: error.message },
-        { status: 500 }
+        { error: 'Provider not configured' },
+        { status: 503 }
       );
     }
 
