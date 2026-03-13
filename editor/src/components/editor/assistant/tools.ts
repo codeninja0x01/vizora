@@ -14,7 +14,104 @@ import { duplicateClip, splitClip, trimClip } from './action-handlers';
 import { useTimelineStore } from '@/stores/timeline-store';
 import { generateCaptionClips } from '@/lib/caption-generator';
 
-export const handleAddClip = async (input: any, studio: Studio) => {
+// ---------- Tool input interfaces ----------
+
+interface AddClipInput {
+  text?: string;
+  prompt?: string;
+  assetType?: 'video' | 'image' | 'text' | 'audio';
+  targetId?: string;
+  duration?: number;
+  width?: number;
+  height?: number;
+  left?: number;
+  top?: number;
+  action?: 'add_text' | 'add_image' | 'add_video' | 'add_audio';
+  from?: number;
+  to?: number;
+}
+
+interface UpdateClipInput {
+  targetId?: string;
+  clipId?: string;
+  left?: number;
+  top?: number;
+  width?: number;
+  height?: number;
+  start?: number;
+  fontSize?: number;
+  fontFamily?: string;
+  fill?: string;
+  opacity?: number;
+  volume?: number;
+  playbackRate?: number;
+}
+
+interface ClipTargetInput {
+  targetId?: string;
+  clipId?: string;
+}
+
+interface SplitClipInput extends ClipTargetInput {
+  time?: number;
+}
+
+interface TrimClipInput extends ClipTargetInput {
+  trimFrom?: number;
+}
+
+interface AddTransitionInput {
+  fromId?: string;
+  toId?: string;
+  transitionType?: string;
+}
+
+interface AddEffectInput {
+  effectName: string;
+  from?: number;
+  to?: number;
+}
+
+interface SearchAndAddMediaInput {
+  query: string;
+  type?: 'video' | 'image';
+  targetId?: string;
+  from?: number;
+}
+
+interface GenerateVoiceoverInput {
+  text: string;
+  voiceId?: string;
+  provider?: string;
+  targetId?: string;
+  from?: number;
+}
+
+interface SeekToTimeInput {
+  time: number;
+}
+
+interface GenerateCaptionsInput {
+  clipIds?: string[];
+}
+
+interface GenerateTemplateInput {
+  prompt: string;
+  styleId?: string;
+}
+
+// ---------- Template track shape from API ----------
+
+interface TemplateTrack {
+  id: string;
+  name: string;
+  type: string;
+  clipIds?: string[];
+}
+
+// ---------- Tool handlers ----------
+
+export const handleAddClip = async (input: AddClipInput, studio: Studio) => {
   const {
     text,
     prompt,
@@ -30,7 +127,7 @@ export const handleAddClip = async (input: any, studio: Studio) => {
   const from = input.from ?? 0;
   const to = input.to ? (input.to - from < 1 ? 1 : input.to) : from + 5;
 
-  let clip: any;
+  let clip: IClip | undefined;
   const type =
     assetType ||
     (action === 'add_text'
@@ -53,7 +150,7 @@ export const handleAddClip = async (input: any, studio: Studio) => {
     const url = 'https://picsum.photos/800/600';
     clip = await Image.fromUrl(url);
   } else if (type === 'text' && (text || input.text)) {
-    clip = new Text(text || input.text, {
+    clip = new Text(text || input.text || '', {
       fontSize: 100,
       fill: '#ffffff',
       fontFamily: 'Inter',
@@ -66,7 +163,7 @@ export const handleAddClip = async (input: any, studio: Studio) => {
   }
 
   if (clip) {
-    if (targetId) (clip as any).id = targetId;
+    if (targetId) clip.id = targetId;
     if (width) clip.width = width;
     if (height) clip.height = height;
     if (left !== undefined) clip.left = left;
@@ -86,7 +183,10 @@ export const handleAddClip = async (input: any, studio: Studio) => {
   }
 };
 
-export const handleUpdateClip = async (input: any, studio: Studio) => {
+export const handleUpdateClip = async (
+  input: UpdateClipInput,
+  studio: Studio,
+) => {
   const {
     left,
     top,
@@ -105,25 +205,29 @@ export const handleUpdateClip = async (input: any, studio: Studio) => {
   const id = targetId || clipId;
   if (!id) return;
 
-  const updates: any = {};
+  const updates: Partial<IClip> = {};
   if (left !== undefined) updates.left = left;
   if (top !== undefined) updates.top = top;
   if (width !== undefined) updates.width = width;
   if (height !== undefined) updates.height = height;
   if (start !== undefined)
-    updates.display = { ...updates.display, from: start * 1000000 };
-  if (fontSize !== undefined) updates.fontSize = fontSize;
-  if (fontFamily !== undefined) updates.fontFamily = fontFamily;
-  if (fill !== undefined) updates.fill = fill;
+    updates.display = { ...updates.display, from: start * 1000000 } as IClip['display'];
+  if (fontSize !== undefined) (updates as Record<string, unknown>).fontSize = fontSize;
+  if (fontFamily !== undefined) (updates as Record<string, unknown>).fontFamily = fontFamily;
+  if (fill !== undefined) (updates as Record<string, unknown>).fill = fill;
   if (opacity !== undefined) updates.opacity = opacity;
-  if (volume !== undefined) updates.volume = volume;
+  if (volume !== undefined) (updates as Record<string, unknown>).volume = volume;
   if (playbackRate !== undefined) updates.playbackRate = playbackRate;
 
   await studio.updateClip(id, updates);
 };
 
-export const handleRemoveClip = async (input: any, studio: Studio) => {
+export const handleRemoveClip = async (
+  input: ClipTargetInput,
+  studio: Studio,
+) => {
   const id = input.targetId || input.clipId;
+  if (!id) return;
   const clip = studio.getClipById(id);
   if (clip) {
     console.log('delete clip:', clip);
@@ -131,25 +235,33 @@ export const handleRemoveClip = async (input: any, studio: Studio) => {
   }
 };
 
-export const handleSplitClip = async (input: any, studio: Studio) => {
+export const handleSplitClip = async (
+  input: SplitClipInput,
+  studio: Studio,
+) => {
   const id = input.targetId || input.clipId;
   const splitTime = input.time || usePlaybackStore.getState().currentTime;
-  const clip = studio.getClipById(id);
-  if (clip && splitTime) {
+  if (!splitTime) return;
+  const clip = id ? studio.getClipById(id) : undefined;
+  if (clip && id) {
     await splitClip(
       id,
       splitTime,
       studio,
       useTimelineStore,
-      useTimelineStore.getState().updateClip
+      useTimelineStore.getState().updateClip,
     );
-  } else if (splitTime) {
+  } else {
     await studio.splitSelected(splitTime * 1_000_000);
   }
 };
 
-export const handleTrimClip = async (input: any, studio: Studio) => {
+export const handleTrimClip = async (
+  input: TrimClipInput,
+  studio: Studio,
+) => {
   const id = input.targetId || input.clipId;
+  if (!id) return;
   const clip = studio.getClipById(id);
   if (clip) {
     await trimClip(
@@ -157,26 +269,32 @@ export const handleTrimClip = async (input: any, studio: Studio) => {
       { from: input.trimFrom, to: 0 }, // This handler expects timeline and display, need to check logic
       { from: 0, to: 0 },
       studio,
-      useTimelineStore.getState().updateClip
+      useTimelineStore.getState().updateClip,
     );
-  } else {
+  } else if (input.trimFrom !== undefined) {
     await studio.trimSelected(input.trimFrom);
   }
 };
 
-export const handleAddTransition = async (input: any, studio: Studio) => {
+export const handleAddTransition = async (
+  input: AddTransitionInput,
+  studio: Studio,
+) => {
   const { fromId, toId, transitionType } = input;
   if (fromId && toId && transitionType) {
     await studio.addTransition(
       transitionType || 'GridFlip',
       2_000_000,
       fromId,
-      toId
+      toId,
     );
   }
 };
 
-export const handleAddEffect = async (input: any, studio: Studio) => {
+export const handleAddEffect = async (
+  input: AddEffectInput,
+  studio: Studio,
+) => {
   const from = input.from ?? 0;
   const to = input.to ? (input.to - from < 1 ? 1 : input.to) : from + 5;
 
@@ -192,8 +310,15 @@ export const handleAddEffect = async (input: any, studio: Studio) => {
   await studio.addClip(effectClip);
 };
 
-export const handleDuplicateClip = async (input: any, studio: Studio) => {
+export const handleDuplicateClip = async (
+  input: ClipTargetInput,
+  studio: Studio,
+) => {
   const id = input.targetId || input.clipId;
+  if (!id) {
+    await studio.duplicateSelected();
+    return;
+  }
   const clip = studio.getClipById(id);
   if (clip) {
     console.log('duplicate clip:', clip);
@@ -203,17 +328,20 @@ export const handleDuplicateClip = async (input: any, studio: Studio) => {
   }
 };
 
-export const handleSearchAndAddMedia = async (input: any, studio: Studio) => {
+export const handleSearchAndAddMedia = async (
+  input: SearchAndAddMediaInput,
+  studio: Studio,
+) => {
   const { query, type, targetId, from: fromTime } = input;
   const _from = fromTime ?? usePlaybackStore.getState().currentTime / 1000;
   console.log({ input });
   try {
     const response = await fetch(
-      `/api/pexels?query=${encodeURIComponent(query)}&type=${type || 'video'}`
+      `/api/pexels?query=${encodeURIComponent(query)}&type=${type || 'video'}`,
     );
     const data = await response.json();
 
-    let clip: any;
+    let clip: IClip | undefined;
     if (type === 'image') {
       const imageUrl = data.photos?.[0]?.src?.large;
       if (imageUrl) {
@@ -227,7 +355,7 @@ export const handleSearchAndAddMedia = async (input: any, studio: Studio) => {
     }
 
     if (clip) {
-      if (targetId) (clip as any).id = targetId;
+      if (targetId) clip.id = targetId;
       // clip.update({
       //   display: {
       //     from: from * 1000000,
@@ -243,7 +371,10 @@ export const handleSearchAndAddMedia = async (input: any, studio: Studio) => {
   }
 };
 
-export const handleGenerateVoiceover = async (input: any, studio: Studio) => {
+export const handleGenerateVoiceover = async (
+  input: GenerateVoiceoverInput,
+  studio: Studio,
+) => {
   const { text, voiceId, provider, targetId, from: fromTime } = input;
   const from = fromTime ?? usePlaybackStore.getState().currentTime / 1000;
 
@@ -261,7 +392,7 @@ export const handleGenerateVoiceover = async (input: any, studio: Studio) => {
 
     if (data.url) {
       const clip = await Audio.fromUrl(data.url);
-      if (targetId) (clip as any).id = targetId;
+      if (targetId) clip.id = targetId;
       clip.update({
         display: {
           from: from * 1000000,
@@ -275,12 +406,18 @@ export const handleGenerateVoiceover = async (input: any, studio: Studio) => {
   }
 };
 
-export const handleSeekToTime = async (input: any, _studio: Studio) => {
+export const handleSeekToTime = async (
+  input: SeekToTimeInput,
+  _studio: Studio,
+) => {
   const { time } = input;
   usePlaybackStore.getState().seek(time * 1000); // seeks uses ms
 };
 
-export const handleGenerateCaptions = async (input: any, studio: Studio) => {
+export const handleGenerateCaptions = async (
+  input: GenerateCaptionsInput,
+  studio: Studio,
+) => {
   const { clipIds } = input;
   const targetIds =
     clipIds ||
@@ -308,8 +445,8 @@ export const handleGenerateCaptions = async (input: any, studio: Studio) => {
             audioUrl: clip.src,
             presetId: 'modern-karaoke',
             format: 'clips',
-            videoWidth: (studio as any).opts?.width || 1920,
-            videoHeight: (studio as any).opts?.height || 1080,
+            videoWidth: studio.opts.width,
+            videoHeight: studio.opts.height,
           }),
         });
 
@@ -345,8 +482,8 @@ export const handleGenerateCaptions = async (input: any, studio: Studio) => {
 
         if (words.length > 0) {
           const captionClipsJSON = await generateCaptionClips({
-            videoWidth: (studio as any).opts.width,
-            videoHeight: (studio as any).opts.height,
+            videoWidth: studio.opts.width,
+            videoHeight: studio.opts.height,
             words,
           });
 
@@ -380,7 +517,10 @@ export const handleGenerateCaptions = async (input: any, studio: Studio) => {
   }
 };
 
-export const handleGenerateTemplate = async (input: any, studio: Studio) => {
+export const handleGenerateTemplate = async (
+  input: GenerateTemplateInput,
+  studio: Studio,
+) => {
   const { prompt, styleId } = input;
 
   try {
@@ -431,8 +571,8 @@ export const handleGenerateTemplate = async (input: any, studio: Studio) => {
             const clip = await jsonToClip(clipData);
 
             // Find the track for this clip
-            const trackId = data.template.tracks?.find((t: any) =>
-              t.clipIds?.includes(clipData.id)
+            const trackId = data.template.tracks?.find(
+              (t: TemplateTrack) => t.clipIds?.includes(clipData.id),
             )?.id;
 
             if (trackId) {
