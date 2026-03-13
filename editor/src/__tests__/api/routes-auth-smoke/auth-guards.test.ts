@@ -1,19 +1,56 @@
 /**
  * Smoke tests: every route protected by requireSession returns 401
  * for unauthenticated requests. Verifies the auth guard is wired up
- * across all 14 routes added in issue #11.
+ * across all protected routes.
+ *
+ * Also tests AI middleware 403 tier gate and rate-limited auth paths.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // --- Mocks ---
 
-const { mockGetSession } = vi.hoisted(() => ({
+const { mockGetSession, mockPrisma } = vi.hoisted(() => ({
   mockGetSession: vi.fn(),
+  mockPrisma: {
+    organization: { findFirst: vi.fn() },
+    member: { findFirst: vi.fn() },
+    creditTransaction: { create: vi.fn() },
+    $transaction: vi.fn(),
+  },
 }));
 
 vi.mock('@/lib/auth', () => ({
   auth: { api: { getSession: mockGetSession } },
 }));
+
+vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
+
+vi.mock('@/lib/ratelimit', () => ({
+  rateLimit: vi.fn().mockResolvedValue({
+    success: true,
+    limit: 60,
+    remaining: 59,
+    reset: Date.now() + 10_000,
+  }),
+  withSessionRateLimit: vi.fn().mockResolvedValue({
+    allowed: true,
+    headers: {},
+  }),
+  sessionTokenBucket: {
+    consume: vi.fn().mockReturnValue({ allowed: true, remaining: 199 }),
+  },
+}));
+
+vi.mock('@/lib/credits', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/credits')>();
+  return {
+    ...actual,
+    deductCreditsForAI: vi
+      .fn()
+      .mockResolvedValue({ success: true, newBalance: 980 }),
+    checkAndWarnLowCredits: vi.fn().mockResolvedValue(undefined),
+  };
+});
 
 // Stub out heavy dependencies that would fail in jsdom
 vi.mock('@/lib/r2', () => ({
@@ -26,6 +63,13 @@ vi.mock('@/lib/r2', () => ({
 
 vi.mock('@/lib/ai/services/template-generation-service', () => ({
   TemplateGenerationService: vi.fn().mockImplementation(() => ({})),
+}));
+
+vi.mock('@/lib/ai/providers/tts/factory', () => ({
+  createTTSProvider: vi.fn().mockReturnValue({
+    synthesize: vi.fn().mockResolvedValue(new ArrayBuffer(8)),
+  }),
+  getAvailableTTSProviders: vi.fn().mockReturnValue(['elevenlabs', 'openai']),
 }));
 
 vi.mock('node:fs', async (importOriginal) => {
@@ -74,10 +118,17 @@ import {
   POST as batchExportPOST,
 } from '@/app/api/batch-export/route';
 import { POST as chatEditorPOST } from '@/app/api/chat/editor/route';
+import { POST as ttsPOST } from '@/app/api/ai/tts/route';
 
 // ---------------------------------------------------------------------------
 // Helper
 // ---------------------------------------------------------------------------
+
+/** Minimal authenticated session with organization context. */
+const AUTHED_SESSION = {
+  session: { id: 's-1', activeOrganizationId: 'org-1' },
+  user: { id: 'u-1' },
+};
 
 function makeRequest(
   method = 'POST',
@@ -93,11 +144,35 @@ function makeRequest(
   });
 }
 
+/** Set up mocks for an authenticated user with a paid org. */
+function setupPaidAuth() {
+  mockGetSession.mockResolvedValue(AUTHED_SESSION);
+  mockPrisma.organization.findFirst.mockResolvedValue({
+    id: 'org-1',
+    tier: 'pro',
+  });
+  mockPrisma.member.findFirst.mockResolvedValue({
+    organizationId: 'org-1',
+  });
+}
+
+/** Set up mocks for an authenticated user on free tier. */
+function setupFreeAuth() {
+  mockGetSession.mockResolvedValue(AUTHED_SESSION);
+  mockPrisma.organization.findFirst.mockResolvedValue({
+    id: 'org-1',
+    tier: 'free',
+  });
+  mockPrisma.member.findFirst.mockResolvedValue({
+    organizationId: 'org-1',
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
-describe('Auth guard smoke tests — all 14 protected routes return 401', () => {
+describe('Auth guard smoke tests — all protected routes return 401', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetSession.mockResolvedValue(null); // unauthenticated for all tests
@@ -123,6 +198,7 @@ describe('Auth guard smoke tests — all 14 protected routes return 401', () => 
     { name: 'GET /api/batch-export', handler: batchExportGET, method: 'GET' },
     { name: 'POST /api/batch-export', handler: batchExportPOST },
     { name: 'POST /api/chat/editor', handler: chatEditorPOST },
+    { name: 'POST /api/ai/tts', handler: ttsPOST },
   ];
 
   for (const { name, handler, method = 'POST' } of cases) {
@@ -138,7 +214,7 @@ describe('Auth guard smoke tests — all 14 protected routes return 401', () => 
 describe('Zod validation smoke tests — authenticated but bad input returns 400', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    setupPaidAuth();
   });
 
   it('POST /api/elevenlabs/music → 400 when text is missing', async () => {
@@ -187,5 +263,57 @@ describe('Zod validation smoke tests — authenticated but bad input returns 400
     expect(res.status).toBe(400);
     const body = await res.json();
     expect(body.error).toBe('Validation failed');
+  });
+});
+
+describe('AI middleware — paid tier gate (403)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setupFreeAuth();
+  });
+
+  it('returns 403 for free tier on AI routes (TTS)', async () => {
+    const req = new Request('http://localhost/api/ai/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: 'hello',
+        voiceId: 'alloy',
+        provider: 'openai',
+      }),
+    });
+    const res = await ttsPOST(req as never);
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.error).toBe('ai_features_require_paid_plan');
+  });
+
+  it('returns 403 for free tier on AI voices route', async () => {
+    const req = new Request('http://localhost/api/ai/voices', {
+      method: 'GET',
+    });
+    const res = await voicesGET(req as never);
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.error).toBe('ai_features_require_paid_plan');
+  });
+});
+
+describe('Pexels — allows free tier', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setupFreeAuth();
+  });
+
+  it('does not return 403 for free tier on Pexels', async () => {
+    const url = new URL(
+      'http://localhost/api/pexels?type=image&query=cat&page=1&per_page=10'
+    );
+    const req = new Request(url, { method: 'GET' });
+    const res = await pexelsGET(req as never);
+    // Pexels uses withRateLimitedAuth (no tier gate), so free tier should pass auth.
+    // It may fail with 500 due to missing PEXELS_API_KEY, but not 401 or 403.
+    expect(res.status).not.toBe(401);
+    expect(res.status).not.toBe(403);
   });
 });
