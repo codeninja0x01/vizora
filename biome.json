@@ -20,6 +20,7 @@
       "!**/coverage",
       "!**/*.d.ts",
       "!**/pnpm-lock.yaml",
+      "!.pnpm-store",
       "!**/turbo.json"
     ]
   },
