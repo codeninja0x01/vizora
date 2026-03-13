@@ -10,32 +10,8 @@ import {
   zodErrorResponse,
 } from '@/lib/require-session';
 import { randomUUID } from 'node:crypto';
-import type Anthropic from '@anthropic-ai/sdk';
+import { setTemplateConversation } from '@/lib/ai/template-conversations';
 import { z } from 'zod';
-
-/**
- * In-memory conversation storage with TTL
- * For production, consider Redis or database storage
- */
-interface ConversationEntry {
-  history: Anthropic.MessageParam[];
-  expiresAt: number;
-}
-
-const conversations = new Map<string, ConversationEntry>();
-
-// Cleanup expired conversations every 5 minutes
-setInterval(
-  () => {
-    const now = Date.now();
-    for (const [id, entry] of conversations.entries()) {
-      if (entry.expiresAt < now) {
-        conversations.delete(id);
-      }
-    }
-  },
-  5 * 60 * 1000
-);
 
 const templateSchema = z.object({
   prompt: z.string().min(1).max(500),
@@ -87,11 +63,15 @@ export async function POST(request: NextRequest) {
 
     // Store conversation history with 30-minute TTL
     const conversationId = randomUUID();
-    const expiresAt = Date.now() + 30 * 60 * 1000; // 30 minutes
-    conversations.set(conversationId, {
-      history: result.conversationHistory,
-      expiresAt,
-    });
+    const storeResult = setTemplateConversation(
+      conversationId,
+      result.conversationHistory,
+      session.user.id
+    );
+
+    if (!storeResult.ok) {
+      return NextResponse.json({ error: storeResult.error }, { status: 429 });
+    }
 
     return NextResponse.json(
       {
@@ -124,5 +104,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-export { conversations };

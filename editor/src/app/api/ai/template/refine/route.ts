@@ -6,33 +6,11 @@ import {
   zodErrorResponse,
 } from '@/lib/require-session';
 import type Anthropic from '@anthropic-ai/sdk';
+import {
+  getTemplateConversation,
+  setTemplateConversation,
+} from '@/lib/ai/template-conversations';
 import { z } from 'zod';
-
-/**
- * In-memory conversation storage (shared with generation endpoint)
- * For production, consider Redis or database storage
- */
-interface ConversationEntry {
-  history: Anthropic.MessageParam[];
-  expiresAt: number;
-}
-
-// Use the same Map as the generation endpoint (in production, use shared storage)
-// For now, we'll create a separate instance, but in practice you'd want to share this
-const conversations = new Map<string, ConversationEntry>();
-
-// Cleanup expired conversations every 5 minutes
-setInterval(
-  () => {
-    const now = Date.now();
-    for (const [id, entry] of conversations.entries()) {
-      if (entry.expiresAt < now) {
-        conversations.delete(id);
-      }
-    }
-  },
-  5 * 60 * 1000
-);
 
 const refineSchema = z.object({
   conversationId: z.string().uuid(),
@@ -69,9 +47,9 @@ export async function POST(request: NextRequest) {
 
     // Get conversation history
     let conversationHistory: Anthropic.MessageParam[] = [];
-    const conversation = conversations.get(conversationId);
+    const conversation = getTemplateConversation(conversationId);
 
-    if (conversation && conversation.expiresAt > Date.now()) {
+    if (conversation) {
       // Use existing conversation history
       conversationHistory = conversation.history;
     } else {
@@ -90,12 +68,15 @@ export async function POST(request: NextRequest) {
       conversationHistory
     );
 
-    // Update conversation history with extended TTL
-    const expiresAt = Date.now() + 30 * 60 * 1000; // 30 minutes from now
-    conversations.set(conversationId, {
-      history: result.conversationHistory,
-      expiresAt,
-    });
+    const storeResult = setTemplateConversation(
+      conversationId,
+      result.conversationHistory,
+      session.user.id
+    );
+
+    if (!storeResult.ok) {
+      return NextResponse.json({ error: storeResult.error }, { status: 429 });
+    }
 
     return NextResponse.json(
       {
