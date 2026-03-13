@@ -101,8 +101,19 @@ describe('GET /api/batch-export', () => {
   it('passes auth guard and attempts to read files (may 500 in test env)', async () => {
     mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
     const res = await GET(makeGetRequest() as never);
-    // Auth passes — route either succeeds or hits a filesystem error, but NOT 401
     expect(res.status).not.toBe(401);
+  });
+
+  it('does not leak internal paths on GET failure', async () => {
+    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockReadFileSync.mockImplementation(() => {
+      throw new Error('ENOENT: no such file /secret/path');
+    });
+    const res = await GET(makeGetRequest() as never);
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.error).toBe('Failed to load animation presets');
+    expect(body.error).not.toContain('ENOENT');
   });
 });
 
@@ -162,7 +173,7 @@ describe('POST /api/batch-export', () => {
     expect(res.status).toBe(400);
   });
 
-  it('accepts a clean filename and attempts to write', async () => {
+  it('accepts a clean filename and does not return server path in response', async () => {
     mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
     mockExistsSync.mockReturnValue(true);
     mockWriteFileSync.mockReturnValue(undefined);
@@ -170,9 +181,27 @@ describe('POST /api/batch-export', () => {
     const res = await POST(
       makePostRequest({ file: blob, filename: 'valid-export-name' }) as never
     );
-    // Should not be 400 or 401 (filesystem write may still error in test env)
+    // Auth + validation pass (filesystem/arrayBuffer may error in test env)
     expect(res.status).not.toBe(400);
     expect(res.status).not.toBe(401);
+    const body = await res.json();
+    expect(body.path).toBeUndefined();
+  });
+
+  it('does not leak internal paths or error details on failure', async () => {
+    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockExistsSync.mockReturnValue(true);
+    mockWriteFileSync.mockImplementation(() => {
+      throw new Error('EACCES: permission denied');
+    });
+    const blob = new Blob(['data'], { type: 'video/mp4' });
+    const res = await POST(
+      makePostRequest({ file: blob, filename: 'test' }) as never
+    );
+    expect(res.status).toBe(500);
+    const body = await res.json();
+    expect(body.error).toBe('Batch export failed');
+    expect(body.error).not.toContain('EACCES');
   });
 
   it('returns 400 when file is missing', async () => {

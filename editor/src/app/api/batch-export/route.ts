@@ -5,8 +5,11 @@ import {
 } from '@/lib/require-session';
 import { type NextRequest, NextResponse } from 'next/server';
 import fs from 'node:fs';
+import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { z } from 'zod';
+
+const EXPORT_DIR = process.env.RENDER_OUTPUT_DIR || '/tmp/batch-exports';
 
 const batchExportSchema = z.object({
   filename: z
@@ -33,14 +36,13 @@ export async function GET(req: NextRequest) {
       ...presetsContent.matchAll(/animationRegistry\.register\("([^"]+)"/g),
     ].map((m) => m[1]);
 
-    // Also send the data.json template to ensure we always have a clip to render
     const projectTemplatePath = path.join(process.cwd(), 'src/data/data.json');
     const template = JSON.parse(fs.readFileSync(projectTemplatePath, 'utf-8'));
 
     return NextResponse.json({ success: true, keys: animationKeys, template });
-  } catch (error: any) {
+  } catch {
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Failed to load animation presets' },
       { status: 500 }
     );
   }
@@ -65,23 +67,23 @@ export async function POST(req: NextRequest) {
     const parsed = batchExportSchema.safeParse({ filename });
     if (!parsed.success) return zodErrorResponse(parsed.error);
 
-    const exportDir = 'D:\\animations';
-    if (!fs.existsSync(exportDir)) {
-      fs.mkdirSync(exportDir, { recursive: true });
+    if (!fs.existsSync(EXPORT_DIR)) {
+      fs.mkdirSync(EXPORT_DIR, { recursive: true });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const filePath = path.join(exportDir, `${parsed.data.filename}.mp4`);
+    const safeFilename = `${randomUUID()}.mp4`;
+    const filePath = path.join(EXPORT_DIR, safeFilename);
     fs.writeFileSync(filePath, buffer);
 
     return NextResponse.json({
       success: true,
-      path: filePath,
+      filename: `${parsed.data.filename}.mp4`,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Batch export error:', error);
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: 'Batch export failed' },
       { status: 500 }
     );
   }
