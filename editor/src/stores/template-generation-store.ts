@@ -7,11 +7,45 @@ interface TemplateGenerationMessage {
   timestamp: number;
 }
 
+/** Track in an AI-generated template */
+interface TemplateTrack {
+  id: string;
+  name: string;
+  type: 'Video' | 'Audio' | 'Image' | 'Text' | 'Caption' | 'Effect';
+  clipIds: string[];
+}
+
+/** Clip in an AI-generated template */
+interface TemplateClip {
+  id: string;
+  type: 'Text' | 'Image' | 'Video' | 'Audio' | 'Caption';
+  name?: string;
+  text?: string;
+  display?: { from: number; to: number };
+  duration?: number;
+  [key: string]: unknown;
+}
+
+/** AI-generated video template structure */
+export interface GeneratedTemplateData {
+  name: string;
+  description: string;
+  duration: number;
+  settings: {
+    width: number;
+    height: number;
+    fps: number;
+    backgroundColor?: string;
+  };
+  tracks: TemplateTrack[];
+  clips: TemplateClip[];
+}
+
 interface TemplateGenerationState {
   // Generation state
   selectedStyleId: string;
   isGenerating: boolean;
-  generatedTemplate: any | null;
+  generatedTemplate: GeneratedTemplateData | null;
   mergeFields: MergeFieldSuggestion[];
   conversationId: string | null;
 
@@ -22,7 +56,7 @@ interface TemplateGenerationState {
   setStyle: (styleId: string) => void;
   setGenerating: (value: boolean) => void;
   setTemplate: (
-    template: any,
+    template: GeneratedTemplateData,
     mergeFields: MergeFieldSuggestion[],
     conversationId: string
   ) => void;

@@ -213,7 +213,7 @@ export function StoryboardWizard() {
             <div className="space-y-3">
               {scenesWithClips.map(({ scene, clip }, index) => (
                 <SceneEditor
-                  key={scene.id || index}
+                  key={scene.id ?? index}
                   scene={scene}
                   index={index}
                   onUpdate={() => {}}
