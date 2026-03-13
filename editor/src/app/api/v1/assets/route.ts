@@ -2,6 +2,7 @@ import { withApiAuth, type ApiKeyContext } from '@/lib/api-middleware';
 import { config } from '@/lib/config';
 import { prisma } from '@/lib/db';
 import { R2StorageService } from '@/lib/r2';
+import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
 
 // Initialize R2 service
@@ -125,7 +126,7 @@ async function getHandler(
     const limit = Math.min(limitParam, 100); // Cap at 100
 
     // Build where clause with organization scope
-    const where: any = {
+    const where: Prisma.AssetWhereInput = {
       organizationId: context.organizationId,
     };
 
@@ -137,12 +138,18 @@ async function getHandler(
     }
 
     // Filter by category
-    if (category && assetCategories.includes(category as any)) {
+    if (
+      category &&
+      assetCategories.includes(category as (typeof assetCategories)[number])
+    ) {
       where.category = category;
     }
 
     // Build pagination options
-    const paginationOptions: any = {
+    const paginationOptions: Omit<
+      Prisma.AssetFindManyArgs,
+      'where' | 'include' | 'select'
+    > = {
       orderBy: { createdAt: 'desc' },
       take: limit + 1, // Fetch one extra to check for more
     };
@@ -173,8 +180,8 @@ async function getHandler(
     const nextCursor = hasMore ? items[items.length - 1].id : null;
 
     // Build folder path breadcrumb data for each item
-    const responseItems = items.map((asset: any) => {
-      const item: any = {
+    const responseItems = items.map((asset) => {
+      const item: Record<string, unknown> = {
         id: asset.id,
         name: asset.name,
         contentType: asset.contentType,
