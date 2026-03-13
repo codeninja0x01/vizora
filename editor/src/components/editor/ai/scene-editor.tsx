@@ -1,7 +1,7 @@
 'use client';
 
 import { X, Clock, Type } from 'lucide-react';
-import type { Scene } from '@/stores/storyboard-store';
+import type { Scene, StoryboardSceneData } from '@/stores/storyboard-store';
 
 interface StockClip {
   url: string;
@@ -12,7 +12,7 @@ interface StockClip {
 }
 
 interface SceneEditorProps {
-  scene: Scene;
+  scene: Scene | StoryboardSceneData;
   index: number;
   onUpdate: (updates: Partial<Scene>) => void;
   onRemove: () => void;
@@ -37,9 +37,10 @@ export function SceneEditor({
   canRemove = true,
 }: SceneEditorProps) {
   const accent = SCENE_ACCENTS[index % SCENE_ACCENTS.length];
-  const descId = `scene-${scene.id}-desc`;
-  const durationId = `scene-${scene.id}-duration`;
-  const overlayId = `scene-${scene.id}-overlay`;
+  const sceneKey = scene.id ?? index;
+  const descId = `scene-${sceneKey}-desc`;
+  const durationId = `scene-${sceneKey}-duration`;
+  const overlayId = `scene-${sceneKey}-overlay`;
 
   return (
     <div className="group relative overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.025] transition-colors duration-200 hover:border-white/[0.12]">

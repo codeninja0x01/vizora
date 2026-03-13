@@ -7,12 +7,62 @@ export interface Scene {
   textOverlay: string;
 }
 
+/** Composition returned by the text-to-video API */
+interface StoryboardComposition {
+  elements: Array<{
+    type: 'Video' | 'Text';
+    id: string;
+    display: { from: number; to: number };
+    [key: string]: unknown;
+  }>;
+  transitions: Array<{
+    type: string;
+    duration: number;
+    from: number;
+    to: number;
+  }>;
+  duration: number;
+  settings: {
+    width: number;
+    height: number;
+    fps: number;
+  };
+}
+
+/** Stock clip preview returned by the text-to-video API */
+interface StoryboardStockClip {
+  id: string;
+  url: string;
+  previewUrl: string;
+  thumbnailUrl: string;
+  duration: number;
+  width: number;
+  height: number;
+  provider: string;
+  attribution?: string;
+}
+
+/** Scene data within an API-returned scene-clip pair */
+export interface StoryboardSceneData {
+  id?: string;
+  description: string;
+  duration: number;
+  mood?: string;
+  textOverlay?: string;
+}
+
+/** Scene-clip pair returned by the text-to-video API */
+export interface SceneWithClip {
+  scene: StoryboardSceneData;
+  clip: StoryboardStockClip | null;
+}
+
 interface StoryboardState {
   scenes: Scene[];
   selectedStyleId: string;
   isGenerating: boolean;
-  composition: any | null;
-  scenesWithClips: any[];
+  composition: StoryboardComposition | null;
+  scenesWithClips: SceneWithClip[];
 
   addScene: () => void;
   removeScene: (id: string) => void;
@@ -20,7 +70,10 @@ interface StoryboardState {
   reorderScenes: (fromIndex: number, toIndex: number) => void;
   setStyle: (styleId: string) => void;
   setGenerating: (value: boolean) => void;
-  setComposition: (composition: any, scenesWithClips: any[]) => void;
+  setComposition: (
+    composition: StoryboardComposition,
+    scenesWithClips: SceneWithClip[],
+  ) => void;
   reset: () => void;
 }
 
@@ -58,7 +111,7 @@ export const useStoryboardStore = create<StoryboardState>((set) => ({
   updateScene: (id, updates) =>
     set((state) => ({
       scenes: state.scenes.map((scene) =>
-        scene.id === id ? { ...scene, ...updates } : scene
+        scene.id === id ? { ...scene, ...updates } : scene,
       ),
     })),
 
