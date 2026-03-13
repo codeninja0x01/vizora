@@ -3,11 +3,8 @@ import {
   createTTSProvider,
 } from '@/lib/ai/providers/tts/factory';
 import type { Voice } from '@/lib/ai/providers/tts/types';
-import {
-  requireSession,
-  unauthorizedResponse,
-  zodErrorResponse,
-} from '@/lib/require-session';
+import { withAIAuth } from '@/lib/ai-middleware';
+import { zodErrorResponse } from '@/lib/require-session';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -24,8 +21,8 @@ let elevenLabsCache: VoiceCache | null = null;
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 export async function GET(req: NextRequest) {
-  const session = await requireSession(req);
-  if (!session) return unauthorizedResponse();
+  const authResult = await withAIAuth('ai/voices')(req);
+  if (authResult instanceof Response) return authResult;
 
   try {
     const { searchParams } = new URL(req.url);

@@ -1,4 +1,4 @@
-import { auth } from '@/lib/auth';
+import { withAIAuth } from '@/lib/ai-middleware';
 import { createTTSProvider } from '@/lib/ai/providers/tts/factory';
 import type { AIProvider } from '@/lib/ai/types';
 import { R2StorageService } from '@/lib/r2';
@@ -15,13 +15,9 @@ const r2 = new R2StorageService({
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: req.headers,
-    });
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const authResult = await withAIAuth('ai/tts')(req);
+    if (authResult instanceof Response) return authResult;
+    const { session } = authResult;
 
     const body = await req.json();
     const { text, voiceId, provider, speed } = body;
@@ -72,7 +68,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get organization ID from session
+    // Use session.user.id for user-scoped R2 storage path
     const orgId = session.user.id;
 
     // Create provider and synthesize

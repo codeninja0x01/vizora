@@ -1,9 +1,6 @@
 // app/api/transcribe/route.ts
-import {
-  requireSession,
-  unauthorizedResponse,
-  zodErrorResponse,
-} from '@/lib/require-session';
+import { withAIAuth } from '@/lib/ai-middleware';
+import { zodErrorResponse } from '@/lib/require-session';
 import { type NextRequest, NextResponse } from 'next/server';
 import { transcribe } from '@/lib/transcribe';
 import { z } from 'zod';
@@ -16,8 +13,8 @@ const transcribeSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
-  const session = await requireSession(request);
-  if (!session) return unauthorizedResponse();
+  const authResult = await withAIAuth('transcribe')(request);
+  if (authResult instanceof Response) return authResult;
 
   try {
     const body = await request.json();
