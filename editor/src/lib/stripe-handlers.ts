@@ -15,6 +15,44 @@ async function getResendClient() {
   return new Resend(resendApiKey);
 }
 
+async function getOrganizationOwnerEmail(organizationId: string) {
+  return prisma.member.findFirst({
+    where: {
+      organizationId,
+      role: 'owner',
+    },
+    include: {
+      user: {
+        select: { email: true, name: true },
+      },
+    },
+  });
+}
+
+async function sendBillingLifecycleEmail({
+  organizationId,
+  subject,
+  text,
+}: {
+  organizationId: string;
+  subject: string;
+  text: string;
+}) {
+  const owner = await getOrganizationOwnerEmail(organizationId);
+  const resend = await getResendClient();
+
+  if (!owner || !resend) {
+    return;
+  }
+
+  await resend.emails.send({
+    from: process.env.RESEND_FROM_EMAIL || 'noreply@vizora.dev',
+    to: owner.user.email,
+    subject,
+    text,
+  });
+}
+
 export async function handleCheckoutComplete(event: Stripe.Event) {
   const session = event.data.object as Stripe.Checkout.Session;
   const organizationId = session.metadata?.organizationId;
@@ -55,6 +93,7 @@ export async function handleCheckoutComplete(event: Stripe.Event) {
     const tierConfig = TIER_CONFIG[tier];
     const now = new Date();
     const cycleEnd = addMonths(now, 1);
+    let newBalance = 0;
 
     // Update organization with subscription details and initial credit grant
     await prisma.$transaction(
@@ -68,7 +107,7 @@ export async function handleCheckoutComplete(event: Stripe.Event) {
           throw new Error(`Organization ${organizationId} not found`);
         }
 
-        const newBalance = org.creditBalance + tierConfig.monthlyAllotment;
+        newBalance = org.creditBalance + tierConfig.monthlyAllotment;
 
         await tx.organization.update({
           where: { id: organizationId },
@@ -112,6 +151,19 @@ export async function handleCheckoutComplete(event: Stripe.Event) {
         isolationLevel: 'RepeatableRead',
       }
     );
+
+    await sendBillingLifecycleEmail({
+      organizationId,
+      subject: `Welcome to Vizora ${tier} subscription`,
+      text: `Your ${tier} tier subscription is now active.
+
+Monthly allotment: ${tierConfig.monthlyAllotment} credits
+Current balance: ${newBalance} credits
+Next billing date: ${cycleEnd.toDateString()}
+
+Manage billing:
+${process.env.NEXT_PUBLIC_APP_URL || 'https://vizora.dev'}/dashboard/billing`,
+    });
   }
 
   // Handle credit pack purchase
@@ -121,6 +173,8 @@ export async function handleCheckoutComplete(event: Stripe.Event) {
       console.error('[handleCheckoutComplete] Missing packSize in metadata');
       return;
     }
+
+    let newBalance = 0;
 
     await prisma.$transaction(
       async (tx) => {
@@ -133,7 +187,7 @@ export async function handleCheckoutComplete(event: Stripe.Event) {
           throw new Error(`Organization ${organizationId} not found`);
         }
 
-        const newBalance = org.creditBalance + packSize;
+        newBalance = org.creditBalance + packSize;
 
         await tx.organization.update({
           where: { id: organizationId },
@@ -166,6 +220,19 @@ export async function handleCheckoutComplete(event: Stripe.Event) {
         isolationLevel: 'RepeatableRead',
       }
     );
+
+    await sendBillingLifecycleEmail({
+      organizationId,
+      subject: 'Credits purchase confirmation',
+      text: `Your credit purchase is complete.
+
+Credits added: ${packSize}
+Amount paid: ${((session.amount_total || 0) / 100).toFixed(2)}
+New balance: ${newBalance}
+
+Manage billing:
+${process.env.NEXT_PUBLIC_APP_URL || 'https://vizora.dev'}/dashboard/billing`,
+    });
   }
 }
 
@@ -209,18 +276,21 @@ export async function handleInvoicePaid(event: Stripe.Event) {
     `[handleInvoicePaid] Processing invoice ${invoice.id} for org ${org.id}`
   );
 
+  let newBalance = org.creditBalance;
+  let addedCredits = 0;
+  const cycleEnd = addMonths(new Date(), 1);
+
   // Perform credit rollover with 2x cap
   await prisma.$transaction(
     async (tx) => {
       const maxRollover = org.monthlyAllotment * 2;
-      const newBalance = Math.min(
+      newBalance = Math.min(
         org.creditBalance + org.monthlyAllotment,
         maxRollover
       );
-      const addedCredits = newBalance - org.creditBalance;
+      addedCredits = newBalance - org.creditBalance;
 
       const now = new Date();
-      const cycleEnd = addMonths(now, 1);
 
       await tx.organization.update({
         where: { id: org.id },
@@ -258,6 +328,19 @@ export async function handleInvoicePaid(event: Stripe.Event) {
       isolationLevel: 'RepeatableRead',
     }
   );
+
+  await sendBillingLifecycleEmail({
+    organizationId: org.id,
+    subject: 'Subscription renewal receipt',
+    text: `Your subscription has renewed successfully.
+
+Credits added: ${addedCredits}
+New balance: ${newBalance}
+Next renewal date: ${cycleEnd.toDateString()}
+
+Manage billing:
+${process.env.NEXT_PUBLIC_APP_URL || 'https://vizora.dev'}/dashboard/billing`,
+  });
 }
 
 export async function handlePaymentFailed(event: Stripe.Event) {
@@ -385,12 +468,17 @@ export async function handleSubscriptionUpdated(event: Stripe.Event) {
   const tierConfig = TIER_CONFIG[tier];
   const tierChanged = tier !== org.tier;
 
+  // Stripe may use cancel_at (specific timestamp) or cancel_at_period_end (boolean)
+  // Treat either as "scheduled for cancellation"
+  const isCancelling =
+    subscription.cancel_at_period_end || subscription.cancel_at !== null;
+
   // Update organization
   await prisma.organization.update({
     where: { id: org.id },
     data: {
       subscriptionStatus: subscription.status,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      cancelAtPeriodEnd: isCancelling,
       ...(tierChanged && {
         tier,
         monthlyAllotment: tierConfig.monthlyAllotment,
@@ -399,8 +487,26 @@ export async function handleSubscriptionUpdated(event: Stripe.Event) {
   });
 
   console.log(
-    `[handleSubscriptionUpdated] Subscription updated: status=${subscription.status}, cancelAtPeriodEnd=${subscription.cancel_at_period_end}${tierChanged ? `, tier changed: ${org.tier} → ${tier}` : ''}`
+    `[handleSubscriptionUpdated] Subscription updated: status=${subscription.status}, cancelAtPeriodEnd=${isCancelling}${tierChanged ? `, tier changed: ${org.tier} → ${tier}` : ''}`
   );
+
+  if (isCancelling) {
+    const cancellationDate = new Date(
+      ((subscription.cancel_at || subscription.current_period_end) ?? 0) * 1000
+    );
+
+    await sendBillingLifecycleEmail({
+      organizationId: org.id,
+      subject: 'Subscription cancellation scheduled',
+      text: `Your subscription is scheduled for cancellation.
+
+Cancellation date: ${cancellationDate.toDateString()}
+After this date your organization will move to the free tier.
+
+Manage billing:
+${process.env.NEXT_PUBLIC_APP_URL || 'https://vizora.dev'}/dashboard/billing`,
+    });
+  }
 }
 
 export async function handleSubscriptionDeleted(event: Stripe.Event) {
