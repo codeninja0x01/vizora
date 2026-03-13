@@ -2,14 +2,46 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // --- Mocks ---
 
-const { mockGetSession, mockFetch } = vi.hoisted(() => ({
+const { mockGetSession, mockFetch, mockPrisma } = vi.hoisted(() => ({
   mockGetSession: vi.fn(),
   mockFetch: vi.fn(),
+  mockPrisma: {
+    organization: { findFirst: vi.fn() },
+    member: { findFirst: vi.fn() },
+  },
 }));
 
 vi.mock('@/lib/auth', () => ({
   auth: { api: { getSession: mockGetSession } },
 }));
+
+vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
+
+vi.mock('@/lib/ratelimit', () => ({
+  rateLimit: vi.fn().mockResolvedValue({
+    success: true,
+    limit: 60,
+    remaining: 59,
+    reset: Date.now() + 10_000,
+  }),
+  withSessionRateLimit: vi
+    .fn()
+    .mockResolvedValue({ allowed: true, headers: {} }),
+  sessionTokenBucket: {
+    consume: vi.fn().mockReturnValue({ allowed: true, remaining: 199 }),
+  },
+}));
+
+vi.mock('@/lib/credits', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/credits')>();
+  return {
+    ...actual,
+    deductCreditsForAI: vi
+      .fn()
+      .mockResolvedValue({ success: true, newBalance: 980 }),
+    checkAndWarnLowCredits: vi.fn().mockResolvedValue(undefined),
+  };
+});
 
 // Use class-style mock so `new R2StorageService(...)` works
 vi.mock('@/lib/r2', () => ({
@@ -69,7 +101,15 @@ describe('POST /api/elevenlabs/voiceover', () => {
   // --- Zod validation ---
 
   it('returns 400 when text is missing', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     const res = await POST(makeRequest({}) as never);
     expect(res.status).toBe(400);
     const body = await res.json();
@@ -77,7 +117,15 @@ describe('POST /api/elevenlabs/voiceover', () => {
   });
 
   it('returns 400 when text is empty', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     const res = await POST(makeRequest({ text: '' }) as never);
     expect(res.status).toBe(400);
   });
@@ -85,7 +133,15 @@ describe('POST /api/elevenlabs/voiceover', () => {
   // --- Path traversal fix ---
 
   it('returns 400 when voiceId contains path traversal (../../admin)', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     const res = await POST(
       makeRequest({ text: 'hi', voiceId: '../../admin' }) as never
     );
@@ -95,13 +151,29 @@ describe('POST /api/elevenlabs/voiceover', () => {
   });
 
   it('returns 400 when voiceId is empty string', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     const res = await POST(makeRequest({ text: 'hi', voiceId: '' }) as never);
     expect(res.status).toBe(400);
   });
 
   it('returns 400 when voiceId exceeds 64 chars', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     const res = await POST(
       makeRequest({ text: 'hi', voiceId: 'a'.repeat(65) }) as never
     );
@@ -109,7 +181,15 @@ describe('POST /api/elevenlabs/voiceover', () => {
   });
 
   it('returns 400 when voiceId contains special chars (spaces)', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     const res = await POST(
       makeRequest({ text: 'hi', voiceId: 'bad voice id' }) as never
     );
@@ -117,7 +197,15 @@ describe('POST /api/elevenlabs/voiceover', () => {
   });
 
   it('accepts a valid voiceId matching /^[a-zA-Z0-9_-]{1,64}$/', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     mockElevenLabsOk();
     const res = await POST(
       makeRequest({
@@ -131,7 +219,15 @@ describe('POST /api/elevenlabs/voiceover', () => {
   });
 
   it('uses default voiceId when none supplied (does not 400)', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     mockElevenLabsOk();
     const res = await POST(makeRequest({ text: 'hello world' }) as never);
     expect(res.status).not.toBe(400);

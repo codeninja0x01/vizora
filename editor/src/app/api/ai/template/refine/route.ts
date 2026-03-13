@@ -1,10 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { TemplateGenerationService } from '@/lib/ai/services/template-generation-service';
-import {
-  requireSession,
-  unauthorizedResponse,
-  zodErrorResponse,
-} from '@/lib/require-session';
+import { withAIAuth } from '@/lib/ai-middleware';
+import { zodErrorResponse } from '@/lib/require-session';
 import type Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
 
@@ -19,8 +16,9 @@ const refineSchema = z.object({
  * Refine an existing template based on user feedback
  */
 export async function POST(request: NextRequest) {
-  const session = await requireSession(request);
-  if (!session) return unauthorizedResponse();
+  const authResult = await withAIAuth('ai/template/refine')(request);
+  if (authResult instanceof Response) return authResult;
+  const { session } = authResult;
 
   try {
     const body = await request.json();

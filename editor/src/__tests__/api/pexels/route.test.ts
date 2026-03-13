@@ -2,13 +2,34 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // --- Mocks ---
 
-const { mockGetSession, mockFetch } = vi.hoisted(() => ({
+const { mockGetSession, mockFetch, mockPrisma } = vi.hoisted(() => ({
   mockGetSession: vi.fn(),
   mockFetch: vi.fn(),
+  mockPrisma: {
+    organization: { findFirst: vi.fn() },
+    member: { findFirst: vi.fn() },
+  },
 }));
 
 vi.mock('@/lib/auth', () => ({
   auth: { api: { getSession: mockGetSession } },
+}));
+
+vi.mock('@/lib/db', () => ({ prisma: mockPrisma }));
+
+vi.mock('@/lib/ratelimit', () => ({
+  rateLimit: vi.fn().mockResolvedValue({
+    success: true,
+    limit: 60,
+    remaining: 59,
+    reset: Date.now() + 10_000,
+  }),
+  withSessionRateLimit: vi
+    .fn()
+    .mockResolvedValue({ allowed: true, headers: {} }),
+  sessionTokenBucket: {
+    consume: vi.fn().mockReturnValue({ allowed: true, remaining: 199 }),
+  },
 }));
 
 vi.stubGlobal('fetch', mockFetch);
@@ -52,7 +73,15 @@ describe('GET /api/pexels', () => {
   // --- Zod validation: type enum ---
 
   it('returns 400 when type is not "image" or "video"', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     const res = await GET(makeRequest({ type: 'audio' }) as never);
     expect(res.status).toBe(400);
     const body = await res.json();
@@ -62,19 +91,43 @@ describe('GET /api/pexels', () => {
   // --- Zod validation: page constraints ---
 
   it('returns 400 when page is 0 (below min 1)', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     const res = await GET(makeRequest({ page: '0' }) as never);
     expect(res.status).toBe(400);
   });
 
   it('returns 400 when page is -1', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     const res = await GET(makeRequest({ page: '-1' }) as never);
     expect(res.status).toBe(400);
   });
 
   it('returns 400 when page exceeds max (101)', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     const res = await GET(makeRequest({ page: '101' }) as never);
     expect(res.status).toBe(400);
   });
@@ -82,13 +135,29 @@ describe('GET /api/pexels', () => {
   // --- Zod validation: per_page constraints ---
 
   it('returns 400 when per_page is 0', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     const res = await GET(makeRequest({ per_page: '0' }) as never);
     expect(res.status).toBe(400);
   });
 
   it('returns 400 when per_page exceeds 80', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     const res = await GET(makeRequest({ per_page: '9999' }) as never);
     expect(res.status).toBe(400);
   });
@@ -96,7 +165,15 @@ describe('GET /api/pexels', () => {
   // --- Valid request passes validation ---
 
   it('accepts valid default params and calls Pexels API', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     mockPexelsOk();
     const res = await GET(makeRequest() as never);
     expect(res.status).not.toBe(400);
@@ -104,7 +181,15 @@ describe('GET /api/pexels', () => {
   });
 
   it('accepts type=video with valid params', async () => {
-    mockGetSession.mockResolvedValue({ user: { id: 'u-1' } });
+    mockGetSession.mockResolvedValue({
+      session: { id: 's-1', activeOrganizationId: 'org-1' },
+      user: { id: 'u-1' },
+    });
+    mockPrisma.organization.findFirst.mockResolvedValue({
+      id: 'org-1',
+      tier: 'pro',
+    });
+    mockPrisma.member.findFirst.mockResolvedValue({ organizationId: 'org-1' });
     mockPexelsOk();
     const res = await GET(
       makeRequest({

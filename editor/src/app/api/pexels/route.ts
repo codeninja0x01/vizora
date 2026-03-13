@@ -1,8 +1,5 @@
-import {
-  requireSession,
-  unauthorizedResponse,
-  zodErrorResponse,
-} from '@/lib/require-session';
+import { withRateLimitedAuth } from '@/lib/ai-middleware';
+import { zodErrorResponse } from '@/lib/require-session';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -15,9 +12,26 @@ const pexelsQuerySchema = z.object({
   per_page: z.coerce.number().int().min(1).max(80).default(20),
 });
 
+function buildPexelsUrl(
+  type: string,
+  query: string | undefined,
+  page: number,
+  per_page: number
+): string {
+  if (type === 'image') {
+    return query
+      ? `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&page=${page}&per_page=${per_page}`
+      : `https://api.pexels.com/v1/curated?page=${page}&per_page=${per_page}`;
+  }
+  return query
+    ? `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&page=${page}&per_page=${per_page}`
+    : `https://api.pexels.com/videos/popular?page=${page}&per_page=${per_page}`;
+}
+
 export async function GET(req: NextRequest) {
-  const session = await requireSession(req);
-  if (!session) return unauthorizedResponse();
+  const authResult = await withRateLimitedAuth()(req);
+  if (authResult instanceof Response) return authResult;
+  // Auth verified — session available in authResult if needed
 
   const { searchParams } = new URL(req.url);
   const parsed = pexelsQuerySchema.safeParse({
@@ -36,17 +50,7 @@ export async function GET(req: NextRequest) {
   }
 
   const { type, query, page, per_page } = parsed.data;
-
-  let url = '';
-  if (type === 'image') {
-    url = query
-      ? `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&page=${page}&per_page=${per_page}`
-      : `https://api.pexels.com/v1/curated?page=${page}&per_page=${per_page}`;
-  } else {
-    url = query
-      ? `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&page=${page}&per_page=${per_page}`
-      : `https://api.pexels.com/videos/popular?page=${page}&per_page=${per_page}`;
-  }
+  const url = buildPexelsUrl(type, query, page, per_page);
 
   try {
     const response = await fetch(url, {

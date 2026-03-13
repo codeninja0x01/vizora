@@ -14,11 +14,8 @@ import {
   generateWebVTT,
   generateSubtitleClipData,
 } from '@/lib/ai/utils/webvtt-generator';
-import {
-  requireSession,
-  unauthorizedResponse,
-  zodErrorResponse,
-} from '@/lib/require-session';
+import { withAIAuth } from '@/lib/ai-middleware';
+import { zodErrorResponse } from '@/lib/require-session';
 import { z } from 'zod';
 
 const subtitlesSchema = z.object({
@@ -48,8 +45,8 @@ const subtitlesSchema = z.object({
  * - format='webvtt': { webvtt: string }
  */
 export async function POST(request: NextRequest) {
-  const session = await requireSession(request);
-  if (!session) return unauthorizedResponse();
+  const authResult = await withAIAuth('ai/subtitles')(request);
+  if (authResult instanceof Response) return authResult;
 
   try {
     const body = await request.json();

@@ -7,11 +7,8 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { TextToVideoService } from '@/lib/ai/services/text-to-video-service';
 import { getVideoStyleById } from '@/lib/ai/presets/video-style-presets';
 import type { Scene } from '@/lib/ai/services/text-to-video-service';
-import {
-  requireSession,
-  unauthorizedResponse,
-  zodErrorResponse,
-} from '@/lib/require-session';
+import { withAIAuth } from '@/lib/ai-middleware';
+import { zodErrorResponse } from '@/lib/require-session';
 import { z } from 'zod';
 
 const sceneSchema = z.object({
@@ -27,8 +24,8 @@ const textToVideoSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const session = await requireSession(req);
-  if (!session) return unauthorizedResponse();
+  const authResult = await withAIAuth('ai/text-to-video')(req);
+  if (authResult instanceof Response) return authResult;
 
   try {
     const body = await req.json();

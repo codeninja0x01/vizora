@@ -1,11 +1,8 @@
+import { withAIAuth } from '@/lib/ai-middleware';
 import { createTTSProvider } from '@/lib/ai/providers/tts/factory';
 import type { AIProvider } from '@/lib/ai/types';
 import { R2StorageService } from '@/lib/r2';
-import {
-  requireSession,
-  unauthorizedResponse,
-  zodErrorResponse,
-} from '@/lib/require-session';
+import { zodErrorResponse } from '@/lib/require-session';
 import { type NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
@@ -26,8 +23,9 @@ const ttsSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const session = await requireSession(req);
-  if (!session) return unauthorizedResponse();
+  const authResult = await withAIAuth('ai/tts')(req);
+  if (authResult instanceof Response) return authResult;
+  const { session } = authResult;
 
   try {
     const body = await req.json();
@@ -36,7 +34,7 @@ export async function POST(req: NextRequest) {
 
     const { text, voiceId, provider, speed } = parsed.data;
 
-    // Get organization ID from session
+    // Use session.user.id for user-scoped R2 storage path
     const orgId = session.user.id;
 
     // Create provider and synthesize

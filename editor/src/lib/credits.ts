@@ -288,3 +288,91 @@ export async function checkAndWarnLowCredits(
     return { shouldShowBanner: false };
   }
 }
+
+/**
+ * TODO: Future considerations (not in scope for initial implementation)
+ * - [ ] Separate credit pool for AI vs render
+ * - [ ] Database-driven dynamic pricing table
+ * - [ ] AI call refund mechanism (currently succeed-or-fail-fast)
+ * - [ ] Changes to v1 API routes (already protected via withApiAuth)
+ * - [ ] Changes to existing render credit flow
+ * - [ ] New database tables (reuses existing CreditTransaction)
+ */
+export const AI_CREDIT_COSTS = {
+  'ai/tts': 20,
+  'ai/text-to-video': 100,
+  'ai/template': 50,
+  'ai/template/refine': 30,
+  'ai/subtitles': 25,
+  'ai/voices': 15,
+  'elevenlabs/voiceover': 200,
+  'elevenlabs/music': 300,
+  'elevenlabs/sfx': 150,
+  'audio/music': 100,
+  'audio/sfx': 75,
+  'chat/editor': 10,
+  transcribe: 5,
+  pexels: 0,
+} as const;
+
+export type AIOperationType = keyof typeof AI_CREDIT_COSTS;
+
+export async function deductCreditsForAI(
+  organizationId: string,
+  operationType: AIOperationType
+): Promise<DeductResult> {
+  const creditsRequired = AI_CREDIT_COSTS[operationType];
+
+  if (creditsRequired === 0) {
+    return { success: true, newBalance: -1 };
+  }
+
+  const result = await prisma.$transaction(
+    async (tx) => {
+      const org = await tx.organization.findUniqueOrThrow({
+        where: { id: organizationId },
+        select: { creditBalance: true },
+      });
+
+      const balanceBefore = org.creditBalance;
+
+      if (balanceBefore < creditsRequired) {
+        return {
+          success: false as const,
+          available: balanceBefore,
+          required: creditsRequired,
+        };
+      }
+
+      const balanceAfter = balanceBefore - creditsRequired;
+
+      await tx.organization.update({
+        where: { id: organizationId },
+        data: { creditBalance: balanceAfter },
+      });
+
+      await tx.creditTransaction.create({
+        data: {
+          organizationId,
+          amount: -creditsRequired,
+          balanceBefore,
+          balanceAfter,
+          reason: 'ai_usage',
+          metadata: { operationType, route: `/api/${operationType}` },
+        },
+      });
+
+      return { success: true as const, newBalance: balanceAfter };
+    },
+    {
+      isolationLevel: 'RepeatableRead',
+      timeout: 10000,
+    }
+  );
+
+  if (result.success) {
+    checkAndWarnLowCredits(organizationId).catch(() => {});
+  }
+
+  return result;
+}

@@ -4,11 +4,8 @@ import {
   getTemplateStyleById,
   getDefaultTemplateStyle,
 } from '@/lib/ai/presets/template-style-presets';
-import {
-  requireSession,
-  unauthorizedResponse,
-  zodErrorResponse,
-} from '@/lib/require-session';
+import { withAIAuth } from '@/lib/ai-middleware';
+import { zodErrorResponse } from '@/lib/require-session';
 import { z } from 'zod';
 
 const templateSchema = z.object({
@@ -21,8 +18,9 @@ const templateSchema = z.object({
  * Generate a new video template from text description and style preset
  */
 export async function POST(request: NextRequest) {
-  const session = await requireSession(request);
-  if (!session) return unauthorizedResponse();
+  const authResult = await withAIAuth('ai/template')(request);
+  if (authResult instanceof Response) return authResult;
+  const { session } = authResult;
 
   try {
     const body = await request.json();

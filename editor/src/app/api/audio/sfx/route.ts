@@ -1,8 +1,5 @@
-import {
-  requireSession,
-  unauthorizedResponse,
-  zodErrorResponse,
-} from '@/lib/require-session';
+import { withAIAuth } from '@/lib/ai-middleware';
+import { zodErrorResponse } from '@/lib/require-session';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -20,8 +17,8 @@ const audioSfxSchema = z
   .strict();
 
 export async function POST(req: NextRequest) {
-  const session = await requireSession(req);
-  if (!session) return unauthorizedResponse();
+  const authResult = await withAIAuth('audio/sfx')(req);
+  if (authResult instanceof Response) return authResult;
 
   try {
     const body = await req.json();

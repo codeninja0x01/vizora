@@ -1,9 +1,6 @@
 import { R2StorageService } from '@/lib/r2';
-import {
-  requireSession,
-  unauthorizedResponse,
-  zodErrorResponse,
-} from '@/lib/require-session';
+import { withAIAuth } from '@/lib/ai-middleware';
+import { zodErrorResponse } from '@/lib/require-session';
 import { type NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -21,8 +18,8 @@ const sfxSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const session = await requireSession(req);
-  if (!session) return unauthorizedResponse();
+  const authResult = await withAIAuth('elevenlabs/sfx')(req);
+  if (authResult instanceof Response) return authResult;
 
   try {
     const body = await req.json();
