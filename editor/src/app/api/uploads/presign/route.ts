@@ -1,12 +1,20 @@
 import { randomUUID } from 'node:crypto';
 import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
 import { config } from '@/lib/config';
 import { R2StorageService } from '@/lib/r2';
+import {
+  requireSession,
+  unauthorizedResponse,
+  zodErrorResponse,
+} from '@/lib/require-session';
 
-interface PresignRequest {
-  userId: string;
-  fileNames: string[];
-}
+const presignSchema = z.object({
+  fileNames: z
+    .array(z.string().min(1).max(255))
+    .min(1, 'fileNames must not be empty')
+    .max(20, 'Maximum 20 files per request'),
+});
 
 const r2 = new R2StorageService({
   bucketName: config.r2.bucket,
@@ -17,16 +25,16 @@ const r2 = new R2StorageService({
 });
 
 export async function POST(request: NextRequest) {
-  try {
-    const body: PresignRequest = await request.json();
-    const { userId = 'mockuser', fileNames } = body;
+  const session = await requireSession(request);
+  if (!session) return unauthorizedResponse();
 
-    if (!fileNames || !Array.isArray(fileNames) || fileNames.length === 0) {
-      return NextResponse.json(
-        { error: 'fileNames array is required and must not be empty' },
-        { status: 400 }
-      );
-    }
+  try {
+    const body = await request.json();
+    const parsed = presignSchema.safeParse(body);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
+
+    const userId = session.user.id;
+    const { fileNames } = parsed.data;
 
     const uploads = await Promise.all(
       fileNames.map(async (originalName) => {
@@ -50,12 +58,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, uploads });
   } catch (error) {
-    console.error('Error in presign route:', error);
+    console.error('[presign] Error:', error);
     return NextResponse.json(
-      {
-        error: 'Internal server error',
-        details: error instanceof Error ? error.message : String(error),
-      },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
