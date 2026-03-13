@@ -1,33 +1,35 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { mockEmailsSend, mockResend, mockPrisma, mockStripe } = vi.hoisted(() => ({
-  mockEmailsSend: vi.fn(),
-  mockResend: vi.fn(function MockResend() {
-    return {
-      emails: {
-        send: mockEmailsSend,
+const { mockEmailsSend, mockResend, mockPrisma, mockStripe } = vi.hoisted(
+  () => ({
+    mockEmailsSend: vi.fn(),
+    mockResend: vi.fn(function MockResend() {
+      return {
+        emails: {
+          send: mockEmailsSend,
+        },
+      };
+    }),
+    mockPrisma: {
+      organization: {
+        findUnique: vi.fn(),
+        update: vi.fn(),
       },
-    };
-  }),
-  mockPrisma: {
-    organization: {
-      findUnique: vi.fn(),
-      update: vi.fn(),
+      member: {
+        findFirst: vi.fn(),
+      },
+      creditTransaction: {
+        create: vi.fn(),
+      },
+      $transaction: vi.fn(),
     },
-    member: {
-      findFirst: vi.fn(),
+    mockStripe: {
+      subscriptions: {
+        retrieve: vi.fn(),
+      },
     },
-    creditTransaction: {
-      create: vi.fn(),
-    },
-    $transaction: vi.fn(),
-  },
-  mockStripe: {
-    subscriptions: {
-      retrieve: vi.fn(),
-    },
-  },
-}));
+  })
+);
 
 vi.mock('resend', () => ({
   Resend: mockResend,
@@ -56,7 +58,9 @@ describe('Billing email flows', () => {
     process.env.NEXT_PUBLIC_APP_URL = 'https://vizora.dev';
     process.env.STRIPE_PRO_PRICE_ID = 'price_pro';
 
-    mockPrisma.$transaction.mockImplementation(async (fn: (tx: typeof mockPrisma) => Promise<unknown>) => fn(mockPrisma));
+    mockPrisma.$transaction.mockImplementation(
+      async (fn: (tx: typeof mockPrisma) => Promise<unknown>) => fn(mockPrisma)
+    );
     mockPrisma.creditTransaction.create.mockResolvedValue({ id: 'ct_1' });
     mockStripe.subscriptions.retrieve.mockResolvedValue({
       id: 'sub_123',
@@ -235,6 +239,7 @@ describe('Billing email flows', () => {
       data: {
         object: {
           id: 'sub_123',
+          customer: 'cus_123',
           cancel_at_period_end: true,
           cancel_at: null,
           current_period_end: 1770000000,
@@ -275,6 +280,7 @@ describe('Billing email flows', () => {
       data: {
         object: {
           id: 'sub_123',
+          customer: 'cus_123',
           cancel_at_period_end: false,
           cancel_at: null,
           current_period_end: 1770000000,
