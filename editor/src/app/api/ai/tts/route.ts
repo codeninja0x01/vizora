@@ -1,9 +1,14 @@
-import { auth } from '@/lib/auth';
 import { createTTSProvider } from '@/lib/ai/providers/tts/factory';
 import type { AIProvider } from '@/lib/ai/types';
 import { R2StorageService } from '@/lib/r2';
+import {
+  requireSession,
+  unauthorizedResponse,
+  zodErrorResponse,
+} from '@/lib/require-session';
 import { type NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'node:crypto';
+import { z } from 'zod';
 
 const r2 = new R2StorageService({
   bucketName: process.env.R2_BUCKET_NAME || '',
@@ -13,64 +18,23 @@ const r2 = new R2StorageService({
   cdn: process.env.R2_PUBLIC_DOMAIN || '',
 });
 
+const ttsSchema = z.object({
+  text: z.string().min(1).max(5000),
+  voiceId: z.string().regex(/^[a-zA-Z0-9_-]{1,64}$/),
+  provider: z.enum(['elevenlabs', 'openai']),
+  speed: z.number().min(0.25).max(4.0).optional(),
+});
+
 export async function POST(req: NextRequest) {
+  const session = await requireSession(req);
+  if (!session) return unauthorizedResponse();
+
   try {
-    const session = await auth.api.getSession({
-      headers: req.headers,
-    });
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const body = await req.json();
-    const { text, voiceId, provider, speed } = body;
+    const parsed = ttsSchema.safeParse(body);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
 
-    // Validation
-    if (!text || typeof text !== 'string') {
-      return NextResponse.json(
-        { error: 'Text is required and must be a string' },
-        { status: 400 }
-      );
-    }
-
-    if (text.length > 5000) {
-      return NextResponse.json(
-        { error: 'Text exceeds maximum length of 5000 characters' },
-        { status: 400 }
-      );
-    }
-
-    if (!voiceId || typeof voiceId !== 'string') {
-      return NextResponse.json(
-        { error: 'Voice ID is required and must be a string' },
-        { status: 400 }
-      );
-    }
-
-    if (!provider || typeof provider !== 'string') {
-      return NextResponse.json(
-        { error: 'Provider is required and must be a string' },
-        { status: 400 }
-      );
-    }
-
-    if (!['elevenlabs', 'openai'].includes(provider)) {
-      return NextResponse.json(
-        { error: 'Provider must be either "elevenlabs" or "openai"' },
-        { status: 400 }
-      );
-    }
-
-    if (
-      speed !== undefined &&
-      (typeof speed !== 'number' || speed < 0.25 || speed > 4.0)
-    ) {
-      return NextResponse.json(
-        { error: 'Speed must be a number between 0.25 and 4.0' },
-        { status: 400 }
-      );
-    }
+    const { text, voiceId, provider, speed } = parsed.data;
 
     // Get organization ID from session
     const orgId = session.user.id;
