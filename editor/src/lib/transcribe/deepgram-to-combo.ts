@@ -1,15 +1,40 @@
+import type { SyncPrerecordedResponse } from '@deepgram/sdk';
 import { detectLanguage } from './detect-language';
 import type { Paragraph, TranscriptObject, Word } from './types';
 
-const getWords = (deepgramResult: any): Word[] => {
+/** Word entry from a Deepgram prerecorded response. */
+interface DeepgramWord {
+  word: string;
+  start: number;
+  end: number;
+  confidence: number;
+  punctuated_word?: string;
+}
+
+/** Sentence within a Deepgram paragraph. */
+interface DeepgramSentence {
+  text: string;
+  start: number;
+  end: number;
+}
+
+/** Paragraph entry from a Deepgram prerecorded response. */
+interface DeepgramParagraph {
+  sentences: DeepgramSentence[];
+  num_words: number;
+  start: number;
+  end: number;
+}
+
+const getWords = (deepgramResult: SyncPrerecordedResponse): Word[] => {
   const alternative = deepgramResult?.results?.channels?.[0]?.alternatives?.[0];
   if (!alternative?.words) {
     return [];
   }
 
-  return alternative.words.map((w: any) => {
+  return alternative.words.map((w: DeepgramWord) => {
     return {
-      word: w.punctuated_word,
+      word: w.punctuated_word ?? w.word,
       start: w.start,
       end: w.end,
       confidence: w.confidence,
@@ -17,16 +42,16 @@ const getWords = (deepgramResult: any): Word[] => {
   });
 };
 
-const getParagraphs = (deepgramResult: any): Paragraph[] => {
+const getParagraphs = (deepgramResult: SyncPrerecordedResponse): Paragraph[] => {
   const alternative = deepgramResult?.results?.channels?.[0]?.alternatives?.[0];
   if (!alternative?.paragraphs?.paragraphs) {
     return [];
   }
 
   const paragraphs = alternative.paragraphs.paragraphs
-    .map((p: any) => {
+    .map((p: DeepgramParagraph) => {
       return {
-        sentences: p.sentences.map((s: any) => {
+        sentences: p.sentences.map((s: DeepgramSentence) => {
           return {
             text: s.text,
             start: s.start,
@@ -38,13 +63,13 @@ const getParagraphs = (deepgramResult: any): Paragraph[] => {
         end: p.end,
       };
     })
-    .filter((p: any) => p.sentences.length > 0);
+    .filter((p: Paragraph) => p.sentences.length > 0);
 
   return paragraphs;
 };
 
 export async function deepgramToCombo(
-  deepgramResult: any
+  deepgramResult: SyncPrerecordedResponse
 ): Promise<Partial<TranscriptObject> | null> {
   const alternative = deepgramResult?.results?.channels?.[0]?.alternatives?.[0];
   const text = alternative?.transcript;
