@@ -10,9 +10,7 @@ import { PixabayProvider } from './pixabay';
 /**
  * Create a stock provider instance
  */
-export function createStockProvider(
-  provider: 'pexels' | 'pixabay'
-): IStockProvider {
+function createStockProvider(provider: 'pexels' | 'pixabay'): IStockProvider {
   switch (provider) {
     case 'pexels': {
       const apiKey = process.env.PEXELS_API_KEY;
@@ -36,7 +34,7 @@ export function createStockProvider(
 /**
  * Get list of available providers (those with configured API keys)
  */
-export function getAvailableStockProviders(): Array<'pexels' | 'pixabay'> {
+function getAvailableStockProviders(): Array<'pexels' | 'pixabay'> {
   const providers: Array<'pexels' | 'pixabay'> = [];
 
   if (process.env.PEXELS_API_KEY) {

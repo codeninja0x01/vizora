@@ -3,7 +3,7 @@
  * 12 distinct visual styles with color palettes, typography, and mood descriptors
  */
 
-export interface TemplateStylePreset {
+interface TemplateStylePreset {
   id: string;
   name: string;
   description: string;

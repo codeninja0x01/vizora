@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { withApiAuth, type ApiKeyContext } from '@/lib/api-middleware';
 import { prisma } from '@/lib/db';
+import type { Prisma } from '@prisma/client';
 import { renderQueue } from '@/lib/queue';
 import { validateMergeData } from '@/lib/template-schema';
 import type { MergeField } from '@/types/template';
@@ -272,7 +273,7 @@ async function getHandler(
     const limit = Math.min(limitParam, 100); // Cap at 100
 
     // Build where clause with organization scope
-    const where: any = {
+    const where: Prisma.RenderWhereInput = {
       organizationId: context.organizationId,
     };
 
@@ -288,18 +289,27 @@ async function getHandler(
       where.templateId = templateId;
     }
 
+    const queuedAtFilter: Prisma.DateTimeFilter<'Render'> = {};
+    let hasQueuedAtFilter = false;
+
     if (fromDate) {
       const date = new Date(fromDate);
       if (!Number.isNaN(date.getTime())) {
-        where.queuedAt = { ...where.queuedAt, gte: date };
+        queuedAtFilter.gte = date;
+        hasQueuedAtFilter = true;
       }
     }
 
     if (toDate) {
       const date = new Date(toDate);
       if (!Number.isNaN(date.getTime())) {
-        where.queuedAt = { ...where.queuedAt, lte: date };
+        queuedAtFilter.lte = date;
+        hasQueuedAtFilter = true;
       }
+    }
+
+    if (hasQueuedAtFilter) {
+      where.queuedAt = queuedAtFilter;
     }
 
     // Fetch renders with pagination
@@ -329,7 +339,7 @@ async function getHandler(
 
     // Map to response format (exclude mergeData)
     const responseItems = items.map((render) => {
-      const item: any = {
+      const item: Record<string, unknown> = {
         id: render.id,
         status: render.status,
         templateId: render.templateId,

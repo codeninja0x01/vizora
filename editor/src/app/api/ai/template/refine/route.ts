@@ -3,10 +3,6 @@ import { TemplateGenerationService } from '@/lib/ai/services/template-generation
 import { withAIAuth } from '@/lib/ai-middleware';
 import { zodErrorResponse } from '@/lib/require-session';
 import type Anthropic from '@anthropic-ai/sdk';
-import {
-  getTemplateConversation,
-  setTemplateConversation,
-} from '@/lib/ai/template-conversations';
 import { z } from 'zod';
 
 const refineSchema = z.object({
@@ -29,7 +25,7 @@ export async function POST(request: NextRequest) {
     const parsed = refineSchema.safeParse(body);
     if (!parsed.success) return zodErrorResponse(parsed.error);
 
-    const { conversationId, prompt, currentTemplate } = parsed.data;
+    const { prompt, currentTemplate } = parsed.data;
 
     // Check for API key
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -43,22 +39,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get conversation history
-    let conversationHistory: Anthropic.MessageParam[] = [];
-    const conversation = getTemplateConversation(conversationId);
+    // Refine template (stateless — no conversation history)
+    const conversationHistory: Anthropic.MessageParam[] = [];
 
-    if (conversation) {
-      // Use existing conversation history
-      conversationHistory = conversation.history;
-    } else {
-      // Conversation expired or not found - start fresh with current template as context
-      console.log(
-        `Conversation ${conversationId} not found or expired. Starting fresh.`
-      );
-      // We'll pass empty history and rely on currentTemplate context
-    }
-
-    // Refine template
     const service = new TemplateGenerationService({ apiKey });
     const result = await service.refine(
       currentTemplate,
@@ -66,21 +49,10 @@ export async function POST(request: NextRequest) {
       conversationHistory
     );
 
-    const storeResult = setTemplateConversation(
-      conversationId,
-      result.conversationHistory,
-      session.user.id
-    );
-
-    if (!storeResult.ok) {
-      return NextResponse.json({ error: storeResult.error }, { status: 429 });
-    }
-
     return NextResponse.json(
       {
         template: result.template,
         mergeFields: result.mergeFields,
-        conversationId,
       },
       { status: 200 }
     );

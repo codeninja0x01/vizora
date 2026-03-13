@@ -16,58 +16,54 @@ async function getOrganizationIdFromEvent(
   event: Stripe.Event
 ): Promise<string | null> {
   try {
-    const eventType = event.type;
-    const dataObject = event.data.object as any;
+    switch (event.type) {
+      // For checkout.session.completed: read from metadata
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        return session.metadata?.organizationId || null;
+      }
 
-    // For checkout.session.completed: read from metadata
-    if (eventType === 'checkout.session.completed') {
-      const session = dataObject as Stripe.Checkout.Session;
-      return session.metadata?.organizationId || null;
+      // For invoice events: look up organization by stripeCustomerId
+      case 'invoice.paid':
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice;
+        const customerId =
+          typeof invoice.customer === 'string'
+            ? invoice.customer
+            : invoice.customer?.id;
+
+        if (!customerId) return null;
+
+        const org = await prisma.organization.findUnique({
+          where: { stripeCustomerId: customerId },
+          select: { id: true },
+        });
+
+        return org?.id || null;
+      }
+
+      // For subscription events: look up organization by stripeCustomerId
+      case 'customer.subscription.updated':
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription;
+        const customerId =
+          typeof subscription.customer === 'string'
+            ? subscription.customer
+            : subscription.customer?.id;
+
+        if (!customerId) return null;
+
+        const org = await prisma.organization.findUnique({
+          where: { stripeCustomerId: customerId },
+          select: { id: true },
+        });
+
+        return org?.id || null;
+      }
+
+      default:
+        return null;
     }
-
-    // For invoice events: look up organization by stripeCustomerId
-    if (
-      eventType === 'invoice.paid' ||
-      eventType === 'invoice.payment_failed'
-    ) {
-      const invoice = dataObject as Stripe.Invoice;
-      const customerId =
-        typeof invoice.customer === 'string'
-          ? invoice.customer
-          : invoice.customer?.id;
-
-      if (!customerId) return null;
-
-      const org = await prisma.organization.findUnique({
-        where: { stripeCustomerId: customerId },
-        select: { id: true },
-      });
-
-      return org?.id || null;
-    }
-
-    // For subscription events: look up organization by stripeCustomerId
-    if (
-      eventType === 'customer.subscription.updated' ||
-      eventType === 'customer.subscription.deleted'
-    ) {
-      const subscription = dataObject as Stripe.Subscription;
-      const customerId =
-        typeof subscription.customer === 'string'
-          ? subscription.customer
-          : subscription.customer?.id;
-
-      if (!customerId) return null;
-
-      const org = await prisma.organization.findUnique({
-        where: { stripeCustomerId: customerId },
-        select: { id: true },
-      });
-
-      return org?.id || null;
-    }
-
-    return null;
   } catch (error) {
     console.error('[Stripe Webhook] Error getting organization ID:', error);
     return null;
@@ -91,7 +87,7 @@ export async function POST(request: NextRequest) {
       console.error('[Stripe Webhook] STRIPE_WEBHOOK_SECRET not configured');
       return NextResponse.json(
         { error: 'Webhook secret not configured' },
-        { status: 400 }
+        { status: 503 }
       );
     }
 

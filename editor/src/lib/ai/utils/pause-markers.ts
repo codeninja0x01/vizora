@@ -1,4 +1,4 @@
-export interface PauseMarker {
+interface PauseMarker {
   position: number;
   duration: number;
 }
@@ -17,7 +17,7 @@ export function stripPauseMarkers(text: string): string {
   return text.replace(/\[pause\s+(\d+(?:\.\d+)?)(s|ms)\]/gi, '. ');
 }
 
-export function extractPauseMarkers(text: string): PauseMarker[] {
+function extractPauseMarkers(text: string): PauseMarker[] {
   const markers: PauseMarker[] = [];
   const regex = /\[pause\s+(\d+(?:\.\d+)?)(s|ms)\]/gi;
   let match: RegExpExecArray | null = null;

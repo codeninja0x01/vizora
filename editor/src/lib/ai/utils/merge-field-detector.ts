@@ -107,7 +107,7 @@ function isBrandColor(color: string): boolean {
 /**
  * Generate a smart label for a merge field
  */
-export function generateMergeFieldLabel(
+function generateMergeFieldLabel(
   elementType: string,
   elementName: string | undefined,
   property: string,
